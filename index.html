@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -185,11 +184,13 @@ background: linear-gradient(90deg, transparent, var(--border2), transparent);
 }
 
 /* ─ Command Buttons ─ */
-#command-buttons { display:flex; flex-direction:column; gap:5px; flex-shrink:0; }
+#command-buttons { display:flex; flex-direction:column; gap:4px; flex-shrink:0; overflow-y:auto; padding-right:4px;}
+#command-buttons::-webkit-scrollbar { width:2px; }
+#command-buttons::-webkit-scrollbar-thumb { background: var(--border2); border-radius:1px; }
 
 .cmd-btn {
 display:flex; align-items:center; gap:7px;
-padding: 0 14px; height: 46px;
+padding: 0 14px; height: 38px;
 border:none; border-radius: 4px;
 cursor:pointer; font-family:'Exo 2', sans-serif;
 font-size:12px; font-weight:700; letter-spacing:1px;
@@ -204,39 +205,19 @@ background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%)
 }
 .cmd-btn:active { transform:scale(0.96); }
 
-.attack-btn {
-background: linear-gradient(135deg, #cc1122, #990011);
-color:#ffdddd; border:1px solid #ff2244;
-}
-.attack-btn:hover {
-background: linear-gradient(135deg, #ff2244, #cc1122);
-box-shadow: 0 0 16px rgba(255,34,68,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-}
-.recall-btn {
-background: linear-gradient(135deg, #004499, #003377);
-color:#ddeeff; border:1px solid #0077cc;
-}
-.recall-btn:hover {
-background: linear-gradient(135deg, #0066cc, #004499);
-box-shadow: 0 0 16px rgba(0,120,255,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-}
-.gold-btn {
-background: linear-gradient(135deg, #9a6a00, #604000);
-color:#fff1b8; border:1px solid #ffd060;
-}
-.gold-btn:hover {
-background: linear-gradient(135deg, #d99600, #8a5d00);
-box-shadow: 0 0 16px rgba(255,208,96,0.5), inset 0 1px 0 rgba(255,255,255,0.16);
-}
-.enemy-gold-btn {
-background: linear-gradient(135deg, #7a3d00, #4a2600);
-color:#ffe1b8; border:1px solid #ff9d3d;
-}
-.enemy-gold-btn:hover {
-background: linear-gradient(135deg, #c96b00, #7a3d00);
-box-shadow: 0 0 16px rgba(255,157,61,0.5), inset 0 1px 0 rgba(255,255,255,0.16);
-}
-.btn-icon { font-size:18px; }
+.attack-btn { background: linear-gradient(135deg, #cc1122, #990011); color:#ffdddd; border:1px solid #ff2244; }
+.attack-btn:hover { background: linear-gradient(135deg, #ff2244, #cc1122); box-shadow: 0 0 16px rgba(255,34,68,0.5), inset 0 1px 0 rgba(255,255,255,0.1); }
+.recall-btn { background: linear-gradient(135deg, #004499, #003377); color:#ddeeff; border:1px solid #0077cc; }
+.recall-btn:hover { background: linear-gradient(135deg, #0066cc, #004499); box-shadow: 0 0 16px rgba(0,120,255,0.5), inset 0 1px 0 rgba(255,255,255,0.1); }
+.gold-btn { background: linear-gradient(135deg, #9a6a00, #604000); color:#fff1b8; border:1px solid #ffd060; }
+.gold-btn:hover { background: linear-gradient(135deg, #d99600, #8a5d00); box-shadow: 0 0 16px rgba(255,208,96,0.5), inset 0 1px 0 rgba(255,255,255,0.16); }
+.enemy-gold-btn { background: linear-gradient(135deg, #7a3d00, #4a2600); color:#ffe1b8; border:1px solid #ff9d3d; }
+.enemy-gold-btn:hover { background: linear-gradient(135deg, #c96b00, #7a3d00); box-shadow: 0 0 16px rgba(255,157,61,0.5), inset 0 1px 0 rgba(255,255,255,0.16); }
+
+.upgrade-btn { background: linear-gradient(135deg, #00aa55, #005522); color:#ddffdd; border:1px solid #00ff88; }
+.upgrade-btn:hover { background: linear-gradient(135deg, #00cc66, #008833); box-shadow: 0 0 16px rgba(0,255,136,0.5), inset 0 1px 0 rgba(255,255,255,0.16); }
+
+.btn-icon { font-size:16px; }
 
 /* ─ Unit Panel ─ */
 #unit-panel { flex:1; overflow-x:hidden; overflow-y:auto; display:flex; flex-direction:column; gap:4px; min-height:0; }
@@ -401,6 +382,9 @@ text-transform:uppercase;
 .alert-msg.blue {
 background: rgba(0,200,255,0.1); border-color:var(--blue); color:var(--blue);
 }
+.alert-msg.green {
+background: rgba(0,255,150,0.1); border-color:var(--green); color:var(--green);
+}
 @keyframes alertpop {
 0%{opacity:0;transform:translateY(-10px) scale(0.9)}
 10%{opacity:1;transform:translateY(0) scale(1)}
@@ -420,6 +404,7 @@ font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacin
 .tag-stun  { background:rgba(255,240,0,0.1); color:#ffe040; border:1px solid #ffe04044; }
 .tag-mech  { background:rgba(80,120,255,0.1); color:#7090ff; border:1px solid #7090ff44; }
 .tag-elite { background:rgba(160,80,255,0.12); color:#aa55ff; border:1px solid #aa55ff44; }
+.tag-tank  { background:rgba(120,120,120,0.3); color:#cccccc; border:1px solid #aaaaaa44; }
 
 
 @media (max-width: 760px), (max-height: 620px) {
@@ -433,8 +418,8 @@ font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacin
   .wave-item { font-size: 9px; color: var(--text); }
   #control-panel { height: clamp(156px, 34dvh, 188px); max-height: calc(100dvh - 54px); padding: 5px 8px; gap:6px; }
   #command-buttons { gap:4px; }
-  .cmd-btn { width: 92px; height: 36px; padding: 0 6px; font-size: 10px; gap:4px; }
-  .btn-icon { font-size: 15px; }
+  .cmd-btn { width: 92px; height: 32px; padding: 0 6px; font-size: 9px; gap:4px; }
+  .btn-icon { font-size: 14px; }
   #unit-panel { min-width:0; gap:2px; }
   .panel-section-label { font-size: 8px; letter-spacing: 1px; color: var(--text); }
   .units-row { gap:4px; padding-bottom:1px; }
@@ -520,6 +505,9 @@ font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacin
       <button class="cmd-btn enemy-gold-btn" onclick="game.addGold('ai')">
         <span class="btn-icon">🏦</span><span>敌方 +5000</span>
       </button>
+      <button class="cmd-btn upgrade-btn" onclick="game.upgradePlayerTowers()">
+        <span class="btn-icon">🗼</span><span id="btn-upgrade-text">升级炮台</span>
+      </button>
     </div>
     <div id="unit-panel">
       <div class="panel-section-label">单体单位</div>
@@ -588,40 +576,51 @@ class SpatialGrid {
 ===================================================================== */
 const UNIT_DEFS = {
   infantry:  {id:'infantry',  name:'步兵',      icon:'🪖',cost:30,  hp:100,maxHp:100,attack:15,range:40, speed:70,size:8,  color:'#44aaff',description:'量大管饱，廉价主力',tags:[]},
-  heavy:     {id:'heavy',     name:'重装',       icon:'🛡️',cost:80,  hp:300,maxHp:300,attack:20,range:35, speed:38,size:11, color:'#88ccff',description:'肉盾吸引火力',tags:[]},
-  sniper:    {id:'sniper',    name:'狙击手',     icon:'🔫',cost:100, hp:80, maxHp:80, attack:60,range:130,speed:50,size:7,  color:'#00ffcc',description:'射程极远精准打击',tags:['range']},
-  demo:      {id:'demo',      name:'爆破兵',     icon:'💣',cost:120, hp:120,maxHp:120,attack:80,range:30, speed:52,size:9,  color:'#ffaa00',splashRadius:60,description:'范围爆炸伤害',tags:['splash']},
-  special:   {id:'special',   name:'特种兵',     icon:'🥷',cost:150, hp:150,maxHp:150,attack:50,range:50, speed:95,size:8,  color:'#aa88ff',priorityTarget:'building',description:'优先攻击建筑',tags:['elite']},
-  emp:       {id:'emp',       name:'电磁兵',     icon:'⚡',cost:180, hp:100,maxHp:100,attack:10,range:55, speed:55,size:8,  color:'#ffff00',stunDuration:2000,description:'攻击眩晕敌人',tags:['stun']},
-  unitree:   {id:'unitree',   name:'宇树机器人', icon:'🤖',cost:250, hp:250,maxHp:250,attack:45,range:65, speed:60,size:10, color:'#00ffaa',immuneToStun:true,description:'背负机枪免疫眩晕',tags:['mech']},
-  lightMech: {id:'lightMech', name:'轻型机甲',   icon:'🦾',cost:350, hp:400,maxHp:400,attack:55,range:60, speed:48,size:13, color:'#4488ff',immuneToStun:true,description:'均衡全面机甲单位',tags:['mech']},
-  heavyMech: {id:'heavyMech', name:'重型机甲',   icon:'⚙️',cost:600, hp:800,maxHp:800,attack:90,range:70, speed:32,size:16, color:'#2255cc',immuneToStun:true,description:'移动堡垒极强火力',tags:['mech']},
-  nano:      {id:'nano',      name:'纳米战士',   icon:'🧬',cost:200, hp:180,maxHp:180,attack:40,range:48, speed:80,size:8,  color:'#00ff88',regenRate:3,description:'战斗中自动回血',tags:['heal']},
-  medic:     {id:'medic',     name:'工程机器人', icon:'🔧',cost:160, hp:120,maxHp:120,attack:0, range:0,  speed:58,size:8,  color:'#ff88aa',healRange:70,healRate:8,description:'为附近友军回血',tags:['heal']},
-  drone:     {id:'drone',     name:'侦察无人机', icon:'🛸',cost:90,  hp:70, maxHp:70, attack:22,range:115,speed:125,size:7,  color:'#66ddff',description:'高速远程骚扰单位',tags:['range']},
-  rocket:    {id:'rocket',    name:'火箭兵',     icon:'🚀',cost:220, hp:130,maxHp:130,attack:105,range:95, speed:45,size:9,  color:'#ff6644',splashRadius:45,description:'远程反甲范围打击',tags:['range','splash']},
-  guardian:  {id:'guardian',  name:'护盾卫士',   icon:'🛡️',cost:260, hp:520,maxHp:520,attack:18,range:36, speed:34,size:12, color:'#55ccff',description:'超高耐久前排屏障',tags:['elite']},
-  railgun:   {id:'railgun',   name:'磁轨炮手',   icon:'☄️',cost:420, hp:170,maxHp:170,attack:150,range:160,speed:36,size:10, color:'#bb88ff',description:'超远程高伤害狙杀',tags:['range','elite']},
-  flamethrower:{id:'flamethrower',name:'喷火兵', icon:'🔥',cost:190, hp:190,maxHp:190,attack:55,range:42, speed:46,size:9, color:'#ff8833',splashRadius:35,description:'近距离锥形清场',tags:['splash']},
+  heavy:     {id:'heavy',     name:'重装',      icon:'🛡️',cost:80,  hp:300,maxHp:300,attack:20,range:35, speed:38,size:11, color:'#88ccff',description:'肉盾吸引火力',tags:[]},
+  meatShield:{id:'meatShield',name:'重装肉盾',  icon:'🧱',cost:220, hp:1800,maxHp:1800,attack:5,range:25, speed:25,size:14,color:'#999999',description:'极限血量，极低攻击的纯掩护墙',tags:['tank','elite']},
+  assassin:  {id:'assassin',  name:'隐匿刺客',  icon:'🥷',cost:140, hp:90, maxHp:90, attack:75,range:20, speed:110,size:7, color:'#222222',description:'高速突入切后排',tags:['elite']},
+  sniper:    {id:'sniper',    name:'狙击手',    icon:'🔫',cost:100, hp:80, maxHp:80, attack:45,range:130,speed:50,size:7,  color:'#00ffcc',description:'射程极远精准打击',tags:['range']},
+  demo:      {id:'demo',      name:'爆破兵',    icon:'💣',cost:120, hp:120,maxHp:120,attack:70,range:30, speed:52,size:9,  color:'#ffaa00',splashRadius:60,description:'范围爆炸伤害',tags:['splash']},
+  plasma:    {id:'plasma',    name:'等离子兵',  icon:'💠',cost:300, hp:180,maxHp:180,attack:65,range:85, speed:45,size:9,  color:'#00ffff',splashRadius:30,description:'中距离能量溅射',tags:['splash','range']},
+  special:   {id:'special',   name:'特种兵',    icon:'🗡️',cost:150, hp:150,maxHp:150,attack:50,range:50, speed:95,size:8,  color:'#aa88ff',priorityTarget:'building',description:'优先攻击建筑',tags:['elite']},
+  hacker:    {id:'hacker',    name:'干扰黑客',  icon:'💻',cost:180, hp:100,maxHp:100,attack:5, range:100,speed:60,size:7,  color:'#44ff44',stunDuration:2500,description:'超远距离单体强控',tags:['stun','range']},
+  emp:       {id:'emp',       name:'电磁兵',    icon:'⚡',cost:180, hp:100,maxHp:100,attack:10,range:55, speed:55,size:8,  color:'#ffff00',stunDuration:2000,description:'攻击眩晕敌人',tags:['stun']},
+  cryo:      {id:'cryo',      name:'冷冻兵',    icon:'❄️',cost:190, hp:160,maxHp:160,attack:15,range:55, speed:45,size:9,  color:'#aaddff',stunDuration:1500,description:'中近距离频繁冻结',tags:['stun']},
+  unitree:   {id:'unitree',   name:'宇树机器人',icon:'🤖',cost:250, hp:250,maxHp:250,attack:45,range:65, speed:60,size:10, color:'#00ffaa',immuneToStun:true,description:'背负机枪免疫眩晕',tags:['mech']},
+  cyborg:    {id:'cyborg',    name:'改造人',    icon:'🦾',cost:260, hp:350,maxHp:350,attack:40,range:35, speed:50,size:9,  color:'#ff66aa',regenRate:15,description:'高额秒回血的战士',tags:['heal','elite']},
+  lightMech: {id:'lightMech', name:'轻型机甲',  icon:'🦿',cost:350, hp:400,maxHp:400,attack:55,range:60, speed:48,size:13, color:'#4488ff',immuneToStun:true,description:'均衡全面机甲单位',tags:['mech']},
+  heavyMech: {id:'heavyMech', name:'重型机甲',  icon:'⚙️',cost:600, hp:700,maxHp:700,attack:80,range:70, speed:32,size:16, color:'#2255cc',immuneToStun:true,description:'移动堡垒极强火力',tags:['mech']},
+  titan:     {id:'titan',     name:'泰坦巨兽',  icon:'🦍',cost:1200,hp:2500,maxHp:2500,attack:140,range:45,speed:20,size:18, color:'#884422',description:'毁天灭地的终极近战',tags:['elite','tank']},
+  nano:      {id:'nano',      name:'纳米战士',  icon:'🧬',cost:200, hp:180,maxHp:180,attack:40,range:48, speed:80,size:8,  color:'#00ff88',regenRate:3,description:'战斗中微弱回血',tags:['heal']},
+  medic:     {id:'medic',     name:'工程机器人',icon:'🔧',cost:160, hp:120,maxHp:120,attack:0, range:0,  speed:58,size:8,  color:'#ff88aa',healRange:70,healRate:8,description:'为附近友军回血',tags:['heal']},
+  medicMech: {id:'medicMech', name:'战地医务车',icon:'🚑',cost:450, hp:600,maxHp:600,attack:0, range:0,  speed:35,size:14, color:'#ff4466',healRange:120,healRate:30,description:'超大范围群体高额急救',tags:['heal','mech']},
+  drone:     {id:'drone',     name:'侦察无人机',icon:'🛸',cost:90,  hp:70, maxHp:70, attack:22,range:115,speed:125,size:7,  color:'#66ddff',description:'高速远程骚扰单位',tags:['range']},
+  bomberDrone:{id:'bomberDrone',name:'轰炸无人机',icon:'✈️',cost:280,hp:80, maxHp:80, attack:100,range:95, speed:90,size:10, color:'#ff3333',splashRadius:45,description:'高速切入范围轰炸',tags:['range','splash']},
+  rocket:    {id:'rocket',    name:'火箭兵',    icon:'🚀',cost:220, hp:130,maxHp:130,attack:90,range:95, speed:45,size:9,  color:'#ff6644',splashRadius:45,description:'远程反甲范围打击',tags:['range','splash']},
+  guardian:  {id:'guardian',  name:'护盾卫士',  icon:'🛡️',cost:260, hp:520,maxHp:520,attack:18,range:36, speed:34,size:12, color:'#55ccff',description:'高耐久前排屏障',tags:['elite']},
+  laser:     {id:'laser',     name:'光束照射者',icon:'🔦',cost:350, hp:150,maxHp:150,attack:110,range:120,speed:38,size:8, color:'#ffffff',description:'极其致命的远距离单杀',tags:['range','elite']},
+  railgun:   {id:'railgun',   name:'磁轨炮手',  icon:'☄️',cost:500, hp:170,maxHp:170,attack:120,range:160,speed:36,size:10, color:'#bb88ff',description:'超远程高伤害狙杀',tags:['range','elite']},
+  flamethrower:{id:'flamethrower',name:'喷火兵',icon:'🔥',cost:190, hp:190,maxHp:190,attack:55,range:42, speed:46,size:9, color:'#ff8833',splashRadius:35,description:'近距离锥形清场',tags:['splash']},
 };
 
 const GROUP_DEFS = {
   infantryGroup:{id:'infantryGroup',name:'步兵突击群',   icon:'🪖',cost:200, isGroup:true,composition:[{type:'infantry',count:8}],   description:'8名步兵',badge:'×8'},
-  specialGroup: {id:'specialGroup', name:'特种作战群',   icon:'🥷',cost:650, isGroup:true,composition:[{type:'special',count:5}],    description:'5名特种兵',badge:'×5'},
+  meatWall:     {id:'meatWall',     name:'绝望之墙',     icon:'🧱',cost:750, isGroup:true,composition:[{type:'meatShield',count:3},{type:'medic',count:1}],description:'3个重装肉盾加工程师，牢不可破',badge:'3+1'},
+  specialGroup: {id:'specialGroup', name:'特种作战群',   icon:'🗡️',cost:650, isGroup:true,composition:[{type:'special',count:5}],    description:'5名特种兵',badge:'×5'},
   sniperGroup:  {id:'sniperGroup',  name:'狙击手阵列',   icon:'🔫',cost:350, isGroup:true,composition:[{type:'sniper',count:4}],     description:'4名狙击手',badge:'×4'},
   demoGroup:    {id:'demoGroup',    name:'爆破突击群',   icon:'💣',cost:600, isGroup:true,composition:[{type:'demo',count:4},{type:'heavy',count:2}],description:'4爆破+2重装',badge:'4+2'},
   mechGroup:    {id:'mechGroup',    name:'机甲突击群',   icon:'⚙️',cost:1600,isGroup:true,composition:[{type:'lightMech',count:3},{type:'heavyMech',count:1}],description:'3轻甲+1重甲',badge:'3+1'},
-  empGroup:     {id:'empGroup',     name:'电磁特战群',   icon:'⚡',cost:900, isGroup:true,composition:[{type:'emp',count:3},{type:'special',count:3}],description:'先瘫痪后突击',badge:'3+3'},
-  eliteGroup:   {id:'eliteGroup',   name:'精英混编群',   icon:'🧬',cost:1100,isGroup:true,composition:[{type:'nano',count:2},{type:'unitree',count:2},{type:'medic',count:1}],description:'自愈持续作战',badge:'精'},
-  droneSwarm:   {id:'droneSwarm',   name:'无人机蜂群',   icon:'🛸',cost:520, isGroup:true,composition:[{type:'drone',count:6},{type:'sniper',count:1}],description:'6架无人机+1名狙击手高速压制',badge:'6+1'},
+  empGroup:     {id:'empGroup',     name:'控制特战群',   icon:'⚡',cost:1100,isGroup:true,composition:[{type:'hacker',count:2},{type:'cryo',count:2},{type:'special',count:3}],description:'强控全场后突击',badge:'2+2+3'},
+  eliteGroup:   {id:'eliteGroup',   name:'不死的战神',   icon:'🦾',cost:1350,isGroup:true,composition:[{type:'cyborg',count:3},{type:'medicMech',count:1}],description:'改造人搭配大篷车，无限回血',badge:'3+1'},
+  droneSwarm:   {id:'droneSwarm',   name:'空天轰炸群',   icon:'✈️',cost:800, isGroup:true,composition:[{type:'bomberDrone',count:2},{type:'drone',count:4}],description:'2轰炸机+4侦察机高速压制',badge:'2+4'},
   rocketBattery:{id:'rocketBattery',name:'火箭炮组',     icon:'🚀',cost:980, isGroup:true,composition:[{type:'rocket',count:3},{type:'heavy',count:2}],description:'远程火箭兵配重装护卫',badge:'3+2'},
-  siegeGroup:   {id:'siegeGroup',   name:'攻城穿甲群',   icon:'☄️',cost:1450,isGroup:true,composition:[{type:'railgun',count:2},{type:'guardian',count:2},{type:'medic',count:1}],description:'磁轨炮与护盾卫士稳步推进',badge:'攻'},
+  siegeGroup:   {id:'siegeGroup',   name:'攻城穿甲群',   icon:'☄️',cost:1650,isGroup:true,composition:[{type:'railgun',count:2},{type:'guardian',count:2},{type:'laser',count:1}],description:'磁轨与光束终极狙杀',badge:'攻'},
   flameSquad:   {id:'flameSquad',   name:'烈焰清场队',   icon:'🔥',cost:760, isGroup:true,composition:[{type:'flamethrower',count:4},{type:'infantry',count:4}],description:'喷火兵清场，步兵补位',badge:'4+4'},
 };
 
 const BUILDING_DEFS = {
   base: {id:'base', name:'指挥中心',hp:3000,maxHp:3000,attack:0, range:0,  width:60,height:60},
-  tower:{id:'tower',name:'防御炮塔',hp:500, maxHp:500, attack:25,range:155,attackSpeed:900,width:28,height:28},
+  tower:{id:'tower',name:'防御炮塔',hp:500, maxHp:500, attack:25,range:155,attackSpeed:1000,width:28,height:28},
   wall: {id:'wall', name:'城墙',    hp:800, maxHp:800, attack:0, range:0,  width:14,height:40},
 };
 
@@ -724,7 +723,7 @@ class Game {
     this.floatingTexts=[]; this.effects=[];
     this.lightnings=[];
 
-    this._hud={playerGold:-1,aiGold:-1,playerGarrison:-1,playerAttacking:-1,aiGarrison:-1,aiAttacking:-1,time:'',kills:-1};
+    this._hud={playerGold:-1,aiGold:-1,playerGarrison:-1,playerAttacking:-1,aiGarrison:-1,aiAttacking:-1,time:'',kills:-1,towerUpgrade:-1};
 
     this.player=null; this.ai=null;
 
@@ -787,7 +786,7 @@ class Game {
     this.selectedUnit=null; this.gameOver=false;
     document.getElementById('game-over').classList.add('hidden');
     this.layoutVillages();
-    this._hud={playerGold:-1,aiGold:-1,playerGarrison:-1,playerAttacking:-1,aiGarrison:-1,aiAttacking:-1,time:'',kills:-1};
+    this._hud={playerGold:-1,aiGold:-1,playerGarrison:-1,playerAttacking:-1,aiGarrison:-1,aiAttacking:-1,time:'',kills:-1,towerUpgrade:-1};
     this.updateHUD();
     if(!this.running){
       this.running=true; this.lastTime=0;
@@ -1184,10 +1183,10 @@ class Game {
     setTimeout(()=>{ if(item.parentNode) item.parentNode.removeChild(item); },2500);
   }
 
-  showAlert(text,isBlue=false){
+  showAlert(text,isBlue=false,isGreen=false){
     const banner=document.getElementById('alert-banner');
     const msg=document.createElement('div');
-    msg.className=`alert-msg${isBlue?' blue':''}`;
+    msg.className=`alert-msg${isBlue?' blue':''}${isGreen?' green':''}`;
     msg.textContent=text;
     banner.appendChild(msg);
     setTimeout(()=>{ if(msg.parentNode) msg.parentNode.removeChild(msg); },3000);
@@ -1201,6 +1200,7 @@ class Game {
     const agS=this.ai.units.filter(u=>u.state==='garrison').length;
     const aaS=this.ai.units.filter(u=>u.state==='attack').length;
     const timeStr=this.formatTime(this.elapsed);
+    const tc = this.player.towerUpgradeCost;
 
     if(pg!==this._hud.playerGold){
       document.getElementById('player-gold').textContent=pg; this._hud.playerGold=pg;
@@ -1216,11 +1216,16 @@ class Game {
     if(aaS!==this._hud.aiAttacking){document.getElementById('ai-attacking').textContent=aaS;this._hud.aiAttacking=aaS;}
     if(timeStr!==this._hud.time){document.getElementById('game-time').textContent=timeStr;this._hud.time=timeStr;}
     if(this.kills!==this._hud.kills){document.getElementById('kills').textContent=this.kills;this._hud.kills=this.kills;}
+    
+    if(tc!==this._hud.towerUpgrade){
+      document.getElementById('btn-upgrade-text').textContent = `升级炮台 (${tc}💰)`;
+      this._hud.towerUpgrade=tc;
+    }
   }
 
   /* ── UI BUILD ── */
   buildUI(){
-    const tagHtml=(tags)=>tags.map(tag=>`<span class="unit-tag tag-${tag}">${{range:'远程',splash:'溅射',stun:'眩晕',heal:'回血',mech:'机甲',elite:'精英'}[tag]||tag}</span>`).join('');
+    const tagHtml=(tags)=>tags.map(tag=>`<span class="unit-tag tag-${tag}">${{range:'远程',splash:'溅射',stun:'眩晕',heal:'回血',mech:'机甲',elite:'精英',tank:'肉盾'}[tag]||tag}</span>`).join('');
 
     const singleRow=document.getElementById('single-units');
     for(const [id,def] of Object.entries(UNIT_DEFS)){
@@ -1261,6 +1266,15 @@ class Game {
     this.showAlert(`${side==='ai'?'敌方':'我方'}金币 +5000`,side!=='ai');
   }
 
+  upgradePlayerTowers() {
+    if (this.player.upgradeTowers()) {
+        this.showAlert(`🗼 炮台已强化至等级 ${this.player.towerLevel}!`, false, true);
+        this.updateHUD();
+    } else {
+        this.showAlert(`❌ 金币不足，需要 ${this.player.towerUpgradeCost} 💰`);
+    }
+  }
+
   spawnUnit(typeId){
     const def=UNIT_DEFS[typeId], groupDef=GROUP_DEFS[typeId];
     if(def){
@@ -1288,8 +1302,10 @@ class Village {
     this.gold=8000; this.goldRate=10;
     this.x=0; this.y=0;
     this.units=[]; this.buildings=[];
-    this.aiTimer=0; this.aiAggressionTimer=0;
+    this.aiTimer=0; this.aiAggressionTimer=0; this.aiUpgradeTimer=0;
     this.difficultyScale=1;
+    this.towerLevel=1;
+    this.towerUpgradeCost=1500;
   }
 
   layoutBuildings(){
@@ -1304,6 +1320,28 @@ class Village {
   }
 
   get enemy(){ return this.side==='player'?this.game.ai:this.game.player; }
+
+  upgradeTowers() {
+    if (this.gold >= this.towerUpgradeCost) {
+      this.gold -= this.towerUpgradeCost;
+      this.towerLevel++;
+      this.towerUpgradeCost = Math.floor(this.towerUpgradeCost * 1.8);
+      
+      this.buildings.forEach(b => {
+        if (b.type === 'tower') {
+          b.maxHp += 500;
+          b.hp += 500;
+          b.attack += 25;
+          b.range += 30;
+          b.attackSpeed = Math.max(300, b.attackSpeed - 150);
+          this.game.spawnExplosion(b.x, b.y, '#00ff99', 1.5);
+          this.game.spawnFloatingText(b.x, b.y-40, `LEVEL UP!`, '#00ff99', 16);
+        }
+      });
+      return true;
+    }
+    return false;
+  }
 
   spawnUnit(typeId){
     const def=UNIT_DEFS[typeId]; if(!def) return;
@@ -1326,18 +1364,32 @@ class Village {
   }
 
   updateAI(dt){
-    this.aiTimer+=dt; this.aiAggressionTimer+=dt;
+    this.aiTimer+=dt; this.aiAggressionTimer+=dt; this.aiUpgradeTimer+=dt;
     const elapsed=this.game.elapsed,scale=this.difficultyScale;
+    
+    // AI Spawn Logic
     const spawnInterval=Math.max(3000,8000-elapsed/5000);
     if(this.aiTimer>=spawnInterval){this.aiTimer=0;this.aiSpawnLogic(elapsed,scale);}
+    
+    // AI Attack Logic
     const attackInterval=Math.max(12000,30000-elapsed/3000);
     if(this.aiAggressionTimer>=attackInterval){this.aiAggressionTimer=0;this.aiAttackDecision(scale);}
+    
     const playerAttacking=this.game.player.units.filter(u=>u.state==='attack').length;
     if(playerAttacking>=6&&Math.random()<0.02) this.aiCounterAttack(scale);
+
+    // AI Tower Upgrade Logic
+    if(this.aiUpgradeTimer >= 20000) {
+      this.aiUpgradeTimer = 0;
+      if (this.gold > this.towerUpgradeCost * 1.5) {
+        this.upgradeTowers();
+        this.game.showAlert('⚠ 敌方防御塔获得了强化！', false, false);
+      }
+    }
   }
 
   aiSpawnLogic(elapsed,scale){
-    const budget=Math.min(2000,300*scale);
+    const budget=Math.min(2500,350*scale);
     if(this.gold<budget*0.4) return;
     let spent=0;
     const pool=this.getAIUnitPool(elapsed);
@@ -1351,11 +1403,11 @@ class Village {
 
   getAIUnitPool(elapsed){
     const m=elapsed/60000;
-    if(m<1) return ['infantry','infantry','heavy'];
-    if(m<2) return ['infantry','heavy','sniper','special','drone'];
-    if(m<4) return ['heavy','sniper','special','emp','unitree','drone','flamethrower'];
-    if(m<6) return ['special','unitree','lightMech','sniper','nano','rocket','guardian'];
-    return ['lightMech','heavyMech','unitree','special','nano','emp','rocket','railgun','guardian'];
+    if(m<1) return ['infantry','infantry','heavy','meatShield'];
+    if(m<2) return ['infantry','heavy','meatShield','sniper','special','drone','assassin'];
+    if(m<4) return ['heavy','meatShield','sniper','special','emp','unitree','drone','flamethrower','hacker','plasma'];
+    if(m<6) return ['special','unitree','lightMech','sniper','nano','rocket','guardian','cryo','bomberDrone','laser'];
+    return ['lightMech','heavyMech','titan','unitree','special','cyborg','hacker','rocket','railgun','guardian','medicMech'];
   }
 
   aiAttackDecision(scale){
@@ -1372,7 +1424,7 @@ class Village {
     for(const u of this.units) if(u.state==='garrison'){u.setState('attack');sent++;}
     if(sent>0) this.game.showAlert('⚠ 敌方发起反击！');
     if(this.gold>500){
-      const pool=['lightMech','heavyMech','unitree','special','rocket','guardian','railgun'];
+      const pool=['lightMech','heavyMech','titan','special','rocket','guardian','railgun','bomberDrone','laser'];
       let budget=this.gold*0.7;
       while(budget>100){
         const choice=pool[Math.floor(Math.random()*pool.length)];
@@ -1475,13 +1527,24 @@ class Building {
 
     } else if(this.type==='tower'){
       const s=this.width*0.5;
+      const lv=this.village.towerLevel;
       ctx.shadowColor=isP?'#0066aa':'#aa0022'; ctx.shadowBlur=8*pulse;
-      ctx.fillStyle=flash?'#ffffff':(isP?'#061428':'#140608');
+      
+      // Upgrade visual indicator (darken per level)
+      const baseR=isP?6:20, baseG=isP?20:6, baseB=isP?40:8;
+      const tBg = flash?'#ffffff':`rgb(${Math.max(0,baseR-lv*2)},${Math.max(0,baseG-lv*2)},${Math.max(0,baseB-lv*2)})`;
+      ctx.fillStyle=tBg;
+      
       ctx.strokeStyle=isP?'#0055aa':'#880011'; ctx.lineWidth=1.5;
       ctx.beginPath(); ctx.roundRect(-s,-s,s*2,s*2,4); ctx.fill(); ctx.stroke();
       ctx.shadowBlur=0;
       ctx.font=`${s*0.9}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('🗼',0,0);
+      
+      // Tower level text
+      ctx.fillStyle=isP?'#00ff99':'#ff99aa'; ctx.font=`6px 'Share Tech Mono'`;
+      ctx.fillText(`Lv.${lv}`, 0, s + 4);
+
       this._drawHPBar(ctx,0,-s-8,s*2,3);
 
     } else if(this.type==='wall'){
@@ -1578,7 +1641,7 @@ class Unit {
   }
 
   fireAt(target){
-    if(this.attack<=0||this.typeId==='medic') return;
+    if(this.attack<=0||this.typeId==='medic'||this.typeId==='medicMech') return;
     const game=this.village.game;
 
     if(this.stunDuration>0){
@@ -1601,7 +1664,7 @@ class Unit {
         const d=dist(target.x,target.y,e.x,e.y);
         e.takeDamage(this.attack*(0.4+0.6*(1-d/this.splashRadius)),this);
       }
-      game.spawnExplosion(target.x,target.y,'#ffaa00',1.5);
+      game.spawnExplosion(target.x,target.y,this.color==='#00ffff'?'#00ffff':'#ffaa00',1.5);
       return;
     }
 
@@ -1688,9 +1751,9 @@ class Unit {
     ctx.shadowBlur=0;
 
     // Medic heal effect
-    if(this.typeId==='medic'){
+    if(this.healRange>0){
       ctx.globalAlpha=0.4*Math.max(0,Math.sin(t*2));
-      ctx.strokeStyle='#ff88aa'; ctx.lineWidth=1;
+      ctx.strokeStyle=this.typeId==='medicMech'?'#ff4466':'#ff88aa'; ctx.lineWidth=this.typeId==='medicMech'?2:1;
       ctx.beginPath(); ctx.arc(0,0,this.healRange,0,Math.PI*2); ctx.stroke();
       ctx.globalAlpha=1;
     }
