@@ -4,1740 +4,1622 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>现代部落冲突</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>现代部落冲突 ∙ NEXUS WAR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin:0; padding:0; box-sizing:border-box; }
 
 :root {
-–bg-dark: #0a0c10;
-–bg-panel: #0f1318;
-–bg-panel2: #141920;
-–player-color: #00aaff;
-–player-dark: #004466;
-–ai-color: #ff3333;
-–ai-dark: #660011;
-–gold-color: #f0c040;
-–green: #00ff88;
-–border: #1e2a3a;
-–text-dim: #556677;
-–text: #aabbcc;
-–text-bright: #ddeeff;
+–bg:       #04060b;
+–bg1:      #080d16;
+–bg2:      #0c1220;
+–blue:     #00c8ff;
+–blue-dim: #005577;
+–blue-glow:#00c8ff44;
+–red:      #ff2244;
+–red-dim:  #550011;
+–red-glow: #ff224444;
+–gold:     #f0b830;
+–gold2:    #ffd060;
+–green:    #00ff99;
+–yellow:   #ffe040;
+–purple:   #aa55ff;
+–border:   #1a2640;
+–border2:  #223355;
+–text-dim: #3a5060;
+–text:     #7aa0c0;
+–text-bright: #d0eeff;
+–panel-bg: rgba(6,10,18,0.97);
 }
 
 body {
-background: var(–bg-dark);
+background: var(–bg);
 color: var(–text);
-font-family: ‘Rajdhani’, sans-serif;
+font-family: ‘Exo 2’, sans-serif;
 overflow: hidden;
-height: 100vh;
-width: 100vw;
+height: 100vh; width: 100vw;
+user-select: none;
 }
 
-#game-container {
-display: flex;
-flex-direction: column;
-height: 100vh;
-width: 100vw;
+/* ── SCANLINE OVERLAY ── */
+body::before {
+content:’’;
+position:fixed; inset:0;
+background: repeating-linear-gradient(0deg,
+rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px,
+transparent 1px, transparent 3px);
+pointer-events:none; z-index:9999;
 }
 
-/* HUD TOP */
+/* ── VIGNETTE ── */
+body::after {
+content:’’;
+position:fixed; inset:0;
+background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%);
+pointer-events:none; z-index:9998;
+}
+
+#game-container { display:flex; flex-direction:column; height:100vh; width:100vw; }
+
+/* ══════════════ HUD TOP ══════════════ */
 #hud-top {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 8px 16px;
-background: var(–bg-panel);
+display:flex; justify-content:space-between; align-items:center;
+padding: 0 20px;
+background: linear-gradient(180deg, rgba(4,6,14,0.99) 0%, rgba(6,10,20,0.95) 100%);
 border-bottom: 1px solid var(–border);
-height: 56px;
-flex-shrink: 0;
+height: 62px; flex-shrink:0;
+position:relative; overflow:hidden;
+box-shadow: 0 4px 30px rgba(0,0,0,0.8);
+}
+#hud-top::after {
+content:’’;
+position:absolute; bottom:0; left:0; right:0; height:1px;
+background: linear-gradient(90deg, var(–blue-dim), var(–blue), var(–blue-dim));
+animation: linepulse 3s ease-in-out infinite;
+}
+@keyframes linepulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+/* Corner decorations */
+#hud-top::before {
+content:’’;
+position:absolute; inset:0;
+background:
+linear-gradient(135deg, rgba(0,200,255,0.05) 0%, transparent 30%),
+linear-gradient(225deg, rgba(255,34,68,0.05) 0%, transparent 30%);
+pointer-events:none;
 }
 
 #hud-left, #hud-right {
-display: flex;
-gap: 16px;
+display:flex; gap:0; align-items:stretch;
 }
-
-#hud-right {
-flex-direction: row-reverse;
-}
+#hud-right { flex-direction:row-reverse; }
 
 .hud-block {
-display: flex;
-flex-direction: column;
-align-items: center;
-min-width: 52px;
+display:flex; flex-direction:column; align-items:center; justify-content:center;
+padding: 0 14px;
+border-right: 1px solid var(–border);
+min-width: 64px; height: 62px;
+position:relative;
 }
+#hud-right .hud-block { border-right:none; border-left: 1px solid var(–border); }
+
+.hud-block:hover { background: rgba(0,200,255,0.04); }
 
 .hud-label {
-font-size: 10px;
-color: var(–text-dim);
-text-transform: uppercase;
-letter-spacing: 1px;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 9px; color: var(–text-dim);
+text-transform: uppercase; letter-spacing: 2px;
+margin-bottom: 2px;
 }
-
 .hud-value {
 font-family: ‘Orbitron’, monospace;
-font-size: 14px;
-color: var(–text-bright);
-font-weight: 700;
+font-size: 16px; color: var(–text-bright); font-weight: 700;
+line-height:1;
 }
+.hud-value.gold { color: var(–gold); text-shadow: 0 0 10px var(–gold); }
+.hud-value.blue { color: var(–blue); text-shadow: 0 0 8px var(–blue); }
+.hud-value.red  { color: var(–red);  text-shadow: 0 0 8px var(–red); }
 
-.hud-value.gold {
-color: var(–gold-color);
-}
-
-#hud-center {
-text-align: center;
-}
+#hud-center { text-align:center; flex:1; }
 
 #game-title {
 font-family: ‘Orbitron’, monospace;
-font-size: 16px;
-font-weight: 900;
-letter-spacing: 3px;
-background: linear-gradient(90deg, var(–player-color), #ffffff, var(–ai-color));
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
+font-size: 13px; font-weight: 900;
+letter-spacing: 5px;
+background: linear-gradient(90deg, var(–blue), #ffffff 50%, var(–red));
+-webkit-background-clip: text; -webkit-text-fill-color: transparent;
 background-clip: text;
+text-transform: uppercase;
+}
+
+#game-subtitle {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 8px; color: var(–text-dim);
+letter-spacing: 4px; margin-top: 1px;
+text-transform: uppercase;
 }
 
 #wave-info {
-display: flex;
-gap: 20px;
-justify-content: center;
-font-size: 12px;
-color: var(–text-dim);
-margin-top: 2px;
+display:flex; gap:16px; justify-content:center;
+margin-top:4px; font-size:11px;
 }
-
-#wave-info span {
-display: flex;
-gap: 4px;
+.wave-item {
+display:flex; align-items:center; gap:4px;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 11px; color: var(–text-dim);
 }
+.wave-item .val { color: var(–text); }
 
-/* CANVAS */
+/* ══════════════ CANVAS ══════════════ */
 #gameCanvas {
-flex: 1;
-display: block;
-width: 100%;
+flex:1; display:block; width:100%;
 cursor: crosshair;
+image-rendering: pixelated;
 }
 
-/* CONTROL PANEL */
+/* ══════════════ CONTROL PANEL ══════════════ */
 #control-panel {
-background: var(–bg-panel);
+background: linear-gradient(180deg, var(–bg2) 0%, var(–bg1) 100%);
 border-top: 1px solid var(–border);
-padding: 8px 12px;
-flex-shrink: 0;
-display: flex;
-gap: 12px;
-align-items: center;
-height: 130px;
+padding: 8px 14px;
+flex-shrink:0;
+display:flex; gap:10px; align-items:center;
+height: 128px;
+box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+position:relative;
+}
+#control-panel::before {
+content:’’;
+position:absolute; top:0; left:0; right:0; height:1px;
+background: linear-gradient(90deg, transparent, var(–border2), transparent);
 }
 
-#command-buttons {
-display: flex;
-flex-direction: column;
-gap: 6px;
-flex-shrink: 0;
-}
+/* ─ Command Buttons ─ */
+#command-buttons { display:flex; flex-direction:column; gap:5px; flex-shrink:0; }
 
 .cmd-btn {
-display: flex;
-align-items: center;
-gap: 6px;
-padding: 8px 14px;
-border: none;
-border-radius: 4px;
-cursor: pointer;
-font-family: ‘Rajdhani’, sans-serif;
-font-size: 13px;
-font-weight: 700;
-letter-spacing: 1px;
-transition: all 0.15s;
-width: 120px;
+display:flex; align-items:center; gap:7px;
+padding: 0 14px; height: 46px;
+border:none; border-radius: 4px;
+cursor:pointer; font-family:‘Exo 2’, sans-serif;
+font-size:12px; font-weight:700; letter-spacing:1px;
+transition: all 0.15s; width:122px;
+position:relative; overflow:hidden;
+text-transform:uppercase;
 }
+.cmd-btn::after {
+content:’’;
+position:absolute; inset:0;
+background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+}
+.cmd-btn:active { transform:scale(0.96); }
 
 .attack-btn {
-background: linear-gradient(135deg, #ff4400, #cc2200);
-color: white;
-border: 1px solid #ff6600;
+background: linear-gradient(135deg, #cc1122, #990011);
+color:#ffdddd; border:1px solid #ff2244;
 }
-
 .attack-btn:hover {
-background: linear-gradient(135deg, #ff6600, #ff3300);
-box-shadow: 0 0 12px rgba(255,80,0,0.5);
+background: linear-gradient(135deg, #ff2244, #cc1122);
+box-shadow: 0 0 16px rgba(255,34,68,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
 }
-
 .recall-btn {
-background: linear-gradient(135deg, #0066cc, #004499);
-color: white;
-border: 1px solid #0088ff;
+background: linear-gradient(135deg, #004499, #003377);
+color:#ddeeff; border:1px solid #0077cc;
 }
-
 .recall-btn:hover {
-background: linear-gradient(135deg, #0088ff, #0055cc);
-box-shadow: 0 0 12px rgba(0,136,255,0.5);
+background: linear-gradient(135deg, #0066cc, #004499);
+box-shadow: 0 0 16px rgba(0,120,255,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
 }
+.btn-icon { font-size:18px; }
 
-.btn-icon {
-font-size: 16px;
-}
-
-/* UNIT PANEL */
-#unit-panel {
-flex: 1;
-overflow: hidden;
-display: flex;
-flex-direction: column;
-gap: 4px;
-}
+/* ─ Unit Panel ─ */
+#unit-panel { flex:1; overflow:hidden; display:flex; flex-direction:column; gap:4px; }
 
 .panel-section-label {
-font-size: 10px;
-color: var(–text-dim);
-text-transform: uppercase;
-letter-spacing: 2px;
-padding-left: 4px;
+font-family:‘Share Tech Mono’,monospace;
+font-size:9px; color: var(–text-dim);
+text-transform:uppercase; letter-spacing:3px;
+padding:0 2px;
+display:flex; align-items:center; gap:6px;
+}
+.panel-section-label::before {
+content:’’; display:inline-block; width:16px; height:1px;
+background: var(–border2);
 }
 
 .units-row {
-display: flex;
-gap: 6px;
-overflow-x: auto;
-padding-bottom: 2px;
+display:flex; gap:5px; overflow-x:auto; padding-bottom:2px; align-items:center;
 }
-
-.units-row::-webkit-scrollbar {
-height: 3px;
-}
-.units-row::-webkit-scrollbar-track {
-background: var(–bg-dark);
-}
-.units-row::-webkit-scrollbar-thumb {
-background: var(–border);
-border-radius: 2px;
-}
+.units-row::-webkit-scrollbar { height:2px; }
+.units-row::-webkit-scrollbar-track { background:var(–bg); }
+.units-row::-webkit-scrollbar-thumb { background: var(–border2); border-radius:1px; }
 
 .unit-btn {
-display: flex;
-flex-direction: column;
-align-items: center;
-padding: 6px 8px;
-background: var(–bg-panel2);
+display:flex; flex-direction:column; align-items:center;
+padding:5px 6px;
+background: var(–bg2);
 border: 1px solid var(–border);
-border-radius: 6px;
-cursor: pointer;
-transition: all 0.15s;
-min-width: 70px;
-max-width: 70px;
-flex-shrink: 0;
-position: relative;
+border-radius:5px; cursor:pointer;
+transition: all 0.12s;
+min-width:66px; max-width:66px; flex-shrink:0;
+position:relative; overflow:hidden;
 }
-
+.unit-btn::before {
+content:’’; position:absolute; top:0; left:0; right:0; height:1px;
+background: linear-gradient(90deg, transparent, rgba(0,200,255,0.3), transparent);
+opacity:0; transition:opacity 0.12s;
+}
 .unit-btn:hover {
-border-color: var(–player-color);
-background: #0a1520;
-box-shadow: 0 0 8px rgba(0,170,255,0.2);
+border-color: var(–blue);
+background: rgba(0,100,150,0.15);
+box-shadow: 0 0 10px rgba(0,200,255,0.2), inset 0 1px 0 rgba(0,200,255,0.1);
 }
-
-.unit-btn:active {
-transform: scale(0.95);
-}
-
-.unit-btn.cant-afford {
-opacity: 0.4;
-cursor: not-allowed;
-}
-
-.unit-btn .unit-icon {
-font-size: 20px;
-line-height: 1;
-}
-
-.unit-btn .unit-name {
-font-size: 9px;
-color: var(–text);
-margin-top: 2px;
-text-align: center;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-width: 100%;
-}
-
+.unit-btn:hover::before { opacity:1; }
+.unit-btn:active { transform:scale(0.94); }
+.unit-btn.cant-afford { opacity:0.28; cursor:not-allowed; filter:grayscale(0.5); }
+.unit-btn .unit-icon { font-size:18px; line-height:1.1; }
+.unit-btn .unit-name { font-size:8px; color:var(–text); margin-top:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
 .unit-btn .unit-cost {
-font-family: ‘Orbitron’, monospace;
-font-size: 10px;
-color: var(–gold-color);
-margin-top: 1px;
+font-family:‘Orbitron’,monospace; font-size:9px;
+color: var(–gold); margin-top:1px;
 }
-
-.unit-btn.group-btn {
-border-color: #335;
-background: #0a0a14;
+.unit-btn.group-btn { background: rgba(80,40,120,0.12); border-color:#2a1844; }
+.unit-btn.group-btn:hover { border-color:#aa55ff; box-shadow:0 0 10px rgba(160,80,255,0.3); }
+.unit-btn.group-btn .unit-cost { color:#cc99ff; }
+.unit-btn .unit-count-badge {
+position:absolute; top:2px; right:2px;
+background:rgba(0,200,255,0.2); border:1px solid var(–blue);
+border-radius:2px; font-size:7px; font-family:‘Share Tech Mono’,monospace;
+color:var(–blue); padding:0 2px; line-height:12px;
 }
+.unit-btn.group-btn .unit-count-badge { background:rgba(160,80,255,0.2); border-color:#aa55ff; color:#aa55ff; }
 
-.unit-btn.group-btn:hover {
-border-color: #aa88ff;
-box-shadow: 0 0 8px rgba(160,120,255,0.3);
-}
-
-.unit-btn.group-btn .unit-cost {
-color: #cc99ff;
-}
-
-/* GAME OVER */
+/* ══════════════ GAME OVER ══════════════ */
 #game-over {
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.85);
-display: flex;
-align-items: center;
-justify-content: center;
-z-index: 100;
-backdrop-filter: blur(4px);
+position:fixed; inset:0;
+background: rgba(0,0,0,0.9);
+display:flex; align-items:center; justify-content:center;
+z-index:200; backdrop-filter:blur(8px);
 }
-
-#game-over.hidden {
-display: none;
-}
+#game-over.hidden { display:none; }
 
 #game-over-content {
-background: var(–bg-panel);
-border: 1px solid var(–border);
-border-radius: 12px;
-padding: 48px 64px;
-text-align: center;
-min-width: 400px;
+background: linear-gradient(135deg, var(–bg1), var(–bg2));
+border: 1px solid var(–border2);
+border-radius: 12px; padding: 52px 72px;
+text-align:center; min-width:420px;
+position:relative; overflow:hidden;
+box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px var(–border);
+}
+#game-over-content::before {
+content:’’; position:absolute; top:0; left:0; right:0; height:2px;
+background: linear-gradient(90deg, transparent, var(–blue), transparent);
+}
+#game-over-content.victory::before {
+background: linear-gradient(90deg, transparent, var(–green), transparent);
+}
+#game-over-content.defeat::before {
+background: linear-gradient(90deg, transparent, var(–red), transparent);
 }
 
 #game-over-title {
-font-family: ‘Orbitron’, monospace;
-font-size: 32px;
-font-weight: 900;
-letter-spacing: 4px;
-margin-bottom: 16px;
+font-family:‘Orbitron’,monospace; font-size:34px; font-weight:900;
+letter-spacing:5px; margin-bottom:8px;
+text-shadow: 0 0 30px currentColor;
 }
-
+#game-over-subtitle {
+font-family:‘Share Tech Mono’,monospace;
+font-size:11px; letter-spacing:4px;
+color:var(–text-dim); text-transform:uppercase;
+margin-bottom:28px;
+}
 #game-over-result {
-font-size: 22px;
-font-weight: 700;
-margin-bottom: 24px;
+font-size:20px; font-weight:600; margin-bottom:24px;
 }
-
 #game-over-stats {
-color: var(–text-dim);
-font-size: 15px;
-line-height: 2;
-margin-bottom: 32px;
+color:var(–text); font-size:13px; line-height:2.2; margin-bottom:36px;
+font-family:‘Share Tech Mono’,monospace;
+border: 1px solid var(–border); border-radius:6px;
+padding: 12px 20px; background: rgba(0,0,0,0.3);
 }
 
 #restart-btn {
-padding: 14px 40px;
-background: linear-gradient(135deg, var(–player-color), #0055aa);
-border: none;
-border-radius: 6px;
-color: white;
-font-family: ‘Orbitron’, monospace;
-font-size: 14px;
-font-weight: 700;
-letter-spacing: 2px;
-cursor: pointer;
-transition: all 0.2s;
+padding:14px 48px;
+background: linear-gradient(135deg, var(–blue-dim), #003366);
+border: 1px solid var(–blue); border-radius:5px;
+color:white; font-family:‘Orbitron’,monospace;
+font-size:13px; font-weight:700; letter-spacing:3px;
+cursor:pointer; transition:all 0.2s; text-transform:uppercase;
 }
-
 #restart-btn:hover {
-box-shadow: 0 0 20px rgba(0,170,255,0.5);
-transform: translateY(-2px);
+background: linear-gradient(135deg, #004488, var(–blue-dim));
+box-shadow: 0 0 24px rgba(0,200,255,0.5);
+transform:translateY(-2px);
 }
 
-/* Damage flash overlay */
-#damage-flash {
-position: fixed;
-inset: 0;
-pointer-events: none;
-z-index: 50;
-opacity: 0;
-transition: opacity 0.1s;
+/* ── TOOLTIP ── */
+.unit-btn[title]:hover::after {
+display:none;
 }
 
-  </style>
+/* ── KILL FEED ── */
+#kill-feed {
+position:fixed; right:20px; top:80px;
+width:180px; z-index:50;
+pointer-events:none;
+}
+.kill-item {
+background: rgba(6,10,20,0.9);
+border-left:2px solid var(–red);
+padding:4px 8px; margin-bottom:4px;
+font-size:10px; font-family:‘Share Tech Mono’,monospace;
+color:var(–text); animation:killfade 2.5s ease forwards;
+border-radius:0 3px 3px 0;
+}
+@keyframes killfade { 0%{opacity:0;transform:translateX(20px)} 10%{opacity:1;transform:translateX(0)} 80%{opacity:1} 100%{opacity:0} }
+
+/* ── ALERT BANNER ── */
+#alert-banner {
+position:fixed; top:72px; left:50%; transform:translateX(-50%);
+z-index:100; pointer-events:none;
+}
+.alert-msg {
+font-family:‘Orbitron’,monospace;
+background: rgba(255,34,68,0.15);
+border:1px solid var(–red);
+color:var(–red); font-size:13px; letter-spacing:3px;
+padding:6px 20px; border-radius:3px;
+animation: alertpop 3s ease forwards;
+text-transform:uppercase;
+}
+.alert-msg.blue {
+background: rgba(0,200,255,0.1); border-color:var(–blue); color:var(–blue);
+}
+@keyframes alertpop {
+0%{opacity:0;transform:translateY(-10px) scale(0.9)}
+10%{opacity:1;transform:translateY(0) scale(1)}
+75%{opacity:1}
+100%{opacity:0;transform:translateY(-5px)}
+}
+
+/* ── ABILITY INDICATORS ── */
+.unit-btn .unit-tags { display:flex; gap:2px; margin-top:2px; flex-wrap:wrap; justify-content:center; }
+.unit-tag {
+font-size:6px; padding:0px 3px; border-radius:2px;
+font-family:‘Share Tech Mono’,monospace; text-transform:uppercase; letter-spacing:0.5px;
+}
+.tag-heal  { background:rgba(255,100,150,0.2); color:#ff88bb; border:1px solid #ff88bb44; }
+.tag-range { background:rgba(0,200,255,0.1); color:#00c8ff; border:1px solid #00c8ff44; }
+.tag-splash{ background:rgba(255,160,0,0.15); color:#ffa000; border:1px solid #ffa00044; }
+.tag-stun  { background:rgba(255,240,0,0.1); color:#ffe040; border:1px solid #ffe04044; }
+.tag-mech  { background:rgba(80,120,255,0.1); color:#7090ff; border:1px solid #7090ff44; }
+.tag-elite { background:rgba(160,80,255,0.12); color:#aa55ff; border:1px solid #aa55ff44; }
+</style>
+
 </head>
 <body>
-  <div id="game-container">
-    <div id="hud-top">
-      <div id="hud-left">
-        <div class="hud-block">
-          <span class="hud-label">金币</span>
-          <span id="player-gold" class="hud-value gold">5000</span>
-        </div>
-        <div class="hud-block">
-          <span class="hud-label">驻守</span>
-          <span id="player-garrison" class="hud-value">0</span>
-        </div>
-        <div class="hud-block">
-          <span class="hud-label">进攻</span>
-          <span id="player-attacking" class="hud-value">0</span>
-        </div>
+<div id="game-container">
+  <div id="hud-top">
+    <div id="hud-left">
+      <div class="hud-block">
+        <span class="hud-label">金币</span>
+        <span id="player-gold" class="hud-value gold">5000</span>
       </div>
-      <div id="hud-center">
-        <div id="game-title">现代部落冲突</div>
-        <div id="wave-info">
-          <span>时间 <span id="game-time">00:00</span></span>
-          <span>消灭 <span id="kills" class="hud-value">0</span></span>
-        </div>
+      <div class="hud-block">
+        <span class="hud-label">驻守</span>
+        <span id="player-garrison" class="hud-value blue">0</span>
       </div>
-      <div id="hud-right">
-        <div class="hud-block">
-          <span class="hud-label">金币</span>
-          <span id="ai-gold" class="hud-value gold">5000</span>
-        </div>
-        <div class="hud-block">
-          <span class="hud-label">驻守</span>
-          <span id="ai-garrison" class="hud-value">0</span>
-        </div>
-        <div class="hud-block">
-          <span class="hud-label">进攻</span>
-          <span id="ai-attacking" class="hud-value">0</span>
-        </div>
+      <div class="hud-block">
+        <span class="hud-label">进攻</span>
+        <span id="player-attacking" class="hud-value red">0</span>
       </div>
     </div>
 
 ```
-<canvas id="gameCanvas"></canvas>
-
-<div id="control-panel">
-  <div id="command-buttons">
-    <button id="btn-attack-all" class="cmd-btn attack-btn" onclick="game.attackAll()">
-      <span class="btn-icon">⚔️</span>
-      <span>全部进攻</span>
-    </button>
-    <button id="btn-recall-all" class="cmd-btn recall-btn" onclick="game.recallAll()">
-      <span class="btn-icon">🏠</span>
-      <span>全部撤回</span>
-    </button>
+<div id="hud-center">
+  <div id="game-title">NEXUS WAR · 现代部落冲突</div>
+  <div id="game-subtitle">TACTICAL COMBAT SIMULATION</div>
+  <div id="wave-info">
+    <div class="wave-item">⏱ <span id="game-time" class="val">00:00</span></div>
+    <div class="wave-item">💀 击杀 <span id="kills" class="val">0</span></div>
+    <div class="wave-item">⚠ <span id="threat-level" class="val">低</span></div>
   </div>
-  <div id="unit-panel">
-    <div class="panel-section-label">单体单位</div>
-    <div id="single-units" class="units-row"></div>
-    <div class="panel-section-label">作战群</div>
-    <div id="group-units" class="units-row"></div>
+</div>
+
+<div id="hud-right">
+  <div class="hud-block">
+    <span class="hud-label">金币</span>
+    <span id="ai-gold" class="hud-value gold">5000</span>
+  </div>
+  <div class="hud-block">
+    <span class="hud-label">驻守</span>
+    <span id="ai-garrison" class="hud-value blue">0</span>
+  </div>
+  <div class="hud-block">
+    <span class="hud-label">进攻</span>
+    <span id="ai-attacking" class="hud-value red">0</span>
   </div>
 </div>
 ```
 
   </div>
 
-  <div id="game-over" class="hidden">
-    <div id="game-over-content">
-      <div id="game-over-title">战斗结束</div>
-      <div id="game-over-result"></div>
-      <div id="game-over-stats"></div>
-      <button id="restart-btn" onclick="game.restart()">再战一局</button>
+<canvas id="gameCanvas"></canvas>
+
+  <div id="control-panel">
+    <div id="command-buttons">
+      <button class="cmd-btn attack-btn" onclick="game.attackAll()">
+        <span class="btn-icon">⚔️</span><span>全部进攻</span>
+      </button>
+      <button class="cmd-btn recall-btn" onclick="game.recallAll()">
+        <span class="btn-icon">🛡️</span><span>全部撤回</span>
+      </button>
+    </div>
+    <div id="unit-panel">
+      <div class="panel-section-label">单体单位</div>
+      <div id="single-units" class="units-row"></div>
+      <div class="panel-section-label">作战群组</div>
+      <div id="group-units" class="units-row"></div>
     </div>
   </div>
+</div>
 
-  <script>
-// ============================================================
-// UNIT DEFINITIONS
-// ============================================================
+<div id="kill-feed"></div>
+<div id="alert-banner"></div>
 
-const UNIT_DEFS = {
-  // ---- SINGLE UNITS ----
-  infantry: {
-    id: 'infantry', name: '步兵', icon: '🪖',
-    cost: 30, hp: 100, maxHp: 100,
-    attack: 15, range: 40, speed: 70,
-    size: 8, isGroup: false,
-    color: '#44aaff',
-    description: '量大管饱'
-  },
-  heavy: {
-    id: 'heavy', name: '重装步兵', icon: '🛡️',
-    cost: 80, hp: 300, maxHp: 300,
-    attack: 20, range: 35, speed: 38,
-    size: 11, isGroup: false,
-    color: '#88ccff',
-    description: '肉盾吸引火力'
-  },
-  sniper: {
-    id: 'sniper', name: '狙击手', icon: '🔫',
-    cost: 100, hp: 80, maxHp: 80,
-    attack: 60, range: 130, speed: 50,
-    size: 7, isGroup: false,
-    color: '#00ffcc',
-    description: '射程极远'
-  },
-  demo: {
-    id: 'demo', name: '爆破兵', icon: '💣',
-    cost: 120, hp: 120, maxHp: 120,
-    attack: 80, range: 30, speed: 52,
-    size: 9, isGroup: false,
-    color: '#ffaa00',
-    splashRadius: 60,
-    description: '范围爆炸伤害'
-  },
-  special: {
-    id: 'special', name: '特种兵', icon: '🥷',
-    cost: 150, hp: 150, maxHp: 150,
-    attack: 50, range: 50, speed: 95,
-    size: 8, isGroup: false,
-    color: '#aa88ff',
-    priorityTarget: 'building',
-    description: '优先攻击建筑'
-  },
-  emp: {
-    id: 'emp', name: '电磁干扰兵', icon: '⚡',
-    cost: 180, hp: 100, maxHp: 100,
-    attack: 10, range: 55, speed: 55,
-    size: 8, isGroup: false,
-    color: '#ffff00',
-    stunDuration: 2000,
-    description: '攻击眩晕敌人'
-  },
-  unitree: {
-    id: 'unitree', name: '宇树机器人', icon: '🤖',
-    cost: 250, hp: 250, maxHp: 250,
-    attack: 45, range: 65, speed: 60,
-    size: 10, isGroup: false,
-    color: '#00ffaa',
-    immuneToStun: true,
-    description: '背负机枪，免疫眩晕'
-  },
-  lightMech: {
-    id: 'lightMech', name: '轻型机甲', icon: '🦾',
-    cost: 350, hp: 400, maxHp: 400,
-    attack: 55, range: 60, speed: 48,
-    size: 13, isGroup: false,
-    color: '#4488ff',
-    immuneToStun: true,
-    description: '均衡全面'
-  },
-  heavyMech: {
-    id: 'heavyMech', name: '重型机甲', icon: '⚙️',
-    cost: 600, hp: 800, maxHp: 800,
-    attack: 90, range: 70, speed: 32,
-    size: 16, isGroup: false,
-    color: '#2255cc',
-    immuneToStun: true,
-    description: '移动堡垒'
-  },
-  nano: {
-    id: 'nano', name: '纳米战士', icon: '🧬',
-    cost: 200, hp: 180, maxHp: 180,
-    attack: 40, range: 48, speed: 80,
-    size: 8, isGroup: false,
-    color: '#00ff88',
-    regenRate: 3,
-    description: '战斗中自动回血'
-  },
-  medic: {
-    id: 'medic', name: '工程机器人', icon: '🔧',
-    cost: 160, hp: 120, maxHp: 120,
-    attack: 0, range: 0, speed: 58,
-    size: 8, isGroup: false,
-    color: '#ff88aa',
-    healRange: 70, healRate: 8,
-    description: '为附近友军回血'
-  },
-};
+<div id="game-over" class="hidden">
+  <div id="game-over-content">
+    <div id="game-over-title"></div>
+    <div id="game-over-subtitle">BATTLE CONCLUDED</div>
+    <div id="game-over-result"></div>
+    <div id="game-over-stats"></div>
+    <button id="restart-btn" onclick="game.restart()">再战一局 · RETRY</button>
+  </div>
+</div>
 
-// ---- GROUP UNIT DEFINITIONS ----
-const GROUP_DEFS = {
-  infantryGroup: {
-    id: 'infantryGroup', name: '步兵突击群', icon: '🪖',
-    cost: 200, isGroup: true,
-    composition: [
-      { type: 'infantry', count: 8 }
-    ],
-    description: '8名步兵'
-  },
-  specialGroup: {
-    id: 'specialGroup', name: '特种作战群', icon: '🥷',
-    cost: 650, isGroup: true,
-    composition: [
-      { type: 'special', count: 5 }
-    ],
-    description: '5名特种兵'
-  },
-  sniperGroup: {
-    id: 'sniperGroup', name: '狙击手作战群', icon: '🔫',
-    cost: 350, isGroup: true,
-    composition: [
-      { type: 'sniper', count: 4 }
-    ],
-    description: '4名狙击手'
-  },
-  demoGroup: {
-    id: 'demoGroup', name: '爆破突击群', icon: '💣',
-    cost: 600, isGroup: true,
-    composition: [
-      { type: 'demo', count: 4 },
-      { type: 'heavy', count: 2 }
-    ],
-    description: '4爆破+2重装'
-  },
-  mechGroup: {
-    id: 'mechGroup', name: '机甲突击群', icon: '⚙️',
-    cost: 1600, isGroup: true,
-    composition: [
-      { type: 'lightMech', count: 3 },
-      { type: 'heavyMech', count: 1 }
-    ],
-    description: '3轻甲+1重甲'
-  },
-  empGroup: {
-    id: 'empGroup', name: '电磁特战群', icon: '⚡',
-    cost: 900, isGroup: true,
-    composition: [
-      { type: 'emp', count: 3 },
-      { type: 'special', count: 3 }
-    ],
-    description: '瘫痪后突击'
-  },
-  eliteGroup: {
-    id: 'eliteGroup', name: '精英混编群', icon: '🧬',
-    cost: 1100, isGroup: true,
-    composition: [
-      { type: 'nano', count: 2 },
-      { type: 'unitree', count: 2 },
-      { type: 'medic', count: 1 }
-    ],
-    description: '自愈持续作战'
-  },
-};
+<script>
+/* =====================================================================
+   UTILITIES
+===================================================================== */
+function dist(x1,y1,x2,y2){ const dx=x2-x1,dy=y2-y1; return Math.sqrt(dx*dx+dy*dy); }
+function fastRemove(arr,i){ arr[i]=arr[arr.length-1]; arr.pop(); }
+function lerp(a,b,t){ return a+(b-a)*t; }
 
-// Building definitions
-const BUILDING_DEFS = {
-  base: {
-    id: 'base', name: '指挥中心',
-    hp: 3000, maxHp: 3000,
-    attack: 0, range: 0,
-    width: 60, height: 60,
-    color: '#224466'
-  },
-  tower: {
-    id: 'tower', name: '防御炮塔',
-    hp: 500, maxHp: 500,
-    attack: 25, range: 150, attackSpeed: 1000,
-    width: 30, height: 30,
-    color: '#1a3355',
-    level: 1
-  },
-  wall: {
-    id: 'wall', name: '城墙',
-    hp: 800, maxHp: 800,
-    attack: 0, range: 0,
-    width: 16, height: 40,
-    color: '#334455'
+class ObjectPool {
+  constructor(factory){ this.factory=factory; this.pool=[]; }
+  acquire(){ return this.pool.length>0?this.pool.pop():this.factory(); }
+  release(obj){ this.pool.push(obj); }
+}
+
+class SpatialGrid {
+  constructor(cellSize){ this.cellSize=cellSize; this.cells=new Map(); this._pool=[]; }
+  clear(){ for(const a of this.cells.values()){a.length=0;this._pool.push(a);} this.cells.clear(); }
+  _key(cx,cy){ return `${cx},${cy}`; }
+  _getCell(cx,cy){ const k=this._key(cx,cy); let a=this.cells.get(k); if(!a){a=this._pool.length>0?this._pool.pop():[]; this.cells.set(k,a);} return a; }
+  insert(e){ this._getCell(Math.floor(e.x/this.cellSize),Math.floor(e.y/this.cellSize)).push(e); }
+  queryNearest(x,y,r,f){
+    let best=null,bsq=r*r; const cs=this.cellSize;
+    const mx=Math.floor((x-r)/cs),ax=Math.floor((x+r)/cs),my=Math.floor((y-r)/cs),ay=Math.floor((y+r)/cs);
+    for(let cx=mx;cx<=ax;cx++) for(let cy=my;cy<=ay;cy++){
+      const arr=this.cells.get(this._key(cx,cy)); if(!arr) continue;
+      for(let i=0;i<arr.length;i++){const e=arr[i];if(f&&!f(e))continue;const dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;if(d<bsq){bsq=d;best=e;}}
+    }
+    return best;
   }
+  query(x,y,r,f){
+    const res=[]; const cs=this.cellSize; const rsq=r*r;
+    const mx=Math.floor((x-r)/cs),ax=Math.floor((x+r)/cs),my=Math.floor((y-r)/cs),ay=Math.floor((y+r)/cs);
+    for(let cx=mx;cx<=ax;cx++) for(let cy=my;cy<=ay;cy++){
+      const arr=this.cells.get(this._key(cx,cy)); if(!arr) continue;
+      for(let i=0;i<arr.length;i++){const e=arr[i];if(f&&!f(e))continue;const dx=e.x-x,dy=e.y-y;if(dx*dx+dy*dy<=rsq)res.push(e);}
+    }
+    return res;
+  }
+}
+
+/* =====================================================================
+   UNIT DEFINITIONS
+===================================================================== */
+const UNIT_DEFS = {
+  infantry:  {id:'infantry',  name:'步兵',      icon:'🪖',cost:30,  hp:100,maxHp:100,attack:15,range:40, speed:70,size:8,  color:'#44aaff',description:'量大管饱，廉价主力',tags:[]},
+  heavy:     {id:'heavy',     name:'重装',       icon:'🛡️',cost:80,  hp:300,maxHp:300,attack:20,range:35, speed:38,size:11, color:'#88ccff',description:'肉盾吸引火力',tags:[]},
+  sniper:    {id:'sniper',    name:'狙击手',     icon:'🔫',cost:100, hp:80, maxHp:80, attack:60,range:130,speed:50,size:7,  color:'#00ffcc',description:'射程极远精准打击',tags:['range']},
+  demo:      {id:'demo',      name:'爆破兵',     icon:'💣',cost:120, hp:120,maxHp:120,attack:80,range:30, speed:52,size:9,  color:'#ffaa00',splashRadius:60,description:'范围爆炸伤害',tags:['splash']},
+  special:   {id:'special',   name:'特种兵',     icon:'🥷',cost:150, hp:150,maxHp:150,attack:50,range:50, speed:95,size:8,  color:'#aa88ff',priorityTarget:'building',description:'优先攻击建筑',tags:['elite']},
+  emp:       {id:'emp',       name:'电磁兵',     icon:'⚡',cost:180, hp:100,maxHp:100,attack:10,range:55, speed:55,size:8,  color:'#ffff00',stunDuration:2000,description:'攻击眩晕敌人',tags:['stun']},
+  unitree:   {id:'unitree',   name:'宇树机器人', icon:'🤖',cost:250, hp:250,maxHp:250,attack:45,range:65, speed:60,size:10, color:'#00ffaa',immuneToStun:true,description:'背负机枪免疫眩晕',tags:['mech']},
+  lightMech: {id:'lightMech', name:'轻型机甲',   icon:'🦾',cost:350, hp:400,maxHp:400,attack:55,range:60, speed:48,size:13, color:'#4488ff',immuneToStun:true,description:'均衡全面机甲单位',tags:['mech']},
+  heavyMech: {id:'heavyMech', name:'重型机甲',   icon:'⚙️',cost:600, hp:800,maxHp:800,attack:90,range:70, speed:32,size:16, color:'#2255cc',immuneToStun:true,description:'移动堡垒极强火力',tags:['mech']},
+  nano:      {id:'nano',      name:'纳米战士',   icon:'🧬',cost:200, hp:180,maxHp:180,attack:40,range:48, speed:80,size:8,  color:'#00ff88',regenRate:3,description:'战斗中自动回血',tags:['heal']},
+  medic:     {id:'medic',     name:'工程机器人', icon:'🔧',cost:160, hp:120,maxHp:120,attack:0, range:0,  speed:58,size:8,  color:'#ff88aa',healRange:70,healRate:8,description:'为附近友军回血',tags:['heal']},
 };
 
-// ============================================================
-// MAIN GAME ENGINE
-// ============================================================
+const GROUP_DEFS = {
+  infantryGroup:{id:'infantryGroup',name:'步兵突击群',   icon:'🪖',cost:200, isGroup:true,composition:[{type:'infantry',count:8}],   description:'8名步兵',badge:'×8'},
+  specialGroup: {id:'specialGroup', name:'特种作战群',   icon:'🥷',cost:650, isGroup:true,composition:[{type:'special',count:5}],    description:'5名特种兵',badge:'×5'},
+  sniperGroup:  {id:'sniperGroup',  name:'狙击手阵列',   icon:'🔫',cost:350, isGroup:true,composition:[{type:'sniper',count:4}],     description:'4名狙击手',badge:'×4'},
+  demoGroup:    {id:'demoGroup',    name:'爆破突击群',   icon:'💣',cost:600, isGroup:true,composition:[{type:'demo',count:4},{type:'heavy',count:2}],description:'4爆破+2重装',badge:'4+2'},
+  mechGroup:    {id:'mechGroup',    name:'机甲突击群',   icon:'⚙️',cost:1600,isGroup:true,composition:[{type:'lightMech',count:3},{type:'heavyMech',count:1}],description:'3轻甲+1重甲',badge:'3+1'},
+  empGroup:     {id:'empGroup',     name:'电磁特战群',   icon:'⚡',cost:900, isGroup:true,composition:[{type:'emp',count:3},{type:'special',count:3}],description:'先瘫痪后突击',badge:'3+3'},
+  eliteGroup:   {id:'eliteGroup',   name:'精英混编群',   icon:'🧬',cost:1100,isGroup:true,composition:[{type:'nano',count:2},{type:'unitree',count:2},{type:'medic',count:1}],description:'自愈持续作战',badge:'精'},
+};
 
+const BUILDING_DEFS = {
+  base: {id:'base', name:'指挥中心',hp:3000,maxHp:3000,attack:0, range:0,  width:60,height:60},
+  tower:{id:'tower',name:'防御炮塔',hp:500, maxHp:500, attack:25,range:155,attackSpeed:900,width:28,height:28},
+  wall: {id:'wall', name:'城墙',    hp:800, maxHp:800, attack:0, range:0,  width:14,height:40},
+};
+
+/* =====================================================================
+   PROJECTILE
+===================================================================== */
+class Projectile {
+  constructor(){ this.x=0;this.y=0;this.target=null;this.damage=0;this.color='#fff';this.game=null;this.fromUnit=false;this.shooter=null;this.speed=380;this.dead=false;this.size=3;this.trail=[];this.age=0; }
+  init(x,y,target,damage,color,game,fromUnit,shooter){
+    this.x=x;this.y=y;this.target=target;this.damage=damage;this.color=color;this.game=game;this.fromUnit=fromUnit;this.shooter=shooter;
+    this.speed=380;this.dead=false;this.size=fromUnit?3:5;this.trail.length=0;this.age=0;
+    return this;
+  }
+  update(dt){
+    if(!this.target||this.target.dead||this.target.hp<=0){this.dead=true;return;}
+    this.age+=dt;
+    this.trail.push({x:this.x,y:this.y});
+    if(this.trail.length>10) this.trail.shift();
+    const tx=this.target.x,ty=this.target.y;
+    const d=dist(this.x,this.y,tx,ty);
+    const step=(this.speed*dt)/1000;
+    if(d<=step+2){
+      this.target.takeDamage(this.damage,this.shooter);
+      this.game.spawnParticles(tx,ty,this.color,6);
+      this.dead=true;
+    } else {
+      this.x+=((tx-this.x)/d)*step;
+      this.y+=((ty-this.y)/d)*step;
+    }
+  }
+  draw(ctx){
+    ctx.save();
+    // Trail
+    for(let i=0;i<this.trail.length;i++){
+      const t=this.trail[i];
+      const a=(i/this.trail.length)*0.45;
+      ctx.globalAlpha=a;
+      ctx.fillStyle=this.color;
+      ctx.beginPath(); ctx.arc(t.x,t.y,this.size*0.5*(i/this.trail.length),0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    // Glow
+    ctx.shadowColor=this.color; ctx.shadowBlur=12;
+    ctx.fillStyle=this.color;
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
+    // Core white
+    ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(255,255,255,0.8)';
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.size*0.4,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* =====================================================================
+   PARTICLE SYSTEMS
+===================================================================== */
+class LightningEffect {
+  constructor(x1,y1,x2,y2,color,life){ this.x1=x1;this.y1=y1;this.x2=x2;this.y2=y2;this.color=color;this.life=life;this.maxLife=life;this.segs=8; }
+  draw(ctx){
+    ctx.save();
+    ctx.globalAlpha=this.life/this.maxLife;
+    ctx.strokeStyle=this.color; ctx.lineWidth=1.5;
+    ctx.shadowColor=this.color; ctx.shadowBlur=6;
+    ctx.beginPath();
+    const dx=(this.x2-this.x1)/this.segs, dy=(this.y2-this.y1)/this.segs;
+    ctx.moveTo(this.x1,this.y1);
+    for(let i=1;i<this.segs;i++){
+      const jitter=10*(1-i/this.segs);
+      ctx.lineTo(this.x1+dx*i+(Math.random()-.5)*jitter, this.y1+dy*i+(Math.random()-.5)*jitter);
+    }
+    ctx.lineTo(this.x2,this.y2); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* =====================================================================
+   GAME ENGINE
+===================================================================== */
 class Game {
-  constructor() {
-    this.canvas = document.getElementById('gameCanvas');
-    this.ctx = this.canvas.getContext('2d');
-    this.running = false;
-    this.gameOver = false;
-    this.lastTime = 0;
-    this.kills = 0;
-    this.startTime = 0;
-    this.elapsed = 0;
+  constructor(){
+    this.canvas=document.getElementById('gameCanvas');
+    this.ctx=this.canvas.getContext('2d');
+    this.running=false; this.gameOver=false;
+    this.lastTime=0; this.kills=0;
+    this.startTime=0; this.elapsed=0;
+    this.selectedUnit=null;
+    this.bgStars=[];
+    this.lastKillTime=0;
+    this.killStreak=0;
 
-    this.particles = [];
-    this.projectiles = [];
-    this.floatingTexts = [];
+    this.particlePool=new ObjectPool(()=>({x:0,y:0,vx:0,vy:0,color:'#fff',size:2,life:0,maxLife:0}));
+    this.projectilePool=new ObjectPool(()=>new Projectile());
+    this.textPool=new ObjectPool(()=>({x:0,y:0,text:'',color:'#fff',size:14,life:0,maxLife:0}));
+    this.ringPool=new ObjectPool(()=>({x:0,y:0,color:'#fff',life:0,maxLife:0,r:0}));
 
-    this.player = null;
-    this.ai = null;
+    this.unitGrid=new SpatialGrid(80);
+    this.buildingGrid=new SpatialGrid(80);
 
+    this.particles=[]; this.projectiles=[];
+    this.floatingTexts=[]; this.effects=[];
+    this.lightnings=[];
+
+    this._hud={playerGold:-1,aiGold:-1,playerGarrison:-1,playerAttacking:-1,aiGarrison:-1,aiAttacking:-1,time:'',kills:-1};
+
+    this.player=null; this.ai=null;
+
+    this.generateBgStars(200);
     this.init();
     this.buildUI();
-    window.addEventListener('resize', () => this.resize());
+    this.setupInput();
+    window.addEventListener('resize',()=>this.resize());
     this.resize();
   }
 
-  resize() {
-    const container = document.getElementById('game-container');
-    const hud = document.getElementById('hud-top');
-    const panel = document.getElementById('control-panel');
-    this.canvas.width = container.clientWidth;
-    this.canvas.height = container.clientHeight - hud.offsetHeight - panel.offsetHeight;
-    if (this.player) this.layoutVillages();
+  generateBgStars(n){
+    this.bgStars=[];
+    for(let i=0;i<n;i++) this.bgStars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.2+0.2,a:Math.random()*0.5+0.1,twinkle:Math.random()*Math.PI*2});
   }
 
-  init() {
-    this.player = new Village('player', this);
-    this.ai = new Village('ai', this);
-    this.kills = 0;
-    this.startTime = Date.now();
-    this.elapsed = 0;
-    this.particles = [];
-    this.projectiles = [];
-    this.floatingTexts = [];
-    this.gameOver = false;
+  setupInput(){
+    this.canvas.addEventListener('click',e=>this.handleCanvasClick(e));
+    document.addEventListener('keydown',e=>{
+      if(e.key==='a'||e.key==='A') this.attackAll();
+      if(e.key==='r'||e.key==='R') this.recallAll();
+      if(e.key==='Escape') this.selectedUnit=null;
+    });
+  }
+
+  handleCanvasClick(e){
+    if(this.gameOver) return;
+    const rect=this.canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(this.canvas.width/rect.width);
+    const my=(e.clientY-rect.top)*(this.canvas.height/rect.height);
+    const unit=this.unitGrid.queryNearest(mx,my,30,u=>u.side==='player'&&!u.dead);
+    this.selectedUnit=unit||null;
+  }
+
+  resize(){
+    const container=document.getElementById('game-container');
+    const hud=document.getElementById('hud-top');
+    const panel=document.getElementById('control-panel');
+    this.canvas.width=container.clientWidth;
+    this.canvas.height=container.clientHeight-hud.offsetHeight-panel.offsetHeight;
+    if(this.player) this.layoutVillages();
+  }
+
+  init(){
+    for(const p of this.particles) this.particlePool.release(p);
+    for(const p of this.projectiles) this.projectilePool.release(p);
+    for(const t of this.floatingTexts) this.textPool.release(t);
+    for(const e of this.effects) this.ringPool.release(e);
+    this.particles.length=0; this.projectiles.length=0;
+    this.floatingTexts.length=0; this.effects.length=0;
+    this.lightnings.length=0;
+
+    this.player=new Village('player',this);
+    this.ai=new Village('ai',this);
+    this.kills=0; this.killStreak=0;
+    this.startTime=Date.now(); this.elapsed=0;
+    this.selectedUnit=null; this.gameOver=false;
     document.getElementById('game-over').classList.add('hidden');
     this.layoutVillages();
-    this.updateUI();
-    if (!this.running) {
-      this.running = true;
-      requestAnimationFrame((t) => this.loop(t));
+    this._hud={playerGold:-1,aiGold:-1,playerGarrison:-1,playerAttacking:-1,aiGarrison:-1,aiAttacking:-1,time:'',kills:-1};
+    this.updateHUD();
+    if(!this.running){
+      this.running=true; this.lastTime=0;
+      requestAnimationFrame(t=>this.loop(t));
     }
   }
 
-  layoutVillages() {
-    const W = this.canvas.width;
-    const H = this.canvas.height;
-    const cx = H / 2;
-
-    // Player village - left side
-    this.player.x = 120;
-    this.player.y = cx;
-    this.player.layoutBuildings();
-
-    // AI village - right side
-    this.ai.x = W - 120;
-    this.ai.y = cx;
-    this.ai.layoutBuildings();
+  layoutVillages(){
+    const W=this.canvas.width,H=this.canvas.height,cx=H/2;
+    this.player.x=120; this.player.y=cx; this.player.layoutBuildings();
+    this.ai.x=W-120; this.ai.y=cx; this.ai.layoutBuildings();
   }
 
-  loop(timestamp) {
-    if (!this.running) return;
-    const dt = Math.min(timestamp - this.lastTime, 50);
-    this.lastTime = timestamp;
-
-    if (!this.gameOver) {
-      this.elapsed = Date.now() - this.startTime;
+  loop(timestamp){
+    if(!this.running) return;
+    const dt=Math.min(timestamp-this.lastTime,50);
+    this.lastTime=timestamp;
+    if(!this.gameOver){
+      this.elapsed=Date.now()-this.startTime;
       this.update(dt);
     }
     this.draw();
-    requestAnimationFrame((t) => this.loop(t));
+    requestAnimationFrame(t=>this.loop(t));
   }
 
-  update(dt) {
+  update(dt){
+    this.unitGrid.clear(); this.buildingGrid.clear();
+    for(const v of [this.player,this.ai]){
+      for(let i=0;i<v.units.length;i++){if(!v.units[i].dead)this.unitGrid.insert(v.units[i]);}
+      for(let i=0;i<v.buildings.length;i++){if(!v.buildings[i].dead)this.buildingGrid.insert(v.buildings[i]);}
+    }
+
     this.player.update(dt);
     this.ai.update(dt);
 
-    // Update projectiles
-    for (let i = this.projectiles.length - 1; i >= 0; i--) {
-      const p = this.projectiles[i];
-      p.update(dt);
-      if (p.dead) this.projectiles.splice(i, 1);
+    for(let i=this.projectiles.length-1;i>=0;i--){
+      this.projectiles[i].update(dt);
+      if(this.projectiles[i].dead){this.projectilePool.release(this.projectiles[i]);fastRemove(this.projectiles,i);}
     }
-
-    // Update particles
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i];
-      p.life -= dt;
-      p.x += p.vx * dt * 0.06;
-      p.y += p.vy * dt * 0.06;
-      p.vy += 0.05 * dt;
-      if (p.life <= 0) this.particles.splice(i, 1);
+    for(let i=this.particles.length-1;i>=0;i--){
+      const p=this.particles[i]; p.life-=dt;
+      p.x+=p.vx*dt*0.06; p.y+=p.vy*dt*0.06; p.vy+=0.04*dt;
+      if(p.life<=0){this.particlePool.release(p);fastRemove(this.particles,i);}
     }
-
-    // Update floating texts
-    for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
-      const t = this.floatingTexts[i];
-      t.life -= dt;
-      t.y -= 0.05 * dt;
-      if (t.life <= 0) this.floatingTexts.splice(i, 1);
+    for(let i=this.floatingTexts.length-1;i>=0;i--){
+      const t=this.floatingTexts[i]; t.life-=dt; t.y-=0.04*dt;
+      if(t.life<=0){this.textPool.release(t);fastRemove(this.floatingTexts,i);}
+    }
+    for(let i=this.effects.length-1;i>=0;i--){
+      this.effects[i].life-=dt;
+      if(this.effects[i].life<=0){this.ringPool.release(this.effects[i]);fastRemove(this.effects,i);}
+    }
+    for(let i=this.lightnings.length-1;i>=0;i--){
+      this.lightnings[i].life-=dt;
+      if(this.lightnings[i].life<=0) fastRemove(this.lightnings,i);
     }
 
     this.updateHUD();
     this.checkGameOver();
   }
 
-  checkGameOver() {
-    const playerBaseDead = this.player.buildings.find(b => b.type === 'base' && b.hp <= 0);
-    const aiBaseDead = this.ai.buildings.find(b => b.type === 'base' && b.hp <= 0);
-
-    if (playerBaseDead || aiBaseDead) {
-      this.gameOver = true;
-      const win = aiBaseDead;
-      const timeStr = this.formatTime(this.elapsed);
-
+  checkGameOver(){
+    const pbd=this.player.buildings.find(b=>b.type==='base'&&b.hp<=0);
+    const abd=this.ai.buildings.find(b=>b.type==='base'&&b.hp<=0);
+    if(pbd||abd){
+      this.gameOver=true;
+      const win=!!abd;
+      const el=document.getElementById('game-over-content');
+      el.classList.remove('victory','defeat');
+      el.classList.add(win?'victory':'defeat');
+      const t=document.getElementById('game-over-title');
+      t.textContent=win?'胜利':'战败';
+      t.style.color=win?'#00ff99':'#ff2244';
+      document.getElementById('game-over-result').textContent=win?'敌方指挥中心已被摧毁！':'我方指挥中心已被摧毁！';
+      document.getElementById('game-over-result').style.color=win?'#00cc66':'#cc1133';
+      const timeStr=this.formatTime(this.elapsed);
+      document.getElementById('game-over-stats').innerHTML=
+        `存活时间 · ${timeStr}\n消灭敌军 · ${this.kills} 人\n最终评级 · ${this.getRating(win)}`;
       document.getElementById('game-over').classList.remove('hidden');
-      document.getElementById('game-over-title').textContent = win ? '🏆 胜利' : '💥 战败';
-      document.getElementById('game-over-title').style.color = win ? '#00ff88' : '#ff3333';
-      document.getElementById('game-over-result').textContent = win ? '敌方指挥中心已被摧毁！' : '我方指挥中心已被摧毁！';
-      document.getElementById('game-over-result').style.color = win ? '#00cc66' : '#cc2200';
-      document.getElementById('game-over-stats').innerHTML = `
-        存活时间：${timeStr}<br>
-        消灭敌军：${this.kills} 人
-      `;
     }
   }
 
-  formatTime(ms) {
-    const s = Math.floor(ms / 1000);
-    const m = Math.floor(s / 60);
+  getRating(win){
+    if(!win) return '☆ 需要更多训练';
+    const mins=this.elapsed/60000;
+    if(mins<2) return '★★★ 闪电战胜';
+    if(mins<5) return '★★☆ 干净利落';
+    return '★☆☆ 险胜';
+  }
+
+  formatTime(ms){
+    const s=Math.floor(ms/1000),m=Math.floor(s/60);
     return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
   }
 
-  draw() {
-    const ctx = this.ctx;
-    const W = this.canvas.width;
-    const H = this.canvas.height;
+  /* ── DRAW ── */
+  draw(){
+    const ctx=this.ctx,W=this.canvas.width,H=this.canvas.height;
+    const t=Date.now()*0.001;
 
-    // Background
-    ctx.fillStyle = '#060810';
-    ctx.fillRect(0, 0, W, H);
+    // Deep background
+    ctx.fillStyle='#04060b';
+    ctx.fillRect(0,0,W,H);
 
-    // Grid
-    this.drawGrid(ctx, W, H);
+    // Stars
+    for(const s of this.bgStars){
+      const flicker=0.5+0.5*Math.sin(t*1.5+s.twinkle);
+      ctx.globalAlpha=s.a*flicker;
+      ctx.fillStyle='#ffffff';
+      ctx.beginPath(); ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+
+    // Subtle grid
+    ctx.strokeStyle='rgba(15,30,50,0.7)'; ctx.lineWidth=0.5;
+    const gs=50;
+    for(let x=0;x<W;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    // Horizon line scanline
+    ctx.strokeStyle=`rgba(0,100,200,${0.15+0.05*Math.sin(t*0.5)})`;
+    ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,H*0.5); ctx.lineTo(W,H*0.5); ctx.stroke();
+
+    // Territory glow
+    const lg=ctx.createLinearGradient(0,0,W,0);
+    lg.addColorStop(0,'rgba(0,80,180,0.07)');
+    lg.addColorStop(0.48,'rgba(0,80,180,0.03)');
+    lg.addColorStop(0.52,'rgba(180,0,30,0.03)');
+    lg.addColorStop(1,'rgba(180,0,30,0.07)');
+    ctx.fillStyle=lg; ctx.fillRect(0,0,W,H);
 
     // Center divider
-    ctx.strokeStyle = '#1a2233';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([8, 8]);
-    ctx.beginPath();
-    ctx.moveTo(W/2, 0);
-    ctx.lineTo(W/2, H);
-    ctx.stroke();
+    ctx.save();
+    const cdG=ctx.createLinearGradient(0,0,0,H);
+    cdG.addColorStop(0,'rgba(255,255,255,0)');
+    cdG.addColorStop(0.3,'rgba(255,255,255,0.06)');
+    cdG.addColorStop(0.5,'rgba(255,255,255,0.1)');
+    cdG.addColorStop(0.7,'rgba(255,255,255,0.06)');
+    cdG.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.strokeStyle=cdG; ctx.lineWidth=1;
+    ctx.setLineDash([6,10]);
+    ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
     ctx.setLineDash([]);
+    ctx.restore();
 
-    // Territory tint
-    ctx.fillStyle = 'rgba(0,100,200,0.03)';
-    ctx.fillRect(0, 0, W/2, H);
-    ctx.fillStyle = 'rgba(200,30,0,0.03)';
-    ctx.fillRect(W/2, 0, W/2, H);
-
-    // Draw villages
+    // Villages
     this.player.draw(ctx);
     this.ai.draw(ctx);
 
-    // Draw projectiles
-    for (const p of this.projectiles) p.draw(ctx);
-
-    // Draw particles
-    for (const p of this.particles) {
-      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+    // Death rings
+    for(let i=0;i<this.effects.length;i++){
+      const e=this.effects[i]; const t2=1-e.life/e.maxLife;
+      const r=e.r?(e.r+40*t2):5+40*t2;
+      ctx.save();
+      ctx.globalAlpha=e.life/e.maxLife*0.9;
+      ctx.strokeStyle=e.color; ctx.lineWidth=2*(1-t2)+0.5;
+      ctx.shadowColor=e.color; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.arc(e.x,e.y,r,0,Math.PI*2); ctx.stroke();
+      // Inner ring
+      ctx.globalAlpha=(e.life/e.maxLife)*0.4;
+      ctx.beginPath(); ctx.arc(e.x,e.y,r*0.5,0,Math.PI*2); ctx.stroke();
+      ctx.shadowBlur=0;
+      ctx.restore();
     }
-    ctx.globalAlpha = 1;
 
-    // Draw floating texts
-    for (const t of this.floatingTexts) {
-      ctx.globalAlpha = Math.max(0, t.life / t.maxLife);
-      ctx.font = `bold ${t.size}px Rajdhani`;
-      ctx.fillStyle = t.color;
-      ctx.textAlign = 'center';
-      ctx.fillText(t.text, t.x, t.y);
+    // Lightning effects
+    for(const l of this.lightnings) l.draw(ctx);
+
+    // Projectiles
+    for(let i=0;i<this.projectiles.length;i++) this.projectiles[i].draw(ctx);
+
+    // Particles
+    for(let i=0;i<this.particles.length;i++){
+      const p=this.particles[i];
+      ctx.save();
+      ctx.globalAlpha=Math.max(0,p.life/p.maxLife);
+      ctx.shadowColor=p.color; ctx.shadowBlur=4;
+      ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
+      ctx.restore();
     }
-    ctx.globalAlpha = 1;
 
-    // Game time
-    const timeStr = this.formatTime(this.elapsed);
-    document.getElementById('game-time').textContent = timeStr;
-    document.getElementById('kills').textContent = this.kills;
+    // Floating texts
+    for(let i=0;i<this.floatingTexts.length;i++){
+      const ft=this.floatingTexts[i]; const alpha=Math.max(0,ft.life/ft.maxLife);
+      ctx.save();
+      ctx.globalAlpha=alpha;
+      ctx.font=`bold ${ft.size}px 'Exo 2',sans-serif`;
+      ctx.fillStyle=ft.color;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.shadowColor=ft.color; ctx.shadowBlur=6;
+      ctx.fillText(ft.text,ft.x,ft.y);
+      ctx.restore();
+    }
+
+    this.drawSelection(ctx);
+    this.drawUnitInfo(ctx);
+    this.drawMinimap(ctx,W,H);
+    this.drawBattleStatus(ctx,W,H);
   }
 
-  drawGrid(ctx, W, H) {
-    ctx.strokeStyle = 'rgba(20,35,55,0.8)';
-    ctx.lineWidth = 0.5;
-    const gs = 40;
-    for (let x = 0; x < W; x += gs) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, H);
-      ctx.stroke();
+  drawSelection(ctx){
+    if(!this.selectedUnit||this.selectedUnit.dead){this.selectedUnit=null;return;}
+    const u=this.selectedUnit, nt=Date.now()*0.006;
+    ctx.save(); ctx.translate(u.x,u.y);
+    // Rotating selection ring
+    ctx.rotate(nt*0.5);
+    ctx.strokeStyle=`rgba(0,255,150,${0.5+0.4*Math.sin(nt*2)})`;
+    ctx.lineWidth=2; ctx.setLineDash([6,4]);
+    ctx.shadowColor='#00ff99'; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(0,0,u.size+9,0,Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.shadowBlur=0;
+    // Range circle
+    if(u.range>0){
+      ctx.rotate(-nt*0.5);
+      ctx.strokeStyle='rgba(0,255,150,0.1)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(0,0,u.range,0,Math.PI*2); ctx.stroke();
     }
-    for (let y = 0; y < H; y += gs) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-      ctx.stroke();
+    ctx.restore();
+  }
+
+  drawUnitInfo(ctx){
+    if(!this.selectedUnit||this.selectedUnit.dead) return;
+    const u=this.selectedUnit, def=UNIT_DEFS[u.typeId];
+    const px=10, py=this.canvas.height-160, pw=220, ph=150;
+    ctx.save();
+    ctx.fillStyle='rgba(4,8,16,0.93)';
+    ctx.strokeStyle='#1a2640'; ctx.lineWidth=1;
+    ctx.shadowColor='rgba(0,150,255,0.3)'; ctx.shadowBlur=15;
+    ctx.beginPath(); ctx.roundRect(px,py,pw,ph,8); ctx.fill();
+    ctx.shadowBlur=0; ctx.stroke();
+    // Top accent
+    ctx.fillStyle=u.color; ctx.fillRect(px,py,pw,2);
+
+    ctx.textAlign='left';
+    ctx.font=`bold 16px 'Exo 2'`; ctx.fillStyle=u.color;
+    ctx.fillText(`${def.icon} ${def.name}`,px+12,py+22);
+
+    ctx.font=`11px 'Share Tech Mono'`; ctx.fillStyle='#6688aa';
+    ctx.fillText(`HP`,px+12,py+42); ctx.fillText(`ATK`,px+12,py+57); ctx.fillText(`RNG`,px+12,py+72); ctx.fillText(`SPD`,px+12,py+87);
+
+    ctx.fillStyle='#aaccee';
+    ctx.fillText(`${Math.round(u.hp)} / ${u.maxHp}`,px+50,py+42);
+    ctx.fillText(u.attack,px+50,py+57);
+    ctx.fillText(u.range,px+50,py+72);
+    ctx.fillText(u.speed,px+50,py+87);
+
+    const stateLabel=u.state==='garrison'?'● 驻守':u.state==='attack'?'● 进攻':'● 撤回';
+    ctx.fillStyle=u.state==='garrison'?'#00ff99':u.state==='attack'?'#ff3344':'#ffee44';
+    ctx.font=`bold 11px 'Share Tech Mono'`; ctx.fillText(stateLabel,px+130,py+57);
+
+    ctx.fillStyle='#334455'; ctx.font=`10px 'Exo 2'`;
+    ctx.fillText(def.description,px+12,py+105);
+
+    const bx=px+12,by=py+ph-18,bw=pw-24,bh=7,pct=u.hp/u.maxHp;
+    ctx.fillStyle='#0a0c14';
+    ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,2); ctx.fill();
+    const hcol=pct>0.5?'#00cc55':pct>0.25?'#ffaa00':'#ff2233';
+    ctx.fillStyle=hcol;
+    ctx.shadowColor=hcol; ctx.shadowBlur=4;
+    ctx.beginPath(); ctx.roundRect(bx,by,bw*pct,bh,2); ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+
+  drawMinimap(ctx,W,H){
+    const mmW=160,mmH=100,mmX=W-mmW-12,mmY=12;
+    ctx.save();
+    ctx.fillStyle='rgba(3,6,12,0.9)';
+    ctx.strokeStyle='#1a2640'; ctx.lineWidth=1;
+    ctx.shadowColor='rgba(0,100,200,0.3)'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.roundRect(mmX,mmY,mmW,mmH,5); ctx.fill();
+    ctx.shadowBlur=0; ctx.stroke();
+    // Title
+    ctx.font=`7px 'Share Tech Mono'`; ctx.fillStyle='#334455'; ctx.textAlign='center';
+    ctx.fillText('TACTICAL MAP',mmX+mmW/2,mmY+9);
+
+    ctx.beginPath(); ctx.roundRect(mmX,mmY,mmW,mmH,5); ctx.clip();
+    const scX=mmW/W,scY=mmH/H;
+
+    // Center line
+    ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+    ctx.setLineDash([3,5]);
+    ctx.beginPath(); ctx.moveTo(mmX+mmW/2,mmY); ctx.lineTo(mmX+mmW/2,mmY+mmH); ctx.stroke();
+    ctx.setLineDash([]);
+
+    for(const v of [this.player,this.ai]){
+      const isP=v.side==='player';
+      const c=isP?'#00aaff':'#ff2244';
+      for(let i=0;i<v.buildings.length;i++){
+        const b=v.buildings[i]; if(b.dead) continue;
+        const s=b.type==='base'?4:b.type==='tower'?3:1;
+        ctx.fillStyle=c;
+        ctx.shadowColor=c; ctx.shadowBlur=3;
+        ctx.fillRect(mmX+b.x*scX-s/2,mmY+b.y*scY-s/2,s,s);
+      }
+      ctx.shadowBlur=0;
+      for(let i=0;i<v.units.length;i++){
+        const u=v.units[i]; if(u.dead) continue;
+        ctx.fillStyle=u.state==='attack'?(isP?'#ff6688':'#ff4466'):c;
+        ctx.fillRect(mmX+u.x*scX-1,mmY+u.y*scY-1,2,2);
+      }
+    }
+
+    if(this.selectedUnit&&!this.selectedUnit.dead){
+      ctx.fillStyle='#00ff99';
+      ctx.shadowColor='#00ff99'; ctx.shadowBlur=5;
+      ctx.beginPath(); ctx.arc(mmX+this.selectedUnit.x*scX,mmY+this.selectedUnit.y*scY,3,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+    }
+    ctx.restore();
+  }
+
+  drawBattleStatus(ctx,W,H){
+    // Base HP bars at top corners
+    const pBase=this.player.getBase(), aBase=this.ai.getBase();
+    if(!pBase||!aBase) return;
+
+    const drawBaseBar=(x,y,hp,maxHp,color,label,flip)=>{
+      const bw=120,bh=8,pad=10;
+      const bx=flip?W-x-bw:x;
+      ctx.save();
+      ctx.font=`8px 'Share Tech Mono'`; ctx.fillStyle=color; ctx.textAlign=flip?'right':'left';
+      ctx.fillText(label,flip?bx+bw:bx,y-2);
+      ctx.fillStyle='#0a0c14';
+      ctx.beginPath(); ctx.roundRect(bx,y,bw,bh,2); ctx.fill();
+      const pct=hp/maxHp;
+      ctx.fillStyle=color; ctx.shadowColor=color; ctx.shadowBlur=5;
+      ctx.beginPath(); ctx.roundRect(bx,y,bw*pct,bh,2); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.textAlign='center'; ctx.font=`7px 'Share Tech Mono'`;
+      ctx.fillText(`${Math.round(hp)}/${maxHp}`,bx+bw/2,y+bh-1);
+      ctx.restore();
+    };
+
+    drawBaseBar(12,this.canvas.height-18,Math.max(0,pBase.hp),pBase.maxHp,'#00aaff','🏛 指挥中心',false);
+    drawBaseBar(12,this.canvas.height-18,Math.max(0,aBase.hp),aBase.maxHp,'#ff2244','🏯 敌方基地',true);
+
+    // Threat level
+    const mins=this.elapsed/60000;
+    const threat=mins<1?'低':mins<3?'中':mins<6?'高':'极危';
+    const threatEl=document.getElementById('threat-level');
+    if(threatEl) threatEl.textContent=threat;
+  }
+
+  /* ── SPAWN HELPERS ── */
+  spawnParticles(x,y,color,count=8){
+    for(let i=0;i<count;i++){
+      const a=Math.random()*Math.PI*2, sp=1+Math.random()*4;
+      const p=this.particlePool.acquire();
+      p.x=x;p.y=y;p.vx=Math.cos(a)*sp;p.vy=Math.sin(a)*sp;
+      p.color=color;p.size=1+Math.random()*2.5;p.life=300+Math.random()*400;p.maxLife=700;
+      this.particles.push(p);
     }
   }
 
-  spawnParticles(x, y, color, count = 8) {
-    for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1 + Math.random() * 3;
-      this.particles.push({
-        x, y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        color,
-        size: 1.5 + Math.random() * 2.5,
-        life: 400 + Math.random() * 400,
-        maxLife: 800
+  spawnExplosion(x,y,color,size=1){
+    // Particles
+    this.spawnParticles(x,y,color,12*size);
+    this.spawnParticles(x,y,'#ffffff',4*size);
+    // Ring
+    const r=this.ringPool.acquire();
+    r.x=x;r.y=y;r.color=color;r.life=600;r.maxLife=600;r.r=size*5;
+    this.effects.push(r);
+    // Secondary ring
+    const r2=this.ringPool.acquire();
+    r2.x=x;r2.y=y;r2.color='#ffffff';r2.life=300;r2.maxLife=300;r2.r=size*2;
+    this.effects.push(r2);
+  }
+
+  spawnDeathRing(x,y,color){
+    const r=this.ringPool.acquire();
+    r.x=x;r.y=y;r.color=color;r.life=500;r.maxLife=500;r.r=0;
+    this.effects.push(r);
+  }
+
+  spawnFloatingText(x,y,text,color='#ffffff',size=14){
+    const t=this.textPool.acquire();
+    t.x=x;t.y=y;t.text=text;t.color=color;t.size=size;t.life=900;t.maxLife=900;
+    this.floatingTexts.push(t);
+  }
+
+  spawnLightning(x1,y1,x2,y2,color='#ffff00'){
+    this.lightnings.push(new LightningEffect(x1,y1,x2,y2,color,200));
+  }
+
+  addKillFeed(text){
+    const feed=document.getElementById('kill-feed');
+    const item=document.createElement('div');
+    item.className='kill-item'; item.textContent=text;
+    feed.insertBefore(item,feed.firstChild);
+    if(feed.children.length>5) feed.removeChild(feed.lastChild);
+    setTimeout(()=>{ if(item.parentNode) item.parentNode.removeChild(item); },2500);
+  }
+
+  showAlert(text,isBlue=false){
+    const banner=document.getElementById('alert-banner');
+    const msg=document.createElement('div');
+    msg.className=`alert-msg${isBlue?' blue':''}`;
+    msg.textContent=text;
+    banner.appendChild(msg);
+    setTimeout(()=>{ if(msg.parentNode) msg.parentNode.removeChild(msg); },3000);
+  }
+
+  /* ── HUD ── */
+  updateHUD(){
+    const pg=Math.floor(this.player.gold), ag=Math.floor(this.ai.gold);
+    const pgS=this.player.units.filter(u=>u.state==='garrison').length;
+    const paS=this.player.units.filter(u=>u.state==='attack').length;
+    const agS=this.ai.units.filter(u=>u.state==='garrison').length;
+    const aaS=this.ai.units.filter(u=>u.state==='attack').length;
+    const timeStr=this.formatTime(this.elapsed);
+
+    if(pg!==this._hud.playerGold){
+      document.getElementById('player-gold').textContent=pg; this._hud.playerGold=pg;
+      document.querySelectorAll('.unit-btn').forEach(btn=>{
+        const cost=parseInt(btn.dataset.cost);
+        btn.classList.toggle('cant-afford',pg<cost);
       });
     }
+    if(ag!==this._hud.aiGold){document.getElementById('ai-gold').textContent=ag;this._hud.aiGold=ag;}
+    if(pgS!==this._hud.playerGarrison){document.getElementById('player-garrison').textContent=pgS;this._hud.playerGarrison=pgS;}
+    if(paS!==this._hud.playerAttacking){document.getElementById('player-attacking').textContent=paS;this._hud.playerAttacking=paS;}
+    if(agS!==this._hud.aiGarrison){document.getElementById('ai-garrison').textContent=agS;this._hud.aiGarrison=agS;}
+    if(aaS!==this._hud.aiAttacking){document.getElementById('ai-attacking').textContent=aaS;this._hud.aiAttacking=aaS;}
+    if(timeStr!==this._hud.time){document.getElementById('game-time').textContent=timeStr;this._hud.time=timeStr;}
+    if(this.kills!==this._hud.kills){document.getElementById('kills').textContent=this.kills;this._hud.kills=this.kills;}
   }
 
-  spawnFloatingText(x, y, text, color = '#ffffff', size = 14) {
-    this.floatingTexts.push({ x, y, text, color, size, life: 800, maxLife: 800 });
-  }
+  /* ── UI BUILD ── */
+  buildUI(){
+    const tagHtml=(tags)=>tags.map(tag=>`<span class="unit-tag tag-${tag}">${{range:'远程',splash:'溅射',stun:'眩晕',heal:'回血',mech:'机甲',elite:'精英'}[tag]||tag}</span>`).join('');
 
-  updateHUD() {
-    document.getElementById('player-gold').textContent = Math.floor(this.player.gold);
-    document.getElementById('ai-gold').textContent = Math.floor(this.ai.gold);
-    document.getElementById('player-garrison').textContent = this.player.units.filter(u => u.state === 'garrison').length;
-    document.getElementById('player-attacking').textContent = this.player.units.filter(u => u.state === 'attack').length;
-    document.getElementById('ai-garrison').textContent = this.ai.units.filter(u => u.state === 'garrison').length;
-    document.getElementById('ai-attacking').textContent = this.ai.units.filter(u => u.state === 'attack').length;
-
-    // Update button affordability
-    document.querySelectorAll('.unit-btn').forEach(btn => {
-      const cost = parseInt(btn.dataset.cost);
-      if (this.player.gold < cost) {
-        btn.classList.add('cant-afford');
-      } else {
-        btn.classList.remove('cant-afford');
-      }
-    });
-  }
-
-  updateUI() {
-    // handled by updateHUD
-  }
-
-  attackAll() {
-    this.player.units.forEach(u => {
-      if (u.state === 'garrison') u.setState('attack');
-    });
-  }
-
-  recallAll() {
-    this.player.units.forEach(u => {
-      if (u.state === 'attack') u.setState('recall');
-    });
-  }
-
-  spawnUnit(typeId) {
-    const def = UNIT_DEFS[typeId] || null;
-    const groupDef = GROUP_DEFS[typeId] || null;
-
-    if (def) {
-      if (this.player.gold < def.cost) return;
-      this.player.gold -= def.cost;
-      this.player.spawnUnit(typeId);
-    } else if (groupDef) {
-      if (this.player.gold < groupDef.cost) return;
-      this.player.gold -= groupDef.cost;
-      for (const comp of groupDef.composition) {
-        for (let i = 0; i < comp.count; i++) {
-          this.player.spawnUnit(comp.type);
-        }
-      }
-    }
-  }
-
-  buildUI() {
-    const singleRow = document.getElementById('single-units');
-    const groupRow = document.getElementById('group-units');
-
-    for (const [id, def] of Object.entries(UNIT_DEFS)) {
-      const btn = document.createElement('button');
-      btn.className = 'unit-btn';
-      btn.dataset.cost = def.cost;
-      btn.innerHTML = `
-        <span class="unit-icon">${def.icon}</span>
-        <span class="unit-name">${def.name}</span>
-        <span class="unit-cost">${def.cost}💰</span>
-      `;
-      btn.title = def.description;
-      btn.addEventListener('click', () => this.spawnUnit(id));
+    const singleRow=document.getElementById('single-units');
+    for(const [id,def] of Object.entries(UNIT_DEFS)){
+      const btn=document.createElement('button');
+      btn.className='unit-btn'; btn.dataset.cost=def.cost;
+      btn.innerHTML=`<span class="unit-icon">${def.icon}</span><span class="unit-name">${def.name}</span><span class="unit-cost">${def.cost}💰</span><div class="unit-tags">${tagHtml(def.tags||[])}</div>`;
+      btn.title=`${def.name}\n${def.description}\nHP:${def.hp} ATK:${def.attack} RNG:${def.range} SPD:${def.speed}`;
+      btn.addEventListener('click',()=>this.spawnUnit(id));
       singleRow.appendChild(btn);
     }
 
-    for (const [id, def] of Object.entries(GROUP_DEFS)) {
-      const btn = document.createElement('button');
-      btn.className = 'unit-btn group-btn';
-      btn.dataset.cost = def.cost;
-      btn.innerHTML = `
-        <span class="unit-icon">${def.icon}</span>
-        <span class="unit-name">${def.name}</span>
-        <span class="unit-cost">${def.cost}💰</span>
-      `;
-      btn.title = def.description;
-      btn.addEventListener('click', () => this.spawnUnit(id));
+    const groupRow=document.getElementById('group-units');
+    for(const [id,def] of Object.entries(GROUP_DEFS)){
+      const btn=document.createElement('button');
+      btn.className='unit-btn group-btn'; btn.dataset.cost=def.cost;
+      btn.innerHTML=`<span class="unit-count-badge">${def.badge||'G'}</span><span class="unit-icon">${def.icon}</span><span class="unit-name">${def.name}</span><span class="unit-cost">${def.cost}💰</span>`;
+      btn.title=`${def.name}\n${def.description}`;
+      btn.addEventListener('click',()=>this.spawnUnit(id));
       groupRow.appendChild(btn);
     }
   }
 
-  restart() {
-    this.running = false;
-    setTimeout(() => {
-      this.running = true;
-      this.init();
-    }, 100);
+  attackAll(){
+    let count=0;
+    this.player.units.forEach(u=>{if(u.state==='garrison'){u.setState('attack');count++;}});
+    if(count>0) this.showAlert(`⚔ ${count}名部队发起进攻！`,true);
   }
-}
-
-// ============================================================
-// VILLAGE CLASS
-// ============================================================
-
-class Village {
-  constructor(side, game) {
-    this.side = side; // 'player' or 'ai'
-    this.game = game;
-    this.gold = 5000;
-    this.goldRate = 10; // per second
-    this.x = 0;
-    this.y = 0;
-    this.units = [];
-    this.buildings = [];
-    this.aiTimer = 0;
-    this.aiPhase = 'build'; // build | defend | attack
-    this.aiAggressionTimer = 0;
-    this.difficultyScale = 1;
+  recallAll(){
+    let count=0;
+    this.player.units.forEach(u=>{if(u.state==='attack'){u.setState('recall');count++;}});
+    if(count>0) this.showAlert(`🛡 ${count}名部队撤回防守`,true);
   }
 
-  layoutBuildings() {
-    const x = this.x;
-    const y = this.y;
-    this.buildings = [];
-
-    const flip = this.side === 'ai' ? -1 : 1;
-
-    // Base (command center)
-    this.buildings.push(new Building('base', x, y, this));
-
-    // Towers
-    this.buildings.push(new Building('tower', x + flip * 50, y - 55, this));
-    this.buildings.push(new Building('tower', x + flip * 50, y + 55, this));
-    this.buildings.push(new Building('tower', x + flip * 80, y, this));
-
-    // Walls
-    const wallXOffset = flip * 100;
-    for (let wy = -60; wy <= 60; wy += 20) {
-      this.buildings.push(new Building('wall', x + wallXOffset, y + wy, this));
+  spawnUnit(typeId){
+    const def=UNIT_DEFS[typeId], groupDef=GROUP_DEFS[typeId];
+    if(def){
+      if(this.player.gold<def.cost) return;
+      this.player.gold-=def.cost;
+      this.player.spawnUnit(typeId);
+    } else if(groupDef){
+      if(this.player.gold<groupDef.cost) return;
+      this.player.gold-=groupDef.cost;
+      for(const comp of groupDef.composition)
+        for(let i=0;i<comp.count;i++) this.player.spawnUnit(comp.type);
+      this.showAlert(`${groupDef.icon} ${groupDef.name} 已部署！`,true);
     }
   }
 
-  get enemy() {
-    return this.side === 'player' ? this.game.ai : this.game.player;
+  restart(){ this.running=false; setTimeout(()=>this.init(),100); }
+}
+
+/* =====================================================================
+   VILLAGE
+===================================================================== */
+class Village {
+  constructor(side,game){
+    this.side=side; this.game=game;
+    this.gold=5000; this.goldRate=10;
+    this.x=0; this.y=0;
+    this.units=[]; this.buildings=[];
+    this.aiTimer=0; this.aiAggressionTimer=0;
+    this.difficultyScale=1;
   }
 
-  spawnUnit(typeId) {
-    const def = UNIT_DEFS[typeId];
-    if (!def) return;
-    const unit = new Unit(typeId, this);
-    // Spawn near base with slight scatter
-    unit.x = this.x + (Math.random() - 0.5) * 60;
-    unit.y = this.y + (Math.random() - 0.5) * 80;
+  layoutBuildings(){
+    const x=this.x,y=this.y,flip=this.side==='ai'?-1:1;
+    this.buildings=[];
+    this.buildings.push(new Building('base',x,y,this));
+    this.buildings.push(new Building('tower',x+flip*52,y-58,this));
+    this.buildings.push(new Building('tower',x+flip*52,y+58,this));
+    this.buildings.push(new Building('tower',x+flip*82,y,this));
+    for(let wy=-60;wy<=60;wy+=20)
+      this.buildings.push(new Building('wall',x+flip*102,y+wy,this));
+  }
+
+  get enemy(){ return this.side==='player'?this.game.ai:this.game.player; }
+
+  spawnUnit(typeId){
+    const def=UNIT_DEFS[typeId]; if(!def) return;
+    const unit=new Unit(typeId,this);
+    unit.x=this.x+(Math.random()-.5)*60;
+    unit.y=this.y+(Math.random()-.5)*80;
     unit.setState('garrison');
     this.units.push(unit);
   }
 
-  update(dt) {
-    // Gold income
-    this.gold += (this.goldRate * this.difficultyScale * dt) / 1000;
-
-    // Units
-    for (let i = this.units.length - 1; i >= 0; i--) {
-      const u = this.units[i];
-      u.update(dt);
-      if (u.dead) {
-        this.game.spawnParticles(u.x, u.y, u.color, 12);
-        this.units.splice(i, 1);
-        if (u.owner !== (this.side === 'player' ? this.game.player : this.game.ai)) {
-          // Enemy unit killed
-        }
-      }
+  update(dt){
+    this.gold+=(this.goldRate*this.difficultyScale*dt)/1000;
+    for(let i=this.units.length-1;i>=0;i--){
+      this.units[i].update(dt);
+      if(this.units[i].dead) fastRemove(this.units,i);
     }
-
-    // Buildings
-    for (const b of this.buildings) {
-      b.update(dt);
-    }
-
-    // AI logic
-    if (this.side === 'ai') {
-      this.updateAI(dt);
-    }
-
-    // Difficulty scale over time
-    this.difficultyScale = 1 + (this.game.elapsed / 120000) * 0.8;
+    for(let i=0;i<this.buildings.length;i++) this.buildings[i].update(dt);
+    if(this.side==='ai') this.updateAI(dt);
+    this.difficultyScale=1+(this.game.elapsed/120000)*0.8;
   }
 
-  updateAI(dt) {
-    this.aiTimer += dt;
-    this.aiAggressionTimer += dt;
+  updateAI(dt){
+    this.aiTimer+=dt; this.aiAggressionTimer+=dt;
+    const elapsed=this.game.elapsed,scale=this.difficultyScale;
+    const spawnInterval=Math.max(3000,8000-elapsed/5000);
+    if(this.aiTimer>=spawnInterval){this.aiTimer=0;this.aiSpawnLogic(elapsed,scale);}
+    const attackInterval=Math.max(12000,30000-elapsed/3000);
+    if(this.aiAggressionTimer>=attackInterval){this.aiAggressionTimer=0;this.aiAttackDecision(scale);}
+    const playerAttacking=this.game.player.units.filter(u=>u.state==='attack').length;
+    if(playerAttacking>=6&&Math.random()<0.02) this.aiCounterAttack(scale);
+  }
 
-    const elapsed = this.game.elapsed;
-    const scale = this.difficultyScale;
-
-    // Gold income scales up over time
-    // (handled by difficultyScale on goldRate)
-
-    // Spawn interval gets faster over time
-    const spawnInterval = Math.max(3000, 8000 - elapsed / 5000);
-
-    if (this.aiTimer >= spawnInterval) {
-      this.aiTimer = 0;
-      this.aiSpawnLogic(elapsed, scale);
-    }
-
-    // Attack decision
-    const attackInterval = Math.max(12000, 30000 - elapsed / 3000);
-    if (this.aiAggressionTimer >= attackInterval) {
-      this.aiAggressionTimer = 0;
-      this.aiAttackDecision(scale);
-    }
-
-    // Counter-attack when player attacks us hard
-    const playerAttacking = this.game.player.units.filter(u => u.state === 'attack').length;
-    if (playerAttacking >= 6 && Math.random() < 0.02) {
-      this.aiCounterAttack(scale);
+  aiSpawnLogic(elapsed,scale){
+    const budget=Math.min(2000,300*scale);
+    if(this.gold<budget*0.4) return;
+    let spent=0;
+    const pool=this.getAIUnitPool(elapsed);
+    while(spent<budget&&this.gold>50){
+      const choice=pool[Math.floor(Math.random()*pool.length)];
+      const def=UNIT_DEFS[choice];
+      if(!def||this.gold<def.cost) break;
+      this.gold-=def.cost; this.spawnUnit(choice); spent+=def.cost;
     }
   }
 
-  aiSpawnLogic(elapsed, scale) {
-    const budget = Math.min(2000, 300 * scale);
-    if (this.gold < budget * 0.4) return;
+  getAIUnitPool(elapsed){
+    const m=elapsed/60000;
+    if(m<1) return ['infantry','infantry','heavy'];
+    if(m<2) return ['infantry','heavy','sniper','special'];
+    if(m<4) return ['heavy','sniper','special','emp','unitree'];
+    if(m<6) return ['special','unitree','lightMech','sniper','nano'];
+    return ['lightMech','heavyMech','unitree','special','nano','emp'];
+  }
 
-    let spent = 0;
-    const unitPool = this.getAIUnitPool(elapsed);
-
-    // Shuffle and pick units to spawn within budget
-    while (spent < budget && this.gold > 50) {
-      const choice = unitPool[Math.floor(Math.random() * unitPool.length)];
-      const def = UNIT_DEFS[choice];
-      if (!def || this.gold < def.cost) break;
-      this.gold -= def.cost;
-      this.spawnUnit(choice);
-      // New units start in garrison by default
-      spent += def.cost;
+  aiAttackDecision(scale){
+    const gc=this.units.filter(u=>u.state==='garrison').length;
+    const min=Math.max(3,Math.floor(4/scale));
+    if(gc>=min){
+      const toSend=Math.floor(gc*(0.6+Math.random()*0.2)); let sent=0;
+      for(const u of this.units) if(u.state==='garrison'&&sent<toSend){u.setState('attack');sent++;}
     }
   }
 
-  getAIUnitPool(elapsed) {
-    const mins = elapsed / 60000;
-    if (mins < 1) return ['infantry', 'infantry', 'heavy'];
-    if (mins < 2) return ['infantry', 'heavy', 'sniper', 'special'];
-    if (mins < 4) return ['heavy', 'sniper', 'special', 'emp', 'unitree'];
-    if (mins < 6) return ['special', 'unitree', 'lightMech', 'sniper', 'nano'];
-    return ['lightMech', 'heavyMech', 'unitree', 'special', 'nano', 'emp'];
-  }
-
-  aiAttackDecision(scale) {
-    const garrisonCount = this.units.filter(u => u.state === 'garrison').length;
-    const minToAttack = Math.max(3, Math.floor(4 / scale));
-
-    if (garrisonCount >= minToAttack) {
-      // Send 60-80% of garrison to attack, keep rest defending
-      const toSend = Math.floor(garrisonCount * (0.6 + Math.random() * 0.2));
-      let sent = 0;
-      for (const u of this.units) {
-        if (u.state === 'garrison' && sent < toSend) {
-          u.setState('attack');
-          sent++;
-        }
+  aiCounterAttack(scale){
+    let sent=0;
+    for(const u of this.units) if(u.state==='garrison'){u.setState('attack');sent++;}
+    if(sent>0) this.game.showAlert('⚠ 敌方发起反击！');
+    if(this.gold>500){
+      const pool=['lightMech','heavyMech','unitree','special'];
+      let budget=this.gold*0.7;
+      while(budget>100){
+        const choice=pool[Math.floor(Math.random()*pool.length)];
+        const def=UNIT_DEFS[choice];
+        if(!def||this.gold<def.cost) break;
+        this.gold-=def.cost; this.spawnUnit(choice);
+        const nu=this.units[this.units.length-1];
+        if(nu) nu.setState('attack');
+        budget-=def.cost;
       }
     }
   }
 
-  aiCounterAttack(scale) {
-    // FIERCE counter-attack: send everything
-    let sent = 0;
-    for (const u of this.units) {
-      if (u.state === 'garrison') {
-        u.setState('attack');
-        sent++;
-      }
-    }
-    if (sent > 0) {
-      this.game.spawnFloatingText(
-        this.x, this.y - 80,
-        '⚠ 反击！',
-        '#ff3333', 20
-      );
-    }
-
-    // Also immediately spawn high-tier units if we have gold
-    if (this.gold > 500) {
-      const pool = ['lightMech', 'heavyMech', 'unitree', 'special'];
-      let budget = this.gold * 0.7;
-      while (budget > 100) {
-        const choice = pool[Math.floor(Math.random() * pool.length)];
-        const def = UNIT_DEFS[choice];
-        if (!def || this.gold < def.cost) break;
-        this.gold -= def.cost;
-        this.spawnUnit(choice);
-        const newUnit = this.units[this.units.length - 1];
-        if (newUnit) newUnit.setState('attack');
-        budget -= def.cost;
-      }
-    }
-  }
-
-  draw(ctx) {
-    // Draw buildings
-    for (const b of this.buildings) {
-      b.draw(ctx);
-    }
-    // Draw units
-    for (const u of this.units) {
-      u.draw(ctx);
-    }
-  }
-
-  getBase() {
-    return this.buildings.find(b => b.type === 'base');
-  }
+  draw(ctx){ for(const b of this.buildings) b.draw(ctx); for(const u of this.units) u.draw(ctx); }
+  getBase(){ return this.buildings.find(b=>b.type==='base'); }
 }
 
-// ============================================================
-// BUILDING CLASS
-// ============================================================
-
+/* =====================================================================
+   BUILDING
+===================================================================== */
 class Building {
-  constructor(type, x, y, village) {
-    this.type = type;
-    this.x = x;
-    this.y = y;
-    this.village = village;
-    this.side = village.side;
-
-    const def = BUILDING_DEFS[type];
-    this.hp = def.hp;
-    this.maxHp = def.maxHp;
-    this.attack = def.attack;
-    this.range = def.range;
-    this.width = def.width;
-    this.height = def.height;
-    this.attackSpeed = def.attackSpeed || 1500;
-    this.attackTimer = 0;
-    this.level = def.level || 1;
-    this.dead = false;
-    this.flashTimer = 0;
+  constructor(type,x,y,village){
+    this.type=type; this.x=x; this.y=y;
+    this.village=village; this.side=village.side;
+    const def=BUILDING_DEFS[type];
+    this.hp=def.hp; this.maxHp=def.maxHp;
+    this.attack=def.attack; this.range=def.range||0;
+    this.width=def.width; this.height=def.height;
+    this.attackSpeed=def.attackSpeed||1500; this.attackTimer=0;
+    this.dead=false; this.flashTimer=0;
+    this.pulsePhase=Math.random()*Math.PI*2;
   }
 
-  get enemy() {
-    return this.village.enemy;
-  }
+  get enemy(){ return this.village.enemy; }
 
-  update(dt) {
-    if (this.dead) return;
-    this.flashTimer = Math.max(0, this.flashTimer - dt);
-
-    if (this.type === 'tower' && this.attack > 0) {
-      this.attackTimer += dt;
-      if (this.attackTimer >= this.attackSpeed) {
-        this.attackTimer = 0;
-        this.fireAtEnemy();
-      }
+  update(dt){
+    if(this.dead) return;
+    this.flashTimer=Math.max(0,this.flashTimer-dt);
+    if(this.type==='tower'&&this.attack>0){
+      this.attackTimer+=dt;
+      if(this.attackTimer>=this.attackSpeed){this.attackTimer=0;this.fireAtEnemy();}
     }
-
-    if (this.hp <= 0) {
-      this.dead = true;
-      this.village.game.spawnParticles(this.x, this.y, '#ff6600', 20);
-      this.village.game.spawnFloatingText(this.x, this.y - 30, '💥 摧毁', '#ff4400', 16);
+    if(this.hp<=0){
+      this.dead=true;
+      this.village.game.spawnExplosion(this.x,this.y,'#ff6600',this.type==='base'?3:1.5);
+      this.village.game.spawnFloatingText(this.x,this.y-30,'💥 DESTROYED','#ff4400',14);
     }
   }
 
-  fireAtEnemy() {
-    const enemies = this.enemy.units.filter(u => !u.dead);
-    let closest = null, minDist = this.range;
-
-    for (const u of enemies) {
-      const d = dist(this.x, this.y, u.x, u.y);
-      if (d < minDist) { minDist = d; closest = u; }
-    }
-
-    if (closest) {
-      const dmg = this.attack * (1 + (this.level - 1) * 0.5);
-      this.village.game.projectiles.push(new Projectile(
-        this.x, this.y, closest, dmg, this.side === 'player' ? '#00aaff' : '#ff3333',
-        this.village.game, false
-      ));
+  fireAtEnemy(){
+    const closest=this.village.game.unitGrid.queryNearest(this.x,this.y,this.range,u=>u.side!==this.side&&!u.dead);
+    if(closest){
+      const proj=this.village.game.projectilePool.acquire();
+      proj.init(this.x,this.y,closest,this.attack,this.side==='player'?'#00aaff':'#ff2244',this.village.game,false,null);
+      this.village.game.projectiles.push(proj);
     }
   }
 
-  takeDamage(amount) {
-    this.hp = Math.max(0, this.hp - amount);
-    this.flashTimer = 100;
-    this.village.game.spawnFloatingText(
-      this.x + (Math.random() - 0.5) * 20,
-      this.y - 20,
-      `-${Math.round(amount)}`,
-      '#ff6666', 11
-    );
+  takeDamage(amount){
+    this.hp=Math.max(0,this.hp-amount);
+    this.flashTimer=120;
+    if(Math.random()<0.4)
+      this.village.game.spawnFloatingText(this.x+(Math.random()-.5)*25,this.y-20,`-${Math.round(amount)}`,'#ff5566',10);
   }
 
-  draw(ctx) {
-    if (this.dead) return;
-
-    const isPlayer = this.side === 'player';
-    const flash = this.flashTimer > 0;
-
-    if (this.type === 'base') {
-      // Base drawing
-      const s = this.width;
-      ctx.save();
-      ctx.translate(this.x, this.y);
-
-      // Glow
-      const grd = ctx.createRadialGradient(0, 0, 10, 0, 0, s);
-      grd.addColorStop(0, isPlayer ? 'rgba(0,150,255,0.3)' : 'rgba(255,50,50,0.3)');
-      grd.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = grd;
-      ctx.beginPath();
-      ctx.arc(0, 0, s, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Body
-      ctx.fillStyle = flash ? '#ffffff' : (isPlayer ? '#0a2a4a' : '#2a0a0a');
-      ctx.strokeStyle = isPlayer ? '#00aaff' : '#ff3333';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(-s/2, -s/2, s, s, 6);
-      ctx.fill();
-      ctx.stroke();
-
-      // Icon
-      ctx.font = '24px serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(isPlayer ? '🏛' : '🏯', 0, 0);
-
-      // HP bar
-      this.drawHPBar(ctx, 0, -s/2 - 12, s, 5);
-      ctx.restore();
-
-    } else if (this.type === 'tower') {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      const s = this.width;
-
-      ctx.fillStyle = flash ? '#ffffff' : (isPlayer ? '#0a1e33' : '#1e0a0a');
-      ctx.strokeStyle = isPlayer ? '#0066aa' : '#aa2200';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(-s/2, -s/2, s, s, 4);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.font = '14px serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🗼', 0, 0);
-
-      this.drawHPBar(ctx, 0, -s/2 - 8, s, 4);
-      ctx.restore();
-
-    } else if (this.type === 'wall') {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.fillStyle = flash ? '#ffffff' : '#1a2a3a';
-      ctx.strokeStyle = '#2a3a4a';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(-this.width/2, -this.height/2, this.width, this.height, 2);
-      ctx.fill();
-      ctx.stroke();
-      this.drawHPBar(ctx, 0, -this.height/2 - 6, this.width, 3);
-      ctx.restore();
-    }
-  }
-
-  drawHPBar(ctx, x, y, w, h) {
-    const pct = this.hp / this.maxHp;
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.roundRect(x - w/2, y, w, h, 1);
-    ctx.fill();
-    ctx.fillStyle = pct > 0.5 ? '#00cc44' : pct > 0.25 ? '#ffaa00' : '#ff2200';
-    ctx.beginPath();
-    ctx.roundRect(x - w/2, y, w * pct, h, 1);
-    ctx.fill();
-  }
-}
-
-// ============================================================
-// UNIT CLASS
-// ============================================================
-
-class Unit {
-  constructor(typeId, village) {
-    this.typeId = typeId;
-    const def = UNIT_DEFS[typeId];
-    this.village = village;
-    this.owner = village;
-    this.side = village.side;
-    this.name = def.name;
-    this.icon = def.icon;
-    this.color = def.color;
-    this.maxHp = def.maxHp;
-    this.hp = def.hp;
-    this.attack = def.attack;
-    this.range = def.range;
-    this.speed = def.speed;
-    this.size = def.size;
-    this.splashRadius = def.splashRadius || 0;
-    this.stunDuration = def.stunDuration || 0;
-    this.immuneToStun = def.immuneToStun || false;
-    this.priorityTarget = def.priorityTarget || null;
-    this.regenRate = def.regenRate || 0;
-    this.healRange = def.healRange || 0;
-    this.healRate = def.healRate || 0;
-
-    this.x = 0;
-    this.y = 0;
-    this.vx = 0;
-    this.vy = 0;
-    this.state = 'garrison'; // garrison | attack | recall | dead
-    this.dead = false;
-    this.target = null;
-    this.attackTimer = 1000;
-    this.attackSpeed = 1000;
-    this.stunTimer = 0;
-    this.flashTimer = 0;
-    this.patrolOffset = { x: (Math.random()-0.5)*50, y: (Math.random()-0.5)*50 };
-  }
-
-  get enemy() {
-    return this.village.enemy;
-  }
-
-  setState(state) {
-    this.state = state;
-    this.target = null;
-  }
-
-  update(dt) {
-    if (this.dead) return;
-    this.flashTimer = Math.max(0, this.flashTimer - dt);
-    this.stunTimer = Math.max(0, this.stunTimer - dt);
-    this.attackTimer += dt;
-
-    // Regen
-    if (this.regenRate > 0) {
-      this.hp = Math.min(this.maxHp, this.hp + (this.regenRate * dt) / 1000);
-    }
-
-    // Medic heal
-    if (this.healRate > 0) {
-      const allies = this.village.units.filter(u => !u.dead && u !== this && dist(this.x, this.y, u.x, u.y) < this.healRange);
-      for (const a of allies) {
-        a.hp = Math.min(a.maxHp, a.hp + (this.healRate * dt) / 1000);
-      }
-    }
-
-    if (this.stunTimer > 0) {
-      // Stunned, can't move or attack
-      return;
-    }
-
-    if (this.state === 'garrison') {
-      this.updateGarrison(dt);
-    } else if (this.state === 'attack') {
-      this.updateAttack(dt);
-    } else if (this.state === 'recall') {
-      this.updateRecall(dt);
-    }
-  }
-
-  updateGarrison(dt) {
-    // Return to patrol position near base
-    const base = this.village.getBase();
-    if (!base) return;
-
-    const homeX = base.x + this.patrolOffset.x;
-    const homeY = base.y + this.patrolOffset.y;
-
-    // Check for enemies entering village territory
-    const enemyUnits = this.enemy.units.filter(u => u.state === 'attack' && !u.dead);
-    let closestEnemy = null;
-    let minDist = 180; // Detection range for garrison
-
-    for (const e of enemyUnits) {
-      const d = dist(this.x, this.y, e.x, e.y);
-      if (d < minDist) { minDist = d; closestEnemy = e; }
-    }
-
-    if (closestEnemy) {
-      // Fight back!
-      this.fightTarget(closestEnemy, dt);
-    } else {
-      // Drift home
-      this.moveToward(homeX, homeY, dt, 0.5);
-    }
-  }
-
-  updateAttack(dt) {
-    // Find target
-    let target = null;
-
-    if (this.priorityTarget === 'building') {
-      // Target buildings first
-      const aliveBuildings = this.enemy.buildings.filter(b => !b.dead && b.hp > 0);
-      if (aliveBuildings.length > 0) {
-        target = aliveBuildings.reduce((a, b) =>
-          dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y) ? a : b
-        );
-      }
-    }
-
-    if (!target) {
-      // Target nearest enemy unit
-      const enemyUnits = this.enemy.units.filter(u => !u.dead);
-      if (enemyUnits.length > 0) {
-        target = enemyUnits.reduce((a, b) =>
-          dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y) ? a : b
-        );
-      }
-    }
-
-    if (!target) {
-      // No units, attack buildings
-      const aliveBuildings = this.enemy.buildings.filter(b => !b.dead && b.hp > 0);
-      if (aliveBuildings.length > 0) {
-        target = aliveBuildings.reduce((a, b) =>
-          dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y) ? a : b
-        );
-      }
-    }
-
-    if (target) {
-      this.fightTarget(target, dt);
-    }
-  }
-
-  updateRecall(dt) {
-    const base = this.village.getBase();
-    if (!base) { this.setState('garrison'); return; }
-
-    const d = dist(this.x, this.y, base.x, base.y);
-    if (d < 80) {
-      this.setState('garrison');
-    } else {
-      this.moveToward(base.x, base.y, dt, 1);
-    }
-  }
-
-  fightTarget(target, dt) {
-    const d = dist(this.x, this.y, target.x, target.y);
-    const effectiveRange = this.range + (target.width || 0) / 2;
-
-    if (d > effectiveRange) {
-      this.moveToward(target.x, target.y, dt, 1);
-    } else {
-      // In range - attack
-      if (this.attackTimer >= this.attackSpeed) {
-        this.attackTimer = 0;
-        this.fireAt(target);
-      }
-    }
-  }
-
-  fireAt(target) {
-    if (this.attack <= 0) return;
-
-    // Medic doesn't attack
-    if (this.typeId === 'medic') return;
-
-    const game = this.village.game;
-
-    // EMP stun
-    if (this.stunDuration > 0) {
-      if (target.immuneToStun) {
-        target.takeDamage(this.attack, this);
-      } else {
-        target.takeDamage(this.attack, this);
-        if (!target.stunTimer || target.stunTimer <= 0) {
-          target.stunTimer = this.stunDuration;
-          game.spawnFloatingText(target.x, target.y - 20, '⚡眩晕', '#ffff00', 13);
-        }
-      }
-      game.spawnParticles(target.x, target.y, '#ffff00', 5);
-      return;
-    }
-
-    // Splash damage
-    if (this.splashRadius > 0) {
-      // AOE
-      const allEnemies = [...this.enemy.units, ...this.enemy.buildings].filter(e => !e.dead && e.hp > 0);
-      for (const e of allEnemies) {
-        const d = dist(target.x, target.y, e.x, e.y);
-        if (d <= this.splashRadius) {
-          const falloff = 1 - d / this.splashRadius;
-          e.takeDamage(this.attack * (0.4 + 0.6 * falloff), this);
-        }
-      }
-      game.spawnParticles(target.x, target.y, '#ffaa00', 16);
-      game.spawnFloatingText(target.x, target.y - 15, '💥', '#ffaa00', 18);
-      return;
-    }
-
-    // Normal projectile
-    game.projectiles.push(new Projectile(
-      this.x, this.y, target, this.attack,
-      this.color, game, true, this
-    ));
-  }
-
-  moveToward(tx, ty, dt, speedMult = 1) {
-    const d = dist(this.x, this.y, tx, ty);
-    if (d < 2) return;
-    const speed = this.speed * speedMult;
-    const step = (speed * dt) / 1000;
-    const ratio = Math.min(step / d, 1);
-    this.x += (tx - this.x) * ratio;
-    this.y += (ty - this.y) * ratio;
-  }
-
-  takeDamage(amount, attacker) {
-    this.hp -= amount;
-    this.flashTimer = 80;
-    if (this.hp <= 0) {
-      this.hp = 0;
-      this.dead = true;
-      if (attacker && attacker.village !== this.village) {
-        if (attacker.village.side === 'player' || (attacker.village && attacker.village.side === 'player')) {
-          this.village.game.kills++;
-        }
-      }
-    }
-  }
-
-  draw(ctx) {
-    if (this.dead) return;
-    const isPlayer = this.side === 'player';
-    const flash = this.flashTimer > 0;
-    const stunned = this.stunTimer > 0;
+  draw(ctx){
+    if(this.dead) return;
+    const isP=this.side==='player', flash=this.flashTimer>0;
+    const t=Date.now()*0.001+this.pulsePhase;
+    const pulse=0.6+0.4*Math.sin(t*1.5);
 
     ctx.save();
-    ctx.translate(this.x, this.y);
+    ctx.translate(this.x,this.y);
+
+    if(this.type==='base'){
+      const s=this.width*0.5;
+      // Outer glow ring
+      ctx.globalAlpha=0.3*pulse; ctx.strokeStyle=isP?'#00aaff':'#ff2244'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(0,0,s+14,0,Math.PI*2); ctx.stroke();
+      ctx.globalAlpha=1;
+      // Base glow bg
+      const grd=ctx.createRadialGradient(0,0,0,0,0,s*1.5);
+      grd.addColorStop(0,isP?'rgba(0,100,200,0.15)':'rgba(200,0,30,0.15)');
+      grd.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(0,0,s*1.5,0,Math.PI*2); ctx.fill();
+      // Body
+      if(flash){ ctx.shadowColor='#ffffff'; ctx.shadowBlur=20; }
+      else { ctx.shadowColor=isP?'#0066ff':'#ff0022'; ctx.shadowBlur=12*pulse; }
+      ctx.fillStyle=flash?'#ffffff':(isP?'#061830':'#180608');
+      ctx.strokeStyle=isP?'#0088ff':'#ff1133'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.roundRect(-s,-s,s*2,s*2,6); ctx.fill(); ctx.stroke();
+      ctx.shadowBlur=0;
+      ctx.font=`${s*0.7}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(isP?'🏛':'🏯',0,0);
+      // HP bar
+      this._drawHPBar(ctx,0,-s-14,s*2,6);
+      // HP label
+      ctx.font=`7px 'Share Tech Mono'`; ctx.fillStyle='#556677'; ctx.textAlign='center';
+      ctx.fillText(`${Math.round(this.hp)}/${this.maxHp}`,0,-s-20);
+
+    } else if(this.type==='tower'){
+      const s=this.width*0.5;
+      ctx.shadowColor=isP?'#0066aa':'#aa0022'; ctx.shadowBlur=8*pulse;
+      ctx.fillStyle=flash?'#ffffff':(isP?'#061428':'#140608');
+      ctx.strokeStyle=isP?'#0055aa':'#880011'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.roundRect(-s,-s,s*2,s*2,4); ctx.fill(); ctx.stroke();
+      ctx.shadowBlur=0;
+      ctx.font=`${s*0.9}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🗼',0,0);
+      this._drawHPBar(ctx,0,-s-8,s*2,3);
+
+    } else if(this.type==='wall'){
+      const pct=this.hp/this.maxHp;
+      const c=pct>0.5?'#1e3348':pct>0.25?'#2a2210':'#1c100a';
+      ctx.fillStyle=flash?'#ffffff':c;
+      ctx.strokeStyle='#2a3a4a'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.roundRect(-this.width/2,-this.height/2,this.width,this.height,2); ctx.fill(); ctx.stroke();
+      this._drawHPBar(ctx,0,-this.height/2-5,this.width,2);
+    }
+    ctx.restore();
+  }
+
+  _drawHPBar(ctx,x,y,w,h){
+    const pct=this.hp/this.maxHp;
+    ctx.fillStyle='#060c14'; ctx.beginPath(); ctx.roundRect(x-w/2,y,w,h,1); ctx.fill();
+    const c=pct>0.5?'#00cc44':pct>0.25?'#ffaa00':'#ff1122';
+    ctx.fillStyle=c; ctx.shadowColor=c; ctx.shadowBlur=3;
+    ctx.beginPath(); ctx.roundRect(x-w/2,y,w*pct,h,1); ctx.fill();
+    ctx.shadowBlur=0;
+  }
+}
+
+/* =====================================================================
+   UNIT
+===================================================================== */
+class Unit {
+  constructor(typeId,village){
+    this.typeId=typeId;
+    const def=UNIT_DEFS[typeId];
+    this.village=village; this.side=village.side;
+    this.name=def.name; this.icon=def.icon; this.color=def.color;
+    this.maxHp=def.maxHp; this.hp=def.hp;
+    this.attack=def.attack; this.range=def.range; this.speed=def.speed;
+    this.size=def.size; this.splashRadius=def.splashRadius||0;
+    this.stunDuration=def.stunDuration||0; this.immuneToStun=def.immuneToStun||false;
+    this.priorityTarget=def.priorityTarget||null;
+    this.regenRate=def.regenRate||0; this.healRange=def.healRange||0; this.healRate=def.healRate||0;
+    this.x=0; this.y=0; this.state='garrison'; this.dead=false;
+    this.attackTimer=1000; this.attackSpeed=1000;
+    this.stunTimer=0; this.flashTimer=0;
+    this.patrolOffset={(Math.random()-.5)*50,y:(Math.random()-.5)*50};
+    this.patrolOffset={x:(Math.random()-.5)*50,y:(Math.random()-.5)*50};
+    this.deathAnimTimer=0; this.lastTarget=null;
+  }
+
+  get enemy(){ return this.village.enemy; }
+  setState(state){ this.state=state; }
+
+  update(dt){
+    if(this.dead) return;
+    this.flashTimer=Math.max(0,this.flashTimer-dt);
+    this.stunTimer=Math.max(0,this.stunTimer-dt);
+    this.attackTimer+=dt;
+    if(this.regenRate>0) this.hp=Math.min(this.maxHp,this.hp+(this.regenRate*dt)/1000);
+    if(this.healRate>0){
+      const allies=this.village.game.unitGrid.query(this.x,this.y,this.healRange,u=>u.side===this.side&&u!==this&&!u.dead&&u.hp<u.maxHp);
+      for(const a of allies) a.hp=Math.min(a.maxHp,a.hp+(this.healRate*dt)/1000);
+    }
+    if(this.stunTimer>0) return;
+    if(this.state==='garrison') this.updateGarrison(dt);
+    else if(this.state==='attack') this.updateAttack(dt);
+    else if(this.state==='recall') this.updateRecall(dt);
+  }
+
+  updateGarrison(dt){
+    const base=this.village.getBase(); if(!base) return;
+    const homeX=base.x+this.patrolOffset.x, homeY=base.y+this.patrolOffset.y;
+    const ce=this.village.game.unitGrid.queryNearest(this.x,this.y,180,u=>u.side!==this.side&&u.state==='attack'&&!u.dead);
+    if(ce) this.fightTarget(ce,dt);
+    else this.moveToward(homeX,homeY,dt,0.5);
+  }
+
+  updateAttack(dt){
+    let target=null;
+    if(this.priorityTarget==='building')
+      target=this.village.game.buildingGrid.queryNearest(this.x,this.y,2000,b=>b.side!==this.side&&!b.dead&&b.hp>0);
+    if(!target) target=this.village.game.unitGrid.queryNearest(this.x,this.y,2000,u=>u.side!==this.side&&!u.dead);
+    if(!target) target=this.village.game.buildingGrid.queryNearest(this.x,this.y,2000,b=>b.side!==this.side&&!b.dead&&b.hp>0);
+    if(target) this.fightTarget(target,dt);
+  }
+
+  updateRecall(dt){
+    const base=this.village.getBase();
+    if(!base){this.setState('garrison');return;}
+    if(dist(this.x,this.y,base.x,base.y)<80) this.setState('garrison');
+    else this.moveToward(base.x,base.y,dt,1);
+  }
+
+  fightTarget(target,dt){
+    const d=dist(this.x,this.y,target.x,target.y);
+    const effR=this.range+(target.width||0)/2;
+    if(d>effR) this.moveToward(target.x,target.y,dt,1);
+    else if(this.attackTimer>=this.attackSpeed){this.attackTimer=0;this.fireAt(target);}
+  }
+
+  fireAt(target){
+    if(this.attack<=0||this.typeId==='medic') return;
+    const game=this.village.game;
+
+    if(this.stunDuration>0){
+      target.takeDamage(this.attack,this);
+      if(!target.immuneToStun&&target.stunTimer<=0){
+        target.stunTimer=this.stunDuration;
+        game.spawnLightning(this.x,this.y,target.x,target.y,'#ffff00');
+        game.spawnFloatingText(target.x,target.y-20,'⚡ 眩晕','#ffff00',12);
+      }
+      game.spawnParticles(target.x,target.y,'#ffff00',5);
+      return;
+    }
+
+    if(this.splashRadius>0){
+      const targets=[
+        ...game.unitGrid.query(target.x,target.y,this.splashRadius,e=>e.side!==this.side&&!e.dead),
+        ...game.buildingGrid.query(target.x,target.y,this.splashRadius,e=>e.side!==this.side&&!e.dead&&e.hp>0)
+      ];
+      for(const e of targets){
+        const d=dist(target.x,target.y,e.x,e.y);
+        e.takeDamage(this.attack*(0.4+0.6*(1-d/this.splashRadius)),this);
+      }
+      game.spawnExplosion(target.x,target.y,'#ffaa00',1.5);
+      return;
+    }
+
+    const proj=game.projectilePool.acquire();
+    proj.init(this.x,this.y,target,this.attack,this.color,game,true,this);
+    game.projectiles.push(proj);
+  }
+
+  moveToward(tx,ty,dt,sm=1){
+    const d=dist(this.x,this.y,tx,ty);
+    if(d<2) return;
+    const step=(this.speed*sm*dt)/1000;
+    const r=Math.min(step/d,1);
+    this.x+=(tx-this.x)*r; this.y+=(ty-this.y)*r;
+  }
+
+  takeDamage(amount,attacker){
+    this.hp-=amount; this.flashTimer=90;
+    if(this.hp<=0){
+      this.hp=0; this.dead=true;
+      this.village.game.spawnExplosion(this.x,this.y,this.color,0.8);
+      if(attacker&&attacker.village!==this.village&&attacker.village.side==='player'){
+        this.village.game.kills++;
+        // Kill streak
+        const now=Date.now();
+        if(now-this.village.game.lastKillTime<2000) this.village.game.killStreak++;
+        else this.village.game.killStreak=1;
+        this.village.game.lastKillTime=now;
+        if(this.village.game.killStreak>=3)
+          this.village.game.spawnFloatingText(this.x,this.y-30,`🔥 ${this.village.game.killStreak}连杀！`,'#ff8800',16);
+        if(Math.random()<0.3)
+          this.village.game.addKillFeed(`⚔ 击杀 ${this.name}`);
+      }
+    }
+  }
+
+  draw(ctx){
+    if(this.dead) return;
+    const isP=this.side==='player', flash=this.flashTimer>0, stunned=this.stunTimer>0;
+    const t=Date.now()*0.001;
+
+    ctx.save(); ctx.translate(this.x,this.y);
 
     // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath();
-    ctx.ellipse(0, this.size * 0.8, this.size * 0.8, this.size * 0.3, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,0.25)';
+    ctx.beginPath(); ctx.ellipse(0,this.size*.9,this.size*.8,this.size*.25,0,0,Math.PI*2); ctx.fill();
 
-    // Body glow
-    if (!flash) {
-      ctx.shadowColor = this.color;
-      ctx.shadowBlur = 6;
+    // Stun aura
+    if(stunned){
+      ctx.globalAlpha=0.5+0.3*Math.sin(t*10);
+      ctx.fillStyle='rgba(255,255,0,0.15)';
+      ctx.beginPath(); ctx.arc(0,0,this.size*1.8,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1;
     }
 
-    // Unit circle
-    ctx.beginPath();
-    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = flash ? '#ffffff' : (isPlayer ? '#051525' : '#150505');
+    // Body
+    if(!flash){ctx.shadowColor=this.color; ctx.shadowBlur=stunned?0:7;}
+    ctx.beginPath(); ctx.arc(0,0,this.size,0,Math.PI*2);
+    ctx.fillStyle=flash?'#ffffff':(isP?'#050e1a':'#1a0505');
     ctx.fill();
-    ctx.strokeStyle = flash ? '#ffffff' : this.color;
-    ctx.lineWidth = stunned ? 2 : 1.5;
-    if (stunned) ctx.strokeStyle = '#ffff00';
+    ctx.strokeStyle=flash?'#ffffff':(stunned?'#ffee00':this.color);
+    ctx.lineWidth=stunned?2:1.5;
     ctx.stroke();
-    ctx.shadowBlur = 0;
+    ctx.shadowBlur=0;
 
     // Icon
-    ctx.font = `${this.size * 1.2}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(UNIT_DEFS[this.typeId].icon, 0, 1);
+    ctx.font=`${this.size*1.2}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(UNIT_DEFS[this.typeId].icon,0,0.5);
 
-    // State indicator dot
-    const dotColor = this.state === 'garrison' ? '#00ff88' : this.state === 'attack' ? '#ff4400' : '#ffff00';
-    ctx.beginPath();
-    ctx.arc(this.size - 2, -this.size + 2, 3, 0, Math.PI * 2);
-    ctx.fillStyle = dotColor;
-    ctx.fill();
+    // State dot (pulsing for attack)
+    const dotColor=this.state==='garrison'?'#00ff88':this.state==='attack'?'#ff3344':'#ffe040';
+    const dotPulse=this.state==='attack'?0.6+0.4*Math.sin(t*5):1;
+    ctx.globalAlpha=dotPulse;
+    ctx.fillStyle=dotColor; ctx.shadowColor=dotColor; ctx.shadowBlur=4;
+    ctx.beginPath(); ctx.arc(this.size-1,-this.size+1,2.5,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0; ctx.globalAlpha=1;
 
     // HP bar
-    const barW = this.size * 2.2;
-    const pct = this.hp / this.maxHp;
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.roundRect(-barW/2, -this.size - 7, barW, 3, 1);
-    ctx.fill();
-    ctx.fillStyle = pct > 0.5 ? '#00cc44' : pct > 0.25 ? '#ffaa00' : '#ff2200';
-    ctx.beginPath();
-    ctx.roundRect(-barW/2, -this.size - 7, barW * pct, 3, 1);
-    ctx.fill();
+    const bw=this.size*2.4, pct=this.hp/this.maxHp;
+    ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.beginPath(); ctx.roundRect(-bw/2,-this.size-7,bw,3,1); ctx.fill();
+    const hc=pct>0.5?'#00cc44':pct>0.25?'#ffaa00':'#ff1122';
+    ctx.fillStyle=hc; ctx.shadowColor=hc; ctx.shadowBlur=2;
+    ctx.beginPath(); ctx.roundRect(-bw/2,-this.size-7,bw*pct,3,1); ctx.fill();
+    ctx.shadowBlur=0;
+
+    // Medic heal effect
+    if(this.typeId==='medic'){
+      ctx.globalAlpha=0.4*Math.max(0,Math.sin(t*2));
+      ctx.strokeStyle='#ff88aa'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(0,0,this.healRange,0,Math.PI*2); ctx.stroke();
+      ctx.globalAlpha=1;
+    }
 
     ctx.restore();
   }
 }
 
-// ============================================================
-// PROJECTILE CLASS
-// ============================================================
-
-class Projectile {
-  constructor(x, y, target, damage, color, game, fromUnit = false, shooter = null) {
-    this.x = x;
-    this.y = y;
-    this.target = target;
-    this.damage = damage;
-    this.color = color;
-    this.game = game;
-    this.fromUnit = fromUnit;
-    this.shooter = shooter;
-    this.speed = 350;
-    this.dead = false;
-    this.size = fromUnit ? 3 : 5;
-  }
-
-  update(dt) {
-    if (this.target.dead || this.target.hp <= 0) {
-      this.dead = true;
-      return;
-    }
-
-    const tx = this.target.x;
-    const ty = this.target.y;
-    const d = dist(this.x, this.y, tx, ty);
-    const step = (this.speed * dt) / 1000;
-
-    if (d <= step + 2) {
-      // Hit!
-      this.target.takeDamage(this.damage, this.shooter);
-      this.game.spawnParticles(tx, ty, this.color, 5);
-      this.dead = true;
-    } else {
-      this.x += ((tx - this.x) / d) * step;
-      this.y += ((ty - this.y) / d) * step;
-    }
-  }
-
-  draw(ctx) {
-    ctx.save();
-    ctx.fillStyle = this.color;
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 6;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-}
-
-// ============================================================
-// UTILITY
-// ============================================================
-
-function dist(x1, y1, x2, y2) {
-  const dx = x2 - x1, dy = y2 - y1;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-// ============================================================
-// BOOT
-// ============================================================
-
+/* =====================================================================
+   BOOT
+===================================================================== */
 const game = new Game();
-
-  </script>
+</script>
 
 </body>
 </html>
