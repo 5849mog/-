@@ -173,7 +173,7 @@ border-top: 1px solid var(–border);
 padding: 8px 14px;
 flex-shrink:0;
 display:flex; gap:10px; align-items:center;
-height: clamp(92px, 16dvh, 118px);
+height: clamp(148px, 24dvh, 176px);
 max-height: calc(100dvh - 58px);
 box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
 position:relative;
@@ -223,7 +223,7 @@ box-shadow: 0 0 16px rgba(0,120,255,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
 .btn-icon { font-size:18px; }
 
 /* ─ Unit Panel ─ */
-#unit-panel { flex:1; overflow:hidden; display:flex; flex-direction:column; gap:4px; }
+#unit-panel { flex:1; overflow-x:hidden; overflow-y:auto; display:flex; flex-direction:column; gap:4px; min-height:0; }
 
 .panel-section-label {
 font-family:‘Share Tech Mono’,monospace;
@@ -415,7 +415,7 @@ font-family:‘Share Tech Mono’,monospace; text-transform:uppercase; letter-sp
   #game-subtitle { display:none; }
   #wave-info { gap:6px; margin-top:2px; flex-wrap:wrap; }
   .wave-item { font-size: 9px; color: var(–text); }
-  #control-panel { height: clamp(82px, 19dvh, 102px); max-height: calc(100dvh - 54px); padding: 5px 8px; gap:6px; }
+  #control-panel { height: clamp(136px, 30dvh, 158px); max-height: calc(100dvh - 54px); padding: 5px 8px; gap:6px; }
   #command-buttons { gap:4px; }
   .cmd-btn { width: 92px; height: 36px; padding: 0 6px; font-size: 10px; gap:4px; }
   .btn-icon { font-size: 15px; }
@@ -423,6 +423,7 @@ font-family:‘Share Tech Mono’,monospace; text-transform:uppercase; letter-sp
   .panel-section-label { font-size: 8px; letter-spacing: 1px; color: var(–text); }
   .units-row { gap:4px; padding-bottom:1px; }
   .unit-btn { min-width:62px; max-width:62px; padding:2px 4px; }
+  .units-row { flex:1; min-height:0; align-items:flex-start; }
   .unit-btn .unit-icon { font-size:16px; }
   .unit-btn .unit-name { font-size:8px; }
   .unit-btn .unit-cost { font-size:8px; }
@@ -448,7 +449,7 @@ font-family:‘Share Tech Mono’,monospace; text-transform:uppercase; letter-sp
     <div id="hud-left">
       <div class="hud-block">
         <span class="hud-label">金币</span>
-        <span id="player-gold" class="hud-value gold">5000</span>
+        <span id="player-gold" class="hud-value gold">8000</span>
       </div>
       <div class="hud-block">
         <span class="hud-label">驻守</span>
@@ -473,7 +474,7 @@ font-family:‘Share Tech Mono’,monospace; text-transform:uppercase; letter-sp
 <div id="hud-right">
   <div class="hud-block">
     <span class="hud-label">金币</span>
-    <span id="ai-gold" class="hud-value gold">5000</span>
+    <span id="ai-gold" class="hud-value gold">8000</span>
   </div>
   <div class="hud-block">
     <span class="hud-label">驻守</span>
@@ -575,6 +576,11 @@ const UNIT_DEFS = {
   heavyMech: {id:'heavyMech', name:'重型机甲',   icon:'⚙️',cost:600, hp:800,maxHp:800,attack:90,range:70, speed:32,size:16, color:'#2255cc',immuneToStun:true,description:'移动堡垒极强火力',tags:['mech']},
   nano:      {id:'nano',      name:'纳米战士',   icon:'🧬',cost:200, hp:180,maxHp:180,attack:40,range:48, speed:80,size:8,  color:'#00ff88',regenRate:3,description:'战斗中自动回血',tags:['heal']},
   medic:     {id:'medic',     name:'工程机器人', icon:'🔧',cost:160, hp:120,maxHp:120,attack:0, range:0,  speed:58,size:8,  color:'#ff88aa',healRange:70,healRate:8,description:'为附近友军回血',tags:['heal']},
+  drone:     {id:'drone',     name:'侦察无人机', icon:'🛸',cost:90,  hp:70, maxHp:70, attack:22,range:115,speed:125,size:7,  color:'#66ddff',description:'高速远程骚扰单位',tags:['range']},
+  rocket:    {id:'rocket',    name:'火箭兵',     icon:'🚀',cost:220, hp:130,maxHp:130,attack:105,range:95, speed:45,size:9,  color:'#ff6644',splashRadius:45,description:'远程反甲范围打击',tags:['range','splash']},
+  guardian:  {id:'guardian',  name:'护盾卫士',   icon:'🛡️',cost:260, hp:520,maxHp:520,attack:18,range:36, speed:34,size:12, color:'#55ccff',description:'超高耐久前排屏障',tags:['elite']},
+  railgun:   {id:'railgun',   name:'磁轨炮手',   icon:'☄️',cost:420, hp:170,maxHp:170,attack:150,range:160,speed:36,size:10, color:'#bb88ff',description:'超远程高伤害狙杀',tags:['range','elite']},
+  flamethrower:{id:'flamethrower',name:'喷火兵', icon:'🔥',cost:190, hp:190,maxHp:190,attack:55,range:42, speed:46,size:9, color:'#ff8833',splashRadius:35,description:'近距离锥形清场',tags:['splash']},
 };
 
 const GROUP_DEFS = {
@@ -585,6 +591,10 @@ const GROUP_DEFS = {
   mechGroup:    {id:'mechGroup',    name:'机甲突击群',   icon:'⚙️',cost:1600,isGroup:true,composition:[{type:'lightMech',count:3},{type:'heavyMech',count:1}],description:'3轻甲+1重甲',badge:'3+1'},
   empGroup:     {id:'empGroup',     name:'电磁特战群',   icon:'⚡',cost:900, isGroup:true,composition:[{type:'emp',count:3},{type:'special',count:3}],description:'先瘫痪后突击',badge:'3+3'},
   eliteGroup:   {id:'eliteGroup',   name:'精英混编群',   icon:'🧬',cost:1100,isGroup:true,composition:[{type:'nano',count:2},{type:'unitree',count:2},{type:'medic',count:1}],description:'自愈持续作战',badge:'精'},
+  droneSwarm:   {id:'droneSwarm',   name:'无人机蜂群',   icon:'🛸',cost:520, isGroup:true,composition:[{type:'drone',count:6},{type:'sniper',count:1}],description:'6架无人机+1名狙击手高速压制',badge:'6+1'},
+  rocketBattery:{id:'rocketBattery',name:'火箭炮组',     icon:'🚀',cost:980, isGroup:true,composition:[{type:'rocket',count:3},{type:'heavy',count:2}],description:'远程火箭兵配重装护卫',badge:'3+2'},
+  siegeGroup:   {id:'siegeGroup',   name:'攻城穿甲群',   icon:'☄️',cost:1450,isGroup:true,composition:[{type:'railgun',count:2},{type:'guardian',count:2},{type:'medic',count:1}],description:'磁轨炮与护盾卫士稳步推进',badge:'攻'},
+  flameSquad:   {id:'flameSquad',   name:'烈焰清场队',   icon:'🔥',cost:760, isGroup:true,composition:[{type:'flamethrower',count:4},{type:'infantry',count:4}],description:'喷火兵清场，步兵补位',badge:'4+4'},
 };
 
 const BUILDING_DEFS = {
@@ -1246,7 +1256,7 @@ class Game {
 class Village {
   constructor(side,game){
     this.side=side; this.game=game;
-    this.gold=5000; this.goldRate=10;
+    this.gold=8000; this.goldRate=10;
     this.x=0; this.y=0;
     this.units=[]; this.buildings=[];
     this.aiTimer=0; this.aiAggressionTimer=0;
@@ -1313,10 +1323,10 @@ class Village {
   getAIUnitPool(elapsed){
     const m=elapsed/60000;
     if(m<1) return ['infantry','infantry','heavy'];
-    if(m<2) return ['infantry','heavy','sniper','special'];
-    if(m<4) return ['heavy','sniper','special','emp','unitree'];
-    if(m<6) return ['special','unitree','lightMech','sniper','nano'];
-    return ['lightMech','heavyMech','unitree','special','nano','emp'];
+    if(m<2) return ['infantry','heavy','sniper','special','drone'];
+    if(m<4) return ['heavy','sniper','special','emp','unitree','drone','flamethrower'];
+    if(m<6) return ['special','unitree','lightMech','sniper','nano','rocket','guardian'];
+    return ['lightMech','heavyMech','unitree','special','nano','emp','rocket','railgun','guardian'];
   }
 
   aiAttackDecision(scale){
@@ -1333,7 +1343,7 @@ class Village {
     for(const u of this.units) if(u.state==='garrison'){u.setState('attack');sent++;}
     if(sent>0) this.game.showAlert('⚠ 敌方发起反击！');
     if(this.gold>500){
-      const pool=['lightMech','heavyMech','unitree','special'];
+      const pool=['lightMech','heavyMech','unitree','special','rocket','guardian','railgun'];
       let budget=this.gold*0.7;
       while(budget>100){
         const choice=pool[Math.floor(Math.random()*pool.length)];
