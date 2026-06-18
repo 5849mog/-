@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>世界盃 - 台球式足球</title>
+<title>世界杯 - 台球式足球</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none}
-body{background:#0a1a0a;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;height:100vh;width:100vw}
+body{background:#0a1a0a;font-family:'Microsoft YaHei','PingFang SC','Segoe UI',system-ui,sans-serif;overflow:hidden;height:100vh;width:100vw}
 #gameCanvas{display:block;width:100%;height:100%}
 .screen{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s;z-index:10}
 .hidden{opacity:0;pointer-events:none;z-index:-1}
@@ -47,18 +47,18 @@ h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;text-shadow:0 0 30px rgba(0,
 <canvas id="gameCanvas"></canvas>
 
 <div id="mainMenu" class="screen">
-<h1>⚽ 世界盃</h1>
-<p class="subtitle">台球式足球 · 拉放射門 · 終極AI對戰</p>
-<button class="btn" onclick="showTeamSelect()">選擇隊伍開始</button>
-<p style="margin-top:25px;color:#4a8a4a;font-size:.8rem">系統自動擺陣 5v5 · 先進3球獲勝 · 輸家發球</p>
+<h1>⚽ 世界杯</h1>
+<p class="subtitle">台球式足球 · 拉放射门 · 终极AI对战</p>
+<button class="btn" onclick="showTeamSelect()">选择队伍开始</button>
+<p style="margin-top:25px;color:#4a8a4a;font-size:.8rem">系统自动摆阵 5v5 · 先进3球获胜 · 输家发球</p>
 </div>
 
 <div id="teamSelect" class="screen hidden">
-<h1>選擇國家隊</h1>
-<p class="subtitle">你的隊伍將在左側進攻右側球門</p>
+<h1>选择国家队</h1>
+<p class="subtitle">你的队伍将在左侧进攻右侧球门</p>
 <div class="teams-grid" id="teamsGrid"></div>
 <div class="vs-box hidden" id="vsBox"></div>
-<button class="btn hidden" id="startBtn" onclick="startGame()">開始比賽</button>
+<button class="btn hidden" id="startBtn" onclick="startGame()">开始比赛</button>
 <button class="btn btn-blue" onclick="showScreen('mainMenu')">返回</button>
 </div>
 
@@ -70,17 +70,17 @@ h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;text-shadow:0 0 30px rgba(0,
 </div>
 <div class="turn-indicator" id="turnIndicator">你的回合</div>
 <div class="power-bar"><div class="power-fill" id="powerFill"></div></div>
-<div class="instructions" id="instr">點擊球員 → 向後拉蓄力 → 圓周移動改方向 → 鬆開射門</div>
+<div class="instructions" id="instr">点击球员 → 向后拉蓄力 → 圆周移动改方向 → 松开射门</div>
 </div>
 
 <div id="goalText" class="goal-text">GOAL!!!</div>
 
 <div id="resultScreen" class="screen hidden winner-screen">
 <div class="winner-trophy" id="resEmoji">🏆</div>
-<div class="result-title" id="resTitle">勝利！</div>
+<div class="result-title" id="resTitle">胜利！</div>
 <div class="final-score" id="resScore">3 - 1</div>
-<button class="btn" onclick="restartGame()">再戰一場</button>
-<button class="btn btn-blue" onclick="showScreen('mainMenu')">主選單</button>
+<button class="btn" onclick="restartGame()">再战一场</button>
+<button class="btn btn-blue" onclick="showScreen('mainMenu')">主菜单</button>
 </div>
 
 <script>
@@ -88,7 +88,7 @@ const canvas=document.getElementById('gameCanvas');
 const ctx=canvas.getContext('2d');
 let W,H;
 
-// ===== 遊戲狀態 =====
+// ===== 游戏状态 =====
 let gameState='menu';
 let selectedTeam=null, opponentTeam=null;
 let scores=[0,0];
@@ -98,7 +98,7 @@ let cameraShake=0;
 let flashAlpha=0;
 let aiAim=null;
 
-// ===== 物理常數 =====
+// ===== 物理常数 =====
 const FRICTION=0.985;
 const WALL_BOUNCE=0.7;
 const PLAYER_MASS=2;
@@ -109,36 +109,36 @@ const MIN_VELOCITY=0.15;
 const GOAL_WIDTH=140;
 const GOAL_DEPTH=25;
 
-// ===== 場地與實體 =====
+// ===== 场地与实体 =====
 let field={x:0,y:0,w:0,h:0,margin:0};
 let ball=null;
 let players=[];
 let walls=[];
 
-// ===== 玩家瞄準 =====
+// ===== 玩家瞄准 =====
 let aimPlayer=null;
 let aimMouseX=0, aimMouseY=0;
 let isAiming=false;
 let shotFired=false;
 
-// ===== 隊伍資料 =====
+// ===== 队伍资料 =====
 const teams=[
 {name:'巴西',flag:'🇧🇷',color:'#ffd700',sec:'#009c3b'},
 {name:'阿根廷',flag:'🇦🇷',color:'#6cb4ee',sec:'#fff'},
-{name:'法國',flag:'🇫🇷',color:'#0055a4',sec:'#ef4135'},
-{name:'德國',flag:'🇩🇪',color:'#ffce00',sec:'#000'},
+{name:'法国',flag:'🇫🇷',color:'#0055a4',sec:'#ef4135'},
+{name:'德国',flag:'🇩🇪',color:'#ffce00',sec:'#000'},
 {name:'西班牙',flag:'🇪🇸',color:'#aa151b',sec:'#f1bf00'},
-{name:'英格蘭',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',color:'#fff',sec:'#cf081f'},
+{name:'英格兰',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',color:'#fff',sec:'#cf081f'},
 {name:'葡萄牙',flag:'🇵🇹',color:'#006600',sec:'#ff0000'},
-{name:'荷蘭',flag:'🇳🇱',color:'#ff4f00',sec:'#fff'},
-{name:'義大利',flag:'🇮🇹',color:'#009246',sec:'#fff'},
+{name:'荷兰',flag:'🇳🇱',color:'#ff4f00',sec:'#fff'},
+{name:'意大利',flag:'🇮🇹',color:'#009246',sec:'#fff'},
 {name:'日本',flag:'🇯🇵',color:'#bc002d',sec:'#fff'},
-{name:'韓國',flag:'🇰🇷',color:'#0047a0',sec:'#cd2e3a'},
-{name:'美國',flag:'🇺🇸',color:'#3c3b6e',sec:'#b22234'},
+{name:'韩国',flag:'🇰🇷',color:'#0047a0',sec:'#cd2e3a'},
+{name:'美国',flag:'🇺🇸',color:'#3c3b6e',sec:'#b22234'},
 {name:'墨西哥',flag:'🇲🇽',color:'#006847',sec:'#ce1126'},
-{name:'比利時',flag:'🇧🇪',color:'#000',sec:'#ffd700'},
-{name:'克羅埃西亞',flag:'🇭🇷',color:'#ff0000',sec:'#fff'},
-{name:'烏拉圭',flag:'🇺🇾',color:'#0038a8',sec:'#fff'}
+{name:'比利时',flag:'🇧🇪',color:'#000',sec:'#ffd700'},
+{name:'克罗地亚',flag:'🇭🇷',color:'#ff0000',sec:'#fff'},
+{name:'乌拉圭',flag:'🇺🇾',color:'#0038a8',sec:'#fff'}
 ];
 
 // ===== 初始化 =====
@@ -243,13 +243,13 @@ updateTurnUI();
 function updateTurnUI(){
 const ind=document.getElementById('turnIndicator');
 if(currentTurn===0){
-ind.textContent='你的回合 - 點擊球員開始瞄準';
+ind.textContent='你的回合 - 点击球员开始瞄准';
 ind.style.color='#00ff88';
 ind.style.borderColor='rgba(0,255,100,.3)';
 document.getElementById('instr').style.display='block';
 document.getElementById('powerFill').parentElement.style.display='block';
 }else{
-ind.textContent='終極AI 思考中...';
+ind.textContent='终极AI 思考中...';
 ind.style.color='#ff6b6b';
 ind.style.borderColor='rgba(255,100,100,.3)';
 document.getElementById('instr').style.display='none';
@@ -279,7 +279,7 @@ if(e.vx!==0||e.vy!==0)moving=true;
 const goalY1=field.y+(field.h-GOAL_WIDTH)/2;
 const goalY2=field.y+(field.h+GOAL_WIDTH)/2;
 
-// 球邊界：嚴格限制不飛出場，球門區域允許進入一定深度
+// 球边界：严格限制不飞出场，球门区域允许进入一定深度
 if(ball.x-ball.r<field.x){
 if(ball.y>goalY1&&ball.y<goalY2){
 if(ball.x<field.x-GOAL_DEPTH){ball.x=field.x-GOAL_DEPTH;ball.vx*=-0.3;ball.vy*=0.6}
@@ -293,7 +293,7 @@ if(ball.x>field.x+field.w+GOAL_DEPTH){ball.x=field.x+field.w+GOAL_DEPTH;ball.vx*
 if(ball.y-ball.r<field.y){ball.vy*=-WALL_BOUNCE;ball.y=field.y+ball.r}
 if(ball.y+ball.r>field.y+field.h){ball.vy*=-WALL_BOUNCE;ball.y=field.y+field.h-ball.r}
 
-// 球員邊界
+// 球员边界
 players.forEach(p=>{
 if(p.x-p.r<field.x){p.x=field.x+p.r;p.vx*=-WALL_BOUNCE}
 if(p.x+p.r>field.x+field.w){p.x=field.x+field.w-p.r;p.vx*=-WALL_BOUNCE}
@@ -301,7 +301,7 @@ if(p.y-p.r<field.y){p.y=field.y+p.r;p.vy*=-WALL_BOUNCE}
 if(p.y+p.r>field.y+field.h){p.y=field.y+field.h-p.r;p.vy*=-WALL_BOUNCE}
 });
 
-// 球與球員碰撞
+// 球与球员碰撞
 players.forEach(p=>{
 const dx=ball.x-p.x,dy=ball.y-p.y;
 const dist=Math.sqrt(dx*dx+dy*dy);
@@ -321,7 +321,7 @@ p.vx+=impulse*ball.mass*nx;p.vy+=impulse*ball.mass*ny;
 }
 });
 
-// 球員之間碰撞
+// 球员之间碰撞
 for(let i=0;i<players.length;i++){
 for(let j=i+1;j<players.length;j++){
 const p1=players[i],p2=players[j];
@@ -347,7 +347,7 @@ p2.vx-=impulse*p1.mass*nx;p2.vy-=impulse*p1.mass*ny;
 return moving;
 }
 
-// ===== 進球檢測 =====
+// ===== 进球检测 =====
 function checkGoal(){
 if(gameState!=='playing')return;
 const goalY1=field.y+(field.h-GOAL_WIDTH)/2;
@@ -539,7 +539,107 @@ score-=Math.abs(power-12)*4;
 return score;
 }
 
-// ===== 繪圖 =====
+// ===== 绘图与轨迹预测 =====
+
+// 获取完整的预测轨迹
+function getTrajectory(player, angle, power) {
+const sp = {x: player.x, y: player.y, vx: Math.cos(angle)*power, vy: Math.sin(angle)*power, r: player.r, mass: player.mass};
+const sb = {x: ball.x, y: ball.y, vx: ball.vx, vy: ball.vy, r: ball.r, mass: ball.mass};
+
+const spPath = [{x: sp.x, y: sp.y}];
+const sbPath = [{x: sb.x, y: sb.y}];
+
+let hitBall = false;
+const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
+const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
+
+for(let step = 0; step < 200; step++) {
+sp.x += sp.vx; sp.y += sp.vy;
+sb.x += sb.vx; sb.y += sb.vy;
+sp.vx *= FRICTION; sp.vy *= FRICTION;
+sb.vx *= FRICTION; sb.vy *= FRICTION;
+
+// 墙壁碰撞 SP
+if(sp.x - sp.r < field.x){ sp.x = field.x + sp.r; sp.vx *= -WALL_BOUNCE; }
+if(sp.x + sp.r > field.x + field.w){ sp.x = field.x + field.w - sp.r; sp.vx *= -WALL_BOUNCE; }
+if(sp.y - sp.r < field.y){ sp.y = field.y + sp.r; sp.vy *= -WALL_BOUNCE; }
+if(sp.y + sp.r > field.y + field.h){ sp.y = field.y + field.h - sp.r; sp.vy *= -WALL_BOUNCE; }
+
+// 墙壁碰撞 SB
+if(sb.x - sb.r < field.x){
+if(!(sb.y > goalY1 && sb.y < goalY2)) { sb.vx *= -WALL_BOUNCE; sb.x = field.x + sb.r; }
+}
+if(sb.x + sb.r > field.x + field.w){
+if(!(sb.y > goalY1 && sb.y < goalY2)) { sb.vx *= -WALL_BOUNCE; sb.x = field.x + field.w - sb.r; }
+}
+if(sb.y - sb.r < field.y){ sb.vy *= -WALL_BOUNCE; sb.y = field.y + sb.r; }
+if(sb.y + sb.r > field.y + field.h){ sb.vy *= -WALL_BOUNCE; sb.y = field.y + field.h - sb.r; }
+
+// SP 与 SB 碰撞
+const dx = sb.x - sp.x, dy = sb.y - sp.y;
+const dist = Math.sqrt(dx * dx + dy * dy);
+const minDist = sb.r + sp.r;
+if(dist < minDist && dist > 0.01){
+hitBall = true;
+const nx = dx / dist, ny = dy / dist;
+const overlap = minDist - dist;
+sb.x += nx * overlap * 0.5; sb.y += ny * overlap * 0.5;
+sp.x -= nx * overlap * 0.5; sp.y -= ny * overlap * 0.5;
+const dvx = sb.vx - sp.vx, dvy = sb.vy - sp.vy;
+const dvn = dvx * nx + dvy * ny;
+if(dvn < 0){
+const impulse = 2 * dvn / (sb.mass + sp.mass) * RESTITUTION;
+sb.vx -= impulse * sp.mass * nx; sb.vy -= impulse * sp.mass * ny;
+sp.vx += impulse * sb.mass * nx; sp.vy += impulse * sb.mass * ny;
+}
+}
+
+// SP 与其他球员碰撞
+for(let p of players){
+if(p === player) continue;
+const pdx = sp.x - p.x, pdy = sp.y - p.y;
+const pd = Math.sqrt(pdx * pdx + pdy * pdy);
+if(pd < sp.r + p.r && pd > 0.01){
+const pnx = pdx / pd, pny = pdy / pd;
+sp.x -= pnx * (sp.r + p.r - pd) * 0.5;
+sp.y -= pny * (sp.r + p.r - pd) * 0.5;
+const p_dvn = sp.vx * pnx + sp.vy * pny;
+if(p_dvn < 0) {
+const impulse = 2 * p_dvn / (sp.mass + p.mass) * RESTITUTION;
+sp.vx -= impulse * p.mass * pnx;
+sp.vy -= impulse * p.mass * pny;
+}
+}
+}
+
+// SB 与其他球员碰撞
+for(let p of players){
+if(p === player) continue;
+const pdx = sb.x - p.x, pdy = sb.y - p.y;
+const pd = Math.sqrt(pdx * pdx + pdy * pdy);
+if(pd < sb.r + p.r && pd > 0.01){
+const pnx = pdx / pd, pny = pdy / pd;
+sb.x -= pnx * (sb.r + p.r - pd) * 0.5;
+sb.y -= pny * (sb.r + p.r - pd) * 0.5;
+const p_dvn = sb.vx * pnx + sb.vy * pny;
+if(p_dvn < 0) {
+const impulse = 2 * p_dvn / (sb.mass + p.mass) * RESTITUTION;
+sb.vx -= impulse * p.mass * pnx;
+sb.vy -= impulse * p.mass * pny;
+}
+}
+}
+
+if(step % 2 === 0) {
+if(Math.abs(sp.vx) > 0.5 || Math.abs(sp.vy) > 0.5) spPath.push({x: sp.x, y: sp.y});
+if(hitBall && (Math.abs(sb.vx) > 0.5 || Math.abs(sb.vy) > 0.5)) sbPath.push({x: sb.x, y: sb.y});
+}
+
+if(Math.abs(sp.vx) < 0.15 && Math.abs(sp.vy) < 0.15 && Math.abs(sb.vx) < 0.15 && Math.abs(sb.vy) < 0.15) break;
+}
+return {spPath, sbPath, hitBall};
+}
+
 function drawField(){
 const grad=ctx.createLinearGradient(0,field.y,0,field.y+field.h);
 grad.addColorStop(0,'#1a5c1a');
@@ -638,17 +738,53 @@ ctx.beginPath();ctx.moveTo(aimMouseX,aimMouseY);ctx.lineTo(px,py);ctx.stroke();
 ctx.fillStyle='#3d2817';ctx.beginPath();ctx.arc(aimMouseX,aimMouseY,13,0,Math.PI*2);ctx.fill();
 ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(aimMouseX,aimMouseY,13,0,Math.PI*2);ctx.stroke();
 
-const predictLen=power*14;
-const ptx=px+Math.cos(angle)*predictLen;
-const pty=py+Math.sin(angle)*predictLen;
-ctx.setLineDash([5,10]);
-ctx.strokeStyle='rgba(255,255,255,.25)';
-ctx.lineWidth=2;
-ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ptx,pty);ctx.stroke();
-ctx.setLineDash([]);
-ctx.fillStyle='rgba(255,255,255,.4)';
-ctx.beginPath();ctx.arc(ptx,pty,5,0,Math.PI*2);ctx.fill();
+// 绘制完整的上帝视角预测轨迹
+const traj = getTrajectory(aimPlayer, angle, power);
 
+// 1. 绘制球员运动轨迹
+if(traj.spPath.length > 0) {
+ctx.beginPath();
+ctx.moveTo(traj.spPath[0].x, traj.spPath[0].y);
+for(let i=1; i<traj.spPath.length; i++) {
+ctx.lineTo(traj.spPath[i].x, traj.spPath[i].y);
+}
+ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+ctx.lineWidth = 2;
+ctx.setLineDash([5, 5]);
+ctx.stroke();
+
+const endPlayer = traj.spPath[traj.spPath.length-1];
+ctx.beginPath();
+ctx.arc(endPlayer.x, endPlayer.y, aimPlayer.r, 0, Math.PI*2);
+ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+ctx.fill();
+ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+ctx.stroke();
+}
+
+// 2. 如果撞击到足球，绘制足球运动轨迹
+if(traj.hitBall && traj.sbPath.length > 0) {
+ctx.beginPath();
+ctx.moveTo(traj.sbPath[0].x, traj.sbPath[0].y);
+for(let i=1; i<traj.sbPath.length; i++) {
+ctx.lineTo(traj.sbPath[i].x, traj.sbPath[i].y);
+}
+ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+ctx.lineWidth = 3;
+ctx.setLineDash([6, 6]);
+ctx.stroke();
+
+const endBall = traj.sbPath[traj.sbPath.length-1];
+ctx.beginPath();
+ctx.arc(endBall.x, endBall.y, ball.r, 0, Math.PI*2);
+ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+ctx.fill();
+ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+ctx.stroke();
+}
+ctx.setLineDash([]);
+
+// 绘制向后的拉力箭头效果
 const aimLen=power*12;
 const ax=px+Math.cos(angle)*aimLen;
 const ay=py+Math.sin(angle)*aimLen;
@@ -779,7 +915,7 @@ if(flashAlpha<0.01)flashAlpha=0;
 ctx.restore();
 }
 
-// ===== 主循環 =====
+// ===== 主循环 =====
 function gameLoop(){
 if(gameState==='playing'){
 updatePhysics();
@@ -798,7 +934,7 @@ draw();
 requestAnimationFrame(gameLoop);
 }
 
-// ===== 輸入 =====
+// ===== 输入 =====
 function getPos(e){
 const rect=canvas.getBoundingClientRect();
 if(e.touches)return{x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};
@@ -822,7 +958,7 @@ const dist=Math.sqrt((pos.x-p.x)**2+(pos.y-p.y)**2);
 if(dist<p.r+30){
 aimPlayer=p;isAiming=true;
 aimMouseX=pos.x;aimMouseY=pos.y;
-document.getElementById('turnIndicator').textContent='向後拉蓄力 · 圓周移動改方向 · 鬆開射門';
+document.getElementById('turnIndicator').textContent='向后拉蓄力 · 圆周移动改方向 · 松开射门';
 break;
 }
 }
@@ -843,7 +979,7 @@ const dist=Math.sqrt(dx*dx+dy*dy);
 const power=Math.min(dist/4,MAX_POWER);
 isAiming=false;aimPlayer=null;
 document.getElementById('powerFill').style.width='0%';
-document.getElementById('turnIndicator').textContent='你的回合 - 點擊球員開始瞄準';
+document.getElementById('turnIndicator').textContent='你的回合 - 点击球员开始瞄准';
 if(power>1.5){
 const angle=Math.atan2(dy,dx);
 shooter.vx=Math.cos(angle)*power;
@@ -852,13 +988,13 @@ shotFired=true;
 }
 }
 
-// ===== 結束 =====
+// ===== 结束 =====
 function endGame(winner){
 gameState='ended';
 showScreen('resultScreen');
 const isWin=winner===0;
 document.getElementById('resEmoji').textContent=isWin?'🏆':'😢';
-document.getElementById('resTitle').textContent=isWin?`${selectedTeam.name} 獲勝！`:`${opponentTeam.name} 獲勝！`;
+document.getElementById('resTitle').textContent=isWin?`${selectedTeam.name} 获胜！`:`${opponentTeam.name} 获胜！`;
 document.getElementById('resTitle').style.color=isWin?'#00ff88':'#ff1744';
 document.getElementById('resScore').textContent=`${scores[0]} - ${scores[1]}`;
 }
