@@ -876,9 +876,15 @@ function draw() {
         cameraShake *= 0.9; if (cameraShake < 0.2) cameraShake = 0;
     }
     ctx.clearRect(0, 0, W, H);
+    
+    // 场地任何时候都需要绘制
     drawField();
-    drawAiming();
-    drawEntities();
+
+    // 【修复核心】只有处于对局状态时，才去渲染物理实体和瞄准UI
+    if (gameState === 'playing' || gameState === 'goalAnimating' || gameState === 'ended') {
+        drawAiming();
+        drawEntities();
+    }
 
     if (flashAlpha > 0) {
         ctx.fillStyle = `rgba(255,255,255,${flashAlpha})`; ctx.fillRect(0, 0, W, H);
@@ -886,6 +892,7 @@ function draw() {
     }
     ctx.restore();
 }
+
 
 // ===== 核心引擎循环 =====
 function gameLoop() {
