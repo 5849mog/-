@@ -2,1055 +2,982 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>世界杯 - 台球式足球 (地狱AI增强版)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>世界杯 - 台球式足球 (iPad极限品质增强版)</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none}
-body{background:#0a1a0a;font-family:'Microsoft YaHei','PingFang SC','Segoe UI',system-ui,sans-serif;overflow:hidden;height:100vh;width:100vw}
-#gameCanvas{display:block;width:100%;height:100%}
-.screen{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s;z-index:10}
-.hidden{opacity:0;pointer-events:none;z-index:-1}
-h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;text-shadow:0 0 30px rgba(0,255,100,.5),0 4px 20px rgba(0,0,0,.8);background:linear-gradient(180deg,#fff 0%,#00ff88 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px}
-.subtitle{font-size:clamp(1rem,2.5vw,1.3rem);color:#7dd87d;margin:10px 0 30px;text-align:center;padding:0 20px}
-.btn{background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:16px;padding:18px 50px;font-size:1.3rem;font-weight:800;color:#000;cursor:pointer;box-shadow:0 8px 30px rgba(0,200,83,.5),inset 0 1px 0 rgba(255,255,255,.3);transition:all .15s;text-transform:uppercase;letter-spacing:1px;margin:8px}
-.btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 40px rgba(0,200,83,.7)}
-.btn:active{transform:translateY(0) scale(.97)}
-.btn-blue{background:linear-gradient(135deg,#2979ff,#448aff);box-shadow:0 8px 30px rgba(41,121,255,.5)}
-.btn-blue:hover{box-shadow:0 12px 40px rgba(41,121,255,.7)}
-.btn-blue:active{transform:translateY(0) scale(.97)}
-.teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;width:92%;max-width:700px;max-height:45vh;overflow-y:auto;padding:15px;background:rgba(0,20,0,.6);border-radius:16px;border:1px solid rgba(0,255,100,.2)}
-.team-card{background:linear-gradient(135deg,rgba(0,255,100,.1),rgba(0,255,100,.03));border:2px solid rgba(0,255,100,.2);border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s}
-.team-card:hover{transform:translateY(-4px);border-color:#00ff88;box-shadow:0 8px 25px rgba(0,255,100,.3)}
-.team-card.selected{border-color:#ffd700;background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,215,0,.05));box-shadow:0 0 20px rgba(255,215,0,.4)}
-.flag{font-size:2.2rem;margin-bottom:6px;display:block}
-.team-name{font-size:.8rem;font-weight:700;color:#fff}
-.vs-box{background:rgba(0,0,0,.5);padding:15px 40px;border-radius:20px;margin:15px 0;border:1px solid rgba(255,215,0,.3);font-size:1.3rem;font-weight:800}
-.score-board{position:absolute;top:15px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(0,0,0,.85),rgba(0,30,0,.85));padding:10px 35px;border-radius:50px;border:2px solid rgba(0,255,100,.3);display:flex;align-items:center;gap:25px;z-index:5;backdrop-filter:blur(15px);box-shadow:0 10px 40px rgba(0,0,0,.6)}
-.score-team{text-align:center;min-width:50px}
-.score-flag{font-size:1.6rem}
-.score-num{font-size:1.8rem;font-weight:900;color:#fff;transition:transform .3s;display:inline-block}
-.score-divider{font-size:1.6rem;font-weight:800;color:#ffd700}
-.turn-indicator{position:absolute;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:6px 25px;border-radius:20px;font-size:.9rem;font-weight:700;z-index:5;border:1px solid rgba(0,255,100,.3);color:#00ff88;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 rgba(0,255,100,0)}50%{box-shadow:0 0 15px rgba(0,255,100,.3)}}
-.goal-text{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:clamp(4rem,12vw,8rem);font-weight:900;color:#ffd700;text-shadow:0 0 50px rgba(255,215,0,.9),0 4px 30px rgba(0,0,0,.9);z-index:30;pointer-events:none;white-space:nowrap}
-.goal-anim{animation:goalPop 1.5s cubic-bezier(.68,-.55,.265,1.55) forwards}
-@keyframes goalPop{0%{transform:translate(-50%,-50%) scale(0) rotate(-15deg)}40%{transform:translate(-50%,-50%) scale(1.3) rotate(8deg)}100%{transform:translate(-50%,-50%) scale(1) rotate(0deg)}}
-.power-bar{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);width:220px;height:14px;background:rgba(0,0,0,.6);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.2);z-index:5}
-.power-fill{height:100%;width:0%;background:linear-gradient(90deg,#00ff88,#ffff00,#ff1744);transition:width .05s}
-.instructions{position:absolute;bottom:58px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:8px 25px;border-radius:20px;font-size:.85rem;color:#aaa;z-index:5;border:1px solid rgba(255,255,255,.1)}
-.winner-screen{text-align:center}
-.winner-trophy{font-size:5rem;margin-bottom:15px}
-.final-score{font-size:2.5rem;margin:15px 0 30px;color:#ffd700;font-weight:900}
-.result-title{font-size:2rem;margin-bottom:10px}
+* {
+    margin: 0; padding: 0; box-sizing: border-box;
+    touch-action: none; -webkit-tap-highlight-color: transparent; user-select: none;
+}
+body {
+    background: #050f05;
+    font-family: system-ui, -apple-system, "SF Pro SC", "SF Pro Text", "Helvetica Neue", sans-serif;
+    overflow: hidden; height: 100vh; width: 100vw;
+}
+canvas { display: block; width: 100%; height: 100%; }
+.screen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 10;
+    backdrop-filter: blur(0px);
+}
+.hidden { opacity: 0; pointer-events: none; transform: scale(1.05); z-index: -1; }
+#mainMenu { background: radial-gradient(circle at center, rgba(10,35,15,0.8) 0%, rgba(5,15,5,0.95) 100%); }
+h1 {
+    font-size: clamp(2.8rem, 8vw, 5.5rem); font-weight: 900; line-height: 1.1;
+    text-shadow: 0 0 40px rgba(0,255,136,0.4), 0 10px 30px rgba(0,0,0,0.7);
+    background: linear-gradient(180deg, #ffffff 20%, #00ff88 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px;
+}
+.subtitle { font-size: clamp(1rem, 2.5vw, 1.4rem); color: #a2e0a2; margin: 15px 0 40px; text-align: center; font-weight: 500; }
+.btn {
+    background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%); border: none; border-radius: 20px;
+    padding: 20px 60px; font-size: 1.4rem; font-weight: 800; color: #031208; cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,230,118,0.3), inset 0 2px 3px rgba(255,255,255,0.4);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1); letter-spacing: 1px; margin: 10px;
+}
+.btn:active { transform: scale(0.95); box-shadow: 0 4px 15px rgba(0,230,118,0.2); }
+.btn-blue { background: linear-gradient(135deg, #2979ff, #00e5ff); box-shadow: 0 10px 30px rgba(41,121,255,0.3); color: #fff; }
+.teams-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: 90%; max-width: 760px;
+    max-height: 48vh; overflow-y: auto; padding: 20px; background: rgba(0,20,5,0.5);
+    border-radius: 24px; border: 1px solid rgba(0,255,136,0.15);
+    -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 600px) { .teams-grid { grid-template-columns: repeat(3, 1fr); } }
+.team-card {
+    background: rgba(255,255,255,0.03); border: 2px solid rgba(0,255,136,0.1); border-radius: 18px;
+    padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.2s ease;
+}
+.team-card:active { transform: scale(0.95); background: rgba(0,255,136,0.1); }
+.team-card.selected {
+    border-color: #ffd700; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,255,136,0.05));
+    box-shadow: 0 0 25px rgba(255,215,0,0.25);
+}
+.flag { font-size: 2.5rem; margin-bottom: 8px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+.team-name { font-size: 0.9rem; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+.vs-box {
+    background: rgba(0,0,0,0.6); padding: 18px 50px; border-radius: 25px; margin: 20px 0;
+    border: 1px solid rgba(255,215,0,0.25); font-size: 1.4rem; font-weight: 800; color: #fff;
+    backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.score-board {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(180deg, rgba(10,15,10,0.85) 0%, rgba(5,10,5,0.95) 100%);
+    padding: 12px 40px; border-radius: 30px; border: 1.5px solid rgba(0,255,136,0.25);
+    display: flex; align-items: center; gap: 30px; z-index: 5; backdrop-filter: blur(20px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+}
+.score-team { text-align: center; min-width: 60px; }
+.score-flag { font-size: 1.8rem; }
+.score-num { font-size: 2.2rem; font-weight: 900; color: #fff; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; }
+.score-divider { font-size: 1.8rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.turn-indicator {
+    position: absolute; top: 92px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.75); padding: 8px 28px; border-radius: 20px;
+    font-size: 0.95rem; font-weight: 700; z-index: 5; border: 1px solid rgba(0,255,136,0.2);
+    color: #00ff88; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.goal-text {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+    font-size: clamp(4.5rem, 15vw, 9.5rem); font-weight: 950; color: #ffd700;
+    text-shadow: 0 0 40px rgba(255,215,0,0.8), 0 10px 50px rgba(0,0,0,0.9);
+    z-index: 30; pointer-events: none; font-style: italic; letter-spacing: -2px;
+}
+.goal-anim { animation: goalPop 1.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes goalPop {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; filter: blur(0px); }
+    100% { transform: translate(-50%, -50%) scale(1.6) rotate(0deg); opacity: 0; filter: blur(10px); }
+}
+.power-bar {
+    position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+    width: 260px; height: 12px; background: rgba(0,0,0,0.7); border-radius: 10px;
+    overflow: hidden; border: 1.5px solid rgba(255,255,255,0.15); z-index: 5;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: none;
+}
+.power-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00ff88, #ffff00, #ff1744); }
+.instructions {
+    position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.6); padding: 8px 24px; border-radius: 20px;
+    font-size: 0.85rem; font-weight: 600; color: #bbb; z-index: 5;
+    border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(5px);
+}
+.winner-screen { text-align: center; background: radial-gradient(circle at center, rgba(5,20,40,0.9) 0%, rgba(3,10,20,0.98) 100%); }
+.winner-trophy { font-size: 6rem; margin-bottom: 20px; filter: drop-shadow(0 0 30px rgba(255,215,0,0.4)); }
+.final-score { font-size: 3rem; margin: 15px 0 35px; color: #ffd700; font-weight: 900; }
 </style>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
 
 <div id="mainMenu" class="screen">
-<h1>⚽ 世界杯</h1>
-<p class="subtitle">台球式足球 · 拉放射门 · 战术大师AI</p>
-<button class="btn" onclick="showTeamSelect()">选择队伍开始</button>
-<p style="margin-top:25px;color:#4a8a4a;font-size:.8rem">系统自动摆阵 5v5 · 先进3球获胜 · 输家发球</p>
+    <h1>⚽ WORLD CUP</h1>
+    <p class="subtitle">台球式足球 · 量子物理轨迹 · 高端iPad重制版</p>
+    <button class="btn" onclick="showTeamSelect()">进入球场</button>
+    <p style="margin-top:30px;color:#559966;font-size:0.85rem;font-weight:600;letter-spacing:0.5px">高端视网膜渲染 · 5v5 属性竞技 · 进球爆破粒子</p>
 </div>
 
-<div id="teamSelect" class="screen hidden">
-<h1>选择国家队</h1>
-<p class="subtitle">你的队伍将在左侧进攻右侧球门</p>
-<div class="teams-grid" id="teamsGrid"></div>
-<div class="vs-box hidden" id="vsBox"></div>
-<button class="btn hidden" id="startBtn" onclick="startGame()">开始比赛</button>
-<button class="btn btn-blue" onclick="showScreen('mainMenu')">返回</button>
+<div id="teamSelect" class="screen hidden" style="background: rgba(4,14,4,0.96);">
+    <h1>挑选国家队</h1>
+    <p class="subtitle">您的球队将在左侧发起进攻</p>
+    <div class="teams-grid" id="teamsGrid"></div>
+    <div class="vs-box hidden" id="vsBox"></div>
+    <button class="btn hidden" id="startBtn" onclick="startGame()">开球</button>
+    <button class="btn btn-blue" onclick="showScreen('mainMenu')">返回</button>
 </div>
 
 <div id="gameScreen" class="screen hidden" style="background:transparent;pointer-events:none">
-<div class="score-board" style="pointer-events:auto">
-<div class="score-team"><div class="score-flag" id="p1Flag">🏳️</div><div class="score-num" id="p1Score">0</div></div>
-<div class="score-divider">:</div>
-<div class="score-team"><div class="score-flag" id="p2Flag">🏳️</div><div class="score-num" id="p2Score">0</div></div>
-</div>
-<div class="turn-indicator" id="turnIndicator">你的回合</div>
-<div class="power-bar"><div class="power-fill" id="powerFill"></div></div>
-<div class="instructions" id="instr">点击球员 → 向后拉蓄力 → 圆周移动改方向 → 松开射门</div>
+    <div class="score-board" style="pointer-events:auto">
+        <div class="score-team"><div class="score-flag" id="p1Flag">🏳️</div><div class="score-num" id="p1Score">0</div></div>
+        <div class="score-divider">VS</div>
+        <div class="score-team"><div class="score-flag" id="p2Flag">🏳️</div><div class="score-num" id="p2Score">0</div></div>
+    </div>
+    <div class="turn-indicator" id="turnIndicator">你的回合</div>
+    <div class="power-bar" id="powerBar"><div class="power-fill" id="powerFill"></div></div>
+    <div class="instructions" id="instr">点击拖拽己方发光球员 → 反向蓄力拉弓 → 释放射门</div>
 </div>
 
-<div id="goalText" class="goal-text">GOAL!!!</div>
+<div id="goalText" class="goal-text">GOAL !!!</div>
 
 <div id="resultScreen" class="screen hidden winner-screen">
-<div class="winner-trophy" id="resEmoji">🏆</div>
-<div class="result-title" id="resTitle">胜利！</div>
-<div class="final-score" id="resScore">3 - 1</div>
-<button class="btn" onclick="restartGame()">再战一场</button>
-<button class="btn btn-blue" onclick="showScreen('mainMenu')">主菜单</button>
+    <div class="winner-trophy" id="resEmoji">🏆</div>
+    <div class="result-title" id="resTitle" style="font-size: 2.5rem; font-weight: 900;">胜利！</div>
+    <div class="final-score" id="resScore">3 - 1</div>
+    <button class="btn" onclick="restartGame()">再战一场</button>
+    <button class="btn btn-blue" onclick="showScreen('mainMenu')">主菜单</button>
 </div>
 
 <script>
-const canvas=document.getElementById('gameCanvas');
-const ctx=canvas.getContext('2d');
-let W,H;
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, DPR;
 
-// ===== 游戏状态 =====
-let gameState='menu';
-let selectedTeam=null, opponentTeam=null;
-let scores=[0,0];
-let currentTurn=0;
-let particles=[];
-let cameraShake=0;
-let flashAlpha=0;
-let aiAim=null;
+// ===== WEB AUDIO API 纯代码原生声音系统 =====
+const AudioEngine = {
+    ctx: null,
+    init() {
+        if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    },
+    playKick(vol = 1) {
+        this.init(); if (!this.ctx) return;
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(vol * 0.6, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.13);
+    },
+    playBounce(vol = 1) {
+        this.init(); if (!this.ctx) return;
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(280, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(180, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(vol * 0.3, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.09);
+    },
+    playCharge(powerRatio) {
+        this.init(); if (!this.ctx) return;
+        // 蓄力低吟音
+        let osc = this.ctx.createOscillator();
+        let gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(100 + powerRatio * 300, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.06);
+    },
+    playGoal() {
+        this.init(); if (!this.ctx) return;
+        // 合成全场欢呼白噪声
+        let bufferSize = this.ctx.sampleRate * 1.5;
+        let buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        let data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        let noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        let filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, this.ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 1.5);
+        let gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 1.5);
+        noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+        noise.start();
+    }
+};
 
-// ===== 物理常数 =====
-const FRICTION=0.985;
-const WALL_BOUNCE=0.7;
-const PLAYER_MASS=2;
-const BALL_MASS=0.5;
-const RESTITUTION=0.85;
-const MAX_POWER=22;
-const MIN_VELOCITY=0.15;
-const GOAL_WIDTH=140;
-const GOAL_DEPTH=25;
+// ===== 游戏基础参数 =====
+let gameState = 'menu';
+let selectedTeam = null, opponentTeam = null;
+let scores = [0, 0];
+let currentTurn = 0; // 0: 玩家, 1: AI
+let particles = [];
+let cameraShake = 0;
+let flashAlpha = 0;
+let aiAim = null;
 
-// ===== 场地与实体 =====
-let field={x:0,y:0,w:0,h:0,margin:0};
-let ball=null;
-let players=[];
-let walls=[];
+const FRICTION = 0.984;
+const WALL_BOUNCE = 0.75;
+const RESTITUTION = 0.88;
+const MAX_POWER = 24;
+const MIN_VELOCITY = 0.15;
+const GOAL_WIDTH = 150;
+const GOAL_DEPTH = 30;
 
-// ===== 玩家瞄准 =====
-let aimPlayer=null;
-let aimMouseX=0, aimMouseY=0;
-let isAiming=false;
-let shotFired=false;
+let field = { x: 0, y: 0, w: 0, h: 0, margin: 0 };
+let ball = null;
+let players = [];
 
-// ===== 队伍资料 =====
-const teams=[
-{name:'巴西',flag:'🇧🇷',color:'#ffd700',sec:'#009c3b'},
-{name:'阿根廷',flag:'🇦🇷',color:'#6cb4ee',sec:'#fff'},
-{name:'法国',flag:'🇫🇷',color:'#0055a4',sec:'#ef4135'},
-{name:'德国',flag:'🇩🇪',color:'#ffce00',sec:'#000'},
-{name:'西班牙',flag:'🇪🇸',color:'#aa151b',sec:'#f1bf00'},
-{name:'英格兰',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',color:'#fff',sec:'#cf081f'},
-{name:'葡萄牙',flag:'🇵🇹',color:'#006600',sec:'#ff0000'},
-{name:'荷兰',flag:'🇳🇱',color:'#ff4f00',sec:'#fff'},
-{name:'意大利',flag:'🇮🇹',color:'#009246',sec:'#fff'},
-{name:'日本',flag:'🇯🇵',color:'#bc002d',sec:'#fff'},
-{name:'韩国',flag:'🇰🇷',color:'#0047a0',sec:'#cd2e3a'},
-{name:'美国',flag:'🇺🇸',color:'#3c3b6e',sec:'#b22234'},
-{name:'墨西哥',flag:'🇲🇽',color:'#006847',sec:'#ce1126'},
-{name:'比利时',flag:'🇧🇪',color:'#000',sec:'#ffd700'},
-{name:'克罗地亚',flag:'🇭🇷',color:'#ff0000',sec:'#fff'},
-{name:'乌拉圭',flag:'🇺🇾',color:'#0038a8',sec:'#fff'}
+// ===== 触控瞄准 =====
+let aimPlayer = null;
+let touchStartX = 0, touchStartY = 0;
+let aimMouseX = 0, aimMouseY = 0;
+let isAiming = false;
+let shotFired = false;
+
+const teams = [
+    { name: '巴西', flag: '🇧🇷', color: '#ffd700', sec: '#009c3b' },
+    { name: '阿根廷', flag: '🇦🇷', color: '#6cb4ee', sec: '#ffffff' },
+    { name: '法国', flag: '🇫🇷', color: '#0055a4', sec: '#ef4135' },
+    { name: '德国', flag: '🇩🇪', color: '#ffffff', sec: '#000000' },
+    { name: '西班牙', flag: '🇪🇸', color: '#aa151b', sec: '#f1bf00' },
+    { name: '英格兰', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', color: '#ffffff', sec: '#cf081f' },
+    { name: '葡萄牙', flag: '🇵🇹', color: '#ff0000', sec: '#006600' },
+    { name: '荷兰', flag: '🇳🇱', color: '#ff4f00', sec: '#ffffff' },
+    { name: '意大利', flag: '🇮🇹', color: '#009246', sec: '#ffffff' },
+    { name: '日本', flag: '🇯🇵', color: '#ffffff', sec: '#bc002d' },
+    { name: '克罗地亚', flag: '🇭🇷', color: '#ff0000', sec: '#ffffff' },
+    { name: '乌拉圭', flag: '🇺🇾', color: '#0038a8', sec: '#ffffff' }
 ];
 
-// ===== 初始化 =====
-function resize(){
-W=canvas.width=window.innerWidth;
-H=canvas.height=window.innerHeight;
-initField();
+function resize() {
+    DPR = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    
+    // 适配 iPad 视网膜屏幕高清化核心
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    ctx.scale(DPR, DPR);
+    
+    initField();
 }
-window.addEventListener('resize',resize);
+window.addEventListener('resize', resize);
 
-function initField(){
-const m=Math.min(W,H)*0.06;
-field={x:m,y:m*1.5,w:W-m*2,h:H-m*3,margin:m};
-walls=[
-{x:field.x,y:field.y,w:field.w,h:10},
-{x:field.x,y:field.y+field.h-10,w:field.w,h:10},
-{x:field.x,y:field.y,w:10,h:(field.h-GOAL_WIDTH)/2},
-{x:field.x,y:field.y+(field.h+GOAL_WIDTH)/2,w:10,h:(field.h-GOAL_WIDTH)/2},
-{x:field.x+field.w-10,y:field.y,w:10,h:(field.h-GOAL_WIDTH)/2},
-{x:field.x+field.w-10,y:field.y+(field.h+GOAL_WIDTH)/2,w:10,h:(field.h-GOAL_WIDTH)/2}
-];
-}
-
-function initPlayers(){
-players=[];
-const cx=field.x+field.w/2;
-const cy=field.y+field.h/2;
-const pr=16;
-
-const pColor=selectedTeam.color, pSec=selectedTeam.sec;
-players.push({x:field.x+50,y:cy,vx:0,vy:0,r:pr+3,mass:PLAYER_MASS*1.3,team:0,id:0,number:1,color:pColor,sec:pSec,isKeeper:true});
-players.push({x:cx-120,y:cy-60,vx:0,vy:0,r:pr,mass:PLAYER_MASS,team:0,id:1,number:7,color:pColor,sec:pSec});
-players.push({x:cx-120,y:cy+60,vx:0,vy:0,r:pr,mass:PLAYER_MASS,team:0,id:2,number:8,color:pColor,sec:pSec});
-players.push({x:cx-40,y:cy-40,vx:0,vy:0,r:pr,mass:PLAYER_MASS,team:0,id:3,number:9,color:pColor,sec:pSec});
-players.push({x:cx-40,y:cy+40,vx:0,vy:0,r:pr,mass:PLAYER_MASS,team:0,id:4,number:10,color:pColor,sec:pSec});
-
-const aColor=opponentTeam.color, aSec=opponentTeam.sec;
-players.push({x:field.x+field.w-50,y:cy,vx:0,vy:0,r:pr+3,mass:PLAYER_MASS*1.3,team:1,id:5,number:1,color:aColor,sec:aSec,isKeeper:true});
-players.push({x:cx+120,y:cy-60,vx:0,vy:0,r:pr,mass:PLAYER_MASS,team:1,id:6,number:7,color:aColor,sec:aSec});
-players.push({x:cx+120,y:cy+60,vx:0,vy:0,r:pr,mass:PLAYER_MASS,team:1,id:7,number:8,color:aColor,sec:aSec});
-players.push({x:cx+40,y:cy-40,vx:0,vy:0,r:pr,mass:PLAYER_MASS,team:1,id:8,number:9,color:aColor,sec:aSec});
-players.push({x:cx+40,y:cy+40,vx:0,vy:0,r:pr,mass:PLAYER_MASS,team:1,id:9,number:10,color:aColor,sec:aSec});
+function initField() {
+    const margin = Math.min(W, H) * 0.08;
+    field = {
+        x: margin,
+        y: margin * 1.4,
+        w: W - margin * 2,
+        h: H - margin * 2.5,
+        margin: margin
+    };
 }
 
-function resetBall(){
-ball={x:field.x+field.w/2,y:field.y+field.h/2,vx:0,vy:0,r:11,mass:BALL_MASS};
+// 针对单文件精细体验，加入技能和3D弹跳数据结构
+function createEntity(x, y, r, mass, team, id, num, color, sec, isKeeper = false) {
+    return {
+        x, y, vx: 0, vy: 0, z: 0, vz: 0,
+        r, mass, team, id, number: num,
+        color, sec, isKeeper,
+        trail: [], // 拖尾量子数组
+        // 核心属性分配
+        speedBuff: (num === 7 || num === 8) ? 0.988 : FRICTION, // 边锋抗摩擦强
+        powerBuff: (num === 9 || num === 10) ? 1.15 : 1.0     // 核心射门力量系数
+    };
 }
 
-// ===== UI =====
-function showScreen(id){
-document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
-document.getElementById(id).classList.remove('hidden');
+function initPlayers() {
+    players = [];
+    const cy = field.y + field.h / 2;
+    const cx = field.x + field.w / 2;
+    const pr = Math.min(field.w, field.h) * 0.026; // 动态基准半径
+
+    // 左侧玩家队
+    const pColor = selectedTeam.color, pSec = selectedTeam.sec;
+    players.push(createEntity(field.x + pr * 2, cy, pr * 1.25, 3.0, 0, 0, 1, pColor, pSec, true)); // 守门员大质量
+    players.push(createEntity(cx - pr * 4, cy - pr * 3, pr, 2.0, 0, 1, 7, pColor, pSec));
+    players.push(createEntity(cx - pr * 4, cy + pr * 3, pr, 2.0, 0, 2, 8, pColor, pSec));
+    players.push(createEntity(cx - pr * 1.5, cy - pr * 1.2, pr, 2.0, 0, 3, 9, pColor, pSec));
+    players.push(createEntity(cx - pr * 1.5, cy + pr * 1.2, pr, 2.0, 0, 4, 10, pColor, pSec));
+
+    // 右侧 AI 队
+    const aColor = opponentTeam.color, aSec = opponentTeam.sec;
+    players.push(createEntity(field.x + field.w - pr * 2, cy, pr * 1.25, 3.0, 1, 5, 1, aColor, aSec, true));
+    players.push(createEntity(cx + pr * 4, cy - pr * 3, pr, 2.0, 1, 6, 7, aColor, aSec));
+    players.push(createEntity(cx + pr * 4, cy + pr * 3, pr, 2.0, 1, 7, 8, aColor, aSec));
+    players.push(createEntity(cx + pr * 1.5, cy - pr * 1.2, pr, 2.0, 1, 8, 9, aColor, aSec));
+    players.push(createEntity(cx + pr * 1.5, cy + pr * 1.2, pr, 2.0, 1, 9, 10, aColor, aSec));
 }
 
-function showTeamSelect(){
-showScreen('teamSelect');
-const grid=document.getElementById('teamsGrid');
-grid.innerHTML='';
-teams.forEach((t,i)=>{
-const card=document.createElement('div');
-card.className='team-card';
-card.innerHTML=`<span class="flag">${t.flag}</span><div class="team-name">${t.name}</div>`;
-card.onclick=()=>selectTeam(i,card);
-grid.appendChild(card);
-});
-document.getElementById('startBtn').classList.add('hidden');
-document.getElementById('vsBox').classList.add('hidden');
-selectedTeam=null;
+function resetBall() {
+    const br = Math.min(field.w, field.h) * 0.018;
+    ball = {
+        x: field.x + field.w / 2, y: field.y + field.h / 2,
+        vx: 0, vy: 0, z: 0, vz: 0, r: br, mass: 0.6,
+        trail: []
+    };
 }
 
-function selectTeam(idx,card){
-document.querySelectorAll('.team-card').forEach(c=>c.classList.remove('selected'));
-card.classList.add('selected');
-selectedTeam=teams[idx];
-let opp;
-do{opp=teams[Math.floor(Math.random()*teams.length)]}while(opp===selectedTeam);
-opponentTeam=opp;
-document.getElementById('vsBox').innerHTML=`${selectedTeam.flag} <b>${selectedTeam.name}</b> <span style="color:#ffd700">VS</span> <b>${opponentTeam.name}</b> ${opponentTeam.flag}`;
-document.getElementById('vsBox').classList.remove('hidden');
-document.getElementById('startBtn').classList.remove('hidden');
+// ===== UI 管理 =====
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
 }
 
-function startGame(){
-showScreen('gameScreen');
-gameState='playing';
-scores=[0,0];
-currentTurn=0;
-shotFired=false;
-particles=[];
-aimPlayer=null;isAiming=false;
-aiAim=null;flashAlpha=0;
-document.getElementById('p1Flag').textContent=selectedTeam.flag;
-document.getElementById('p2Flag').textContent=opponentTeam.flag;
-document.getElementById('p1Score').textContent='0';
-document.getElementById('p2Score').textContent='0';
-initField();
-initPlayers();
-resetBall();
-updateTurnUI();
+function showTeamSelect() {
+    AudioEngine.init();
+    showScreen('teamSelect');
+    const grid = document.getElementById('teamsGrid');
+    grid.innerHTML = '';
+    teams.forEach((t, i) => {
+        const card = document.createElement('div');
+        card.className = 'team-card';
+        card.innerHTML = `<span class="flag">${t.flag}</span><div class="team-name">${t.name}</div>`;
+        card.onclick = () => selectTeam(i, card);
+        grid.appendChild(card);
+    });
+    document.getElementById('startBtn').classList.add('hidden');
+    document.getElementById('vsBox').classList.add('hidden');
+    selectedTeam = null;
 }
 
-function updateTurnUI(){
-const ind=document.getElementById('turnIndicator');
-if(currentTurn===0){
-ind.textContent='你的回合 - 点击球员开始瞄准';
-ind.style.color='#00ff88';
-ind.style.borderColor='rgba(0,255,100,.3)';
-document.getElementById('instr').style.display='block';
-document.getElementById('powerFill').parentElement.style.display='block';
-}else{
-ind.textContent='地狱AI 正在解算最优战术路径...';
-ind.style.color='#ff6b6b';
-ind.style.borderColor='rgba(255,100,100,.3)';
-document.getElementById('instr').style.display='none';
-document.getElementById('powerFill').parentElement.style.display='none';
-}
+function selectTeam(idx, card) {
+    document.querySelectorAll('.team-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedTeam = teams[idx];
+    let opp;
+    do { opp = teams[Math.floor(Math.random() * teams.length)]; } while (opp === selectedTeam);
+    opponentTeam = opp;
+    
+    const vs = document.getElementById('vsBox');
+    vs.innerHTML = `${selectedTeam.flag} <span style="color:#00ff88">${selectedTeam.name}</span> <span style="color:#ffd700;font-style:italic">VS</span> <span style="color:#ff4444">${opponentTeam.name}</span> ${opponentTeam.flag}`;
+    vs.classList.remove('hidden');
+    document.getElementById('startBtn').classList.remove('hidden');
+    AudioEngine.playBounce(1);
 }
 
-// ===== 物理引擎 =====
-function isAnythingMoving(){
-const t=MIN_VELOCITY;
-for(let e of[ball,...players]){if(Math.abs(e.vx)>t||Math.abs(e.vy)>t)return true}
-return false;
+function startGame() {
+    showScreen('gameScreen');
+    gameState = 'playing';
+    scores = [0, 0]; currentTurn = 0; shotFired = false; particles = [];
+    document.getElementById('p1Flag').textContent = selectedTeam.flag;
+    document.getElementById('p2Flag').textContent = opponentTeam.flag;
+    document.getElementById('p1Score').textContent = '0';
+    document.getElementById('p2Score').textContent = '0';
+    resize();
+    initPlayers();
+    resetBall();
+    updateTurnUI();
 }
 
-function updatePhysics(){
-if(gameState!=='playing')return false;
-let moving=false;
-
-[ball,...players].forEach(e=>{
-e.x+=e.vx;e.y+=e.vy;
-e.vx*=FRICTION;e.vy*=FRICTION;
-if(Math.abs(e.vx)<MIN_VELOCITY)e.vx=0;
-if(Math.abs(e.vy)<MIN_VELOCITY)e.vy=0;
-if(e.vx!==0||e.vy!==0)moving=true;
-});
-
-const goalY1=field.y+(field.h-GOAL_WIDTH)/2;
-const goalY2=field.y+(field.h+GOAL_WIDTH)/2;
-
-if(ball.x-ball.r<field.x){
-if(ball.y>goalY1&&ball.y<goalY2){
-if(ball.x<field.x-GOAL_DEPTH){ball.x=field.x-GOAL_DEPTH;ball.vx*=-0.3;ball.vy*=0.6}
-}else{ball.vx*=-WALL_BOUNCE;ball.x=field.x+ball.r}
-}
-if(ball.x+ball.r>field.x+field.w){
-if(ball.y>goalY1&&ball.y<goalY2){
-if(ball.x>field.x+field.w+GOAL_DEPTH){ball.x=field.x+field.w+GOAL_DEPTH;ball.vx*=-0.3;ball.vy*=0.6}
-}else{ball.vx*=-WALL_BOUNCE;ball.x=field.x+field.w-ball.r}
-}
-if(ball.y-ball.r<field.y){ball.vy*=-WALL_BOUNCE;ball.y=field.y+ball.r}
-if(ball.y+ball.r>field.y+field.h){ball.vy*=-WALL_BOUNCE;ball.y=field.y+field.h-ball.r}
-
-players.forEach(p=>{
-if(p.x-p.r<field.x){p.x=field.x+p.r;p.vx*=-WALL_BOUNCE}
-if(p.x+p.r>field.x+field.w){p.x=field.x+field.w-p.r;p.vx*=-WALL_BOUNCE}
-if(p.y-p.r<field.y){p.y=field.y+p.r;p.vy*=-WALL_BOUNCE}
-if(p.y+p.r>field.y+field.h){p.y=field.y+field.h-p.r;p.vy*=-WALL_BOUNCE}
-});
-
-players.forEach(p=>{
-const dx=ball.x-p.x,dy=ball.y-p.y;
-const dist=Math.sqrt(dx*dx+dy*dy);
-const minDist=ball.r+p.r;
-if(dist<minDist&&dist>0){
-const nx=dx/dist,ny=dy/dist;
-const overlap=minDist-dist;
-ball.x+=nx*overlap*0.5;ball.y+=ny*overlap*0.5;
-p.x-=nx*overlap*0.5;p.y-=ny*overlap*0.5;
-const dvx=ball.vx-p.vx,dvy=ball.vy-p.vy;
-const dvn=dvx*nx+dvy*ny;
-if(dvn<0){
-const impulse=2*dvn/(ball.mass+p.mass)*RESTITUTION;
-ball.vx-=impulse*p.mass*nx;ball.vy-=impulse*p.mass*ny;
-p.vx+=impulse*ball.mass*nx;p.vy+=impulse*ball.mass*ny;
-}
-}
-});
-
-for(let i=0;i<players.length;i++){
-for(let j=i+1;j<players.length;j++){
-const p1=players[i],p2=players[j];
-const dx=p2.x-p1.x,dy=p2.y-p1.y;
-const dist=Math.sqrt(dx*dx+dy*dy);
-const minDist=p1.r+p2.r;
-if(dist<minDist&&dist>0){
-const nx=dx/dist,ny=dy/dist;
-const overlap=minDist-dist;
-p1.x-=nx*overlap*0.5;p1.y-=ny*overlap*0.5;
-p2.x+=nx*overlap*0.5;p2.y+=ny*overlap*0.5;
-const dvx=p2.vx-p1.vx,dvy=p2.vy-p1.vy;
-const dvn=dvx*nx+dvy*ny;
-if(dvn<0){
-const impulse=2*dvn/(p1.mass+p2.mass)*RESTITUTION;
-p1.vx+=impulse*p2.mass*nx;p1.vy+=impulse*p2.mass*ny;
-p2.vx-=impulse*p1.mass*nx;p2.vy-=impulse*p1.mass*ny;
-}
-}
-}
+function updateTurnUI() {
+    const ind = document.getElementById('turnIndicator');
+    if (currentTurn === 0) {
+        ind.textContent = '⚽ 你的回合 - 划动发力';
+        ind.style.color = '#00ff88';
+        ind.style.borderColor = 'rgba(0,255,136,0.4)';
+        document.getElementById('powerBar').style.display = 'block';
+    } else {
+        ind.textContent = '🤖 地狱战术 AI 解算中...';
+        ind.style.color = '#ff4444';
+        ind.style.borderColor = 'rgba(255,68,68,0.4)';
+        document.getElementById('powerBar').style.display = 'none';
+    }
 }
 
-return moving;
+// ===== 增强级高级物理引擎 =====
+function isAnythingMoving() {
+    const lim = MIN_VELOCITY;
+    if (Math.abs(ball.vx) > lim || Math.abs(ball.vy) > lim || ball.z > 0.1) return true;
+    for (let p of players) {
+        if (Math.abs(p.vx) > lim || Math.abs(p.vy) > lim || p.z > 0.1) return true;
+    }
+    return false;
 }
 
-// ===== 进球检测 =====
-function checkGoal(){
-if(gameState!=='playing')return;
-const goalY1=field.y+(field.h-GOAL_WIDTH)/2;
-const goalY2=field.y+(field.h+GOAL_WIDTH)/2;
-if(ball.x<field.x-10&&ball.y>goalY1&&ball.y<goalY2){triggerGoal(1);return}
-if(ball.x>field.x+field.w+10&&ball.y>goalY1&&ball.y<goalY2){triggerGoal(0);return}
+function updatePhysics() {
+    if (gameState !== 'playing') return false;
+    let moving = false;
+
+    // 处理带 3D 弹跳的实体运动
+    [ball, ...players].forEach(e => {
+        // Z轴高度伪3D处理
+        if (e.z > 0 || e.vz !== 0) {
+            e.z += e.vz; e.vz -= 0.35; // 重力加速衰减
+            if (e.z <= 0) {
+                e.z = 0; e.vz = -e.vz * 0.5; // 地面弹起
+                if (Math.abs(e.vz) < 0.3) e.vz = 0;
+            }
+        }
+
+        e.x += e.vx; e.y += e.vy;
+        const f = e.speedBuff || FRICTION;
+        e.vx *= f; e.vy *= f;
+
+        if (Math.abs(e.vx) < MIN_VELOCITY) e.vx = 0;
+        if (Math.abs(e.vy) < MIN_VELOCITY) e.vy = 0;
+        if (e.vx !== 0 || e.vy !== 0 || e.z > 0) moving = true;
+
+        // 记录轨迹拖尾
+        e.trail.push({ x: e.x, y: e.y, z: e.z });
+        if (e.trail.length > 12) e.trail.shift();
+    });
+
+    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
+    const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
+
+    // 边界撞击与火花特效判定
+    [ball, ...players].forEach(e => {
+        const isBall = (e === ball);
+        const elRest = isBall ? 0.85 : WALL_BOUNCE;
+
+        if (e.x - e.r < field.x) {
+            if (isBall && e.y > goalY1 && e.y < goalY2) {
+                // 允许滚入网内
+            } else {
+                e.vx = -e.vx * elRest; e.x = field.x + e.r;
+                spawnSpark(e.x - e.r, e.y, '#00ff88'); AudioEngine.playBounce(Math.abs(e.vx)/5);
+            }
+        }
+        if (e.x + e.r > field.x + field.w) {
+            if (isBall && e.y > goalY1 && e.y < goalY2) {
+                // 允许滚入网内
+            } else {
+                e.vx = -e.vx * elRest; e.x = field.x + field.w - e.r;
+                spawnSpark(e.x + e.r, e.y, '#00ff88'); AudioEngine.playBounce(Math.abs(e.vx)/5);
+            }
+        }
+        if (e.y - e.r < field.y) {
+            e.vy = -e.vy * elRest; e.y = field.y + e.r;
+            spawnSpark(e.x, e.y - e.r, '#00ff88'); AudioEngine.playBounce(Math.abs(e.vy)/5);
+        }
+        if (e.y + e.r > field.y + field.h) {
+            e.vy = -e.vy * elRest; e.y = field.y + field.h - e.r;
+            spawnSpark(e.x, e.y + e.r, '#00ff88'); AudioEngine.playBounce(Math.abs(e.vy)/5);
+        }
+    });
+
+    // 球员与球的圆周深度碰撞 (含Z轴错开阻力判定)
+    players.forEach(p => {
+        const dx = ball.x - p.x; const dy = ball.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = ball.r + p.r;
+        
+        // 当且仅当高度相近时发生完全物理碰撞
+        if (dist < minDist && dist > 0 && Math.abs(ball.z - p.z) < ball.r * 1.5) {
+            const nx = dx / dist; const ny = dy / dist;
+            const overlap = minDist - dist;
+            ball.x += nx * overlap * 0.6; ball.y += ny * overlap * 0.6;
+            p.x -= nx * overlap * 0.4; p.y -= ny * overlap * 0.4;
+
+            const dvx = ball.vx - p.vx; const dvy = ball.vy - p.vy;
+            const dvn = dvx * nx + dvy * ny;
+            if (dvn < 0) {
+                const impulse = (2 * dvn / (ball.mass + p.mass)) * RESTITUTION;
+                ball.vx -= impulse * p.mass * nx; ball.vy -= impulse * p.mass * ny;
+                p.vx += impulse * ball.mass * nx; p.vy += impulse * ball.mass * ny;
+                
+                // 巨大冲击引发高空弹跳
+                if (Math.abs(impulse) > 3) {
+                    ball.vz = Math.abs(impulse) * 0.6;
+                    cameraShake = Math.min(15, Math.abs(impulse) * 2);
+                }
+                AudioEngine.playKick(Math.min(1, Math.abs(impulse)/6));
+            }
+        }
+    });
+
+    // 球员相互碰撞平衡
+    for (let i = 0; i < players.length; i++) {
+        for (let j = i + 1; j < players.length; j++) {
+            const p1 = players[i]; const p2 = players[j];
+            const dx = p2.x - p1.x; const dy = p2.y - p1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const minDist = p1.r + p2.r;
+            if (dist < minDist && dist > 0) {
+                const nx = dx / dist; const ny = dy / dist;
+                const overlap = minDist - dist;
+                p1.x -= nx * overlap * 0.5; p1.y -= ny * overlap * 0.5;
+                p2.x += nx * overlap * 0.5; p2.y += ny * overlap * 0.5;
+                const dvx = p2.vx - p1.vx; const dvy = p2.vy - p1.vy;
+                if ((dvx * nx + dvy * ny) < 0) {
+                    const impulse = (2 * (dvx * nx + dvy * ny) / (p1.mass + p2.mass)) * RESTITUTION;
+                    p1.vx += impulse * p2.mass * nx; p1.vy += impulse * p2.mass * ny;
+                    p2.vx -= impulse * p1.mass * nx; p2.vy -= impulse * p1.mass * ny;
+                }
+            }
+        }
+    }
+    return moving;
 }
 
-function triggerGoal(scoringTeam){
-gameState='goalAnimating';
-scores[scoringTeam]++;
-const el=scoringTeam===0?document.getElementById('p1Score'):document.getElementById('p2Score');
-el.textContent=scores[scoringTeam];
-el.style.transform='scale(1.6)';
-setTimeout(()=>el.style.transform='scale(1)',300);
-cameraShake=25;
-flashAlpha=0.5;
-
-const gt=document.getElementById('goalText');
-gt.classList.remove('goal-anim');void gt.offsetWidth;gt.classList.add('goal-anim');
-
-const gx=scoringTeam===0?field.x+field.w:field.x;
-const gy=field.y+field.h/2;
-const colors=scoringTeam===0?['#00ff88','#fff','#ffd700','#00c853']:['#ff1744','#fff','#ffd700','#ff6b6b'];
-for(let i=0;i<120;i++){
-const angle=(Math.PI*2/120)*i+Math.random()*0.4;
-const speed=3+Math.random()*12;
-particles.push({x:gx,y:gy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life:140+Math.random()*60,color:colors[Math.floor(Math.random()*colors.length)],size:3+Math.random()*8,gravity:0.08,drag:0.97});
+function spawnSpark(x, y, color) {
+    for(let i=0; i<6; i++) {
+        particles.push({
+            x, y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5,
+            life: 30+Math.random()*20, color, size: 2+Math.random()*3
+        });
+    }
 }
 
-setTimeout(()=>{processGoalReset(scoringTeam);},1500);
+// ===== 进球与终局检测 =====
+function checkGoal() {
+    if (gameState !== 'playing') return;
+    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
+    const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
+    
+    if (ball.x < field.x - 5 && ball.y > goalY1 && ball.y < goalY2) { triggerGoal(1); }
+    else if (ball.x > field.x + field.w + 5 && ball.y > goalY1 && ball.y < goalY2) { triggerGoal(0); }
 }
 
-function processGoalReset(lastScorer){
-[ball,...players].forEach(e=>{e.vx=0;e.vy=0});
-particles=[];
-document.getElementById('goalText').classList.remove('goal-anim');
+function triggerGoal(scoringTeam) {
+    gameState = 'goalAnimating';
+    scores[scoringTeam]++;
+    AudioEngine.playGoal();
+    
+    const el = scoringTeam === 0 ? document.getElementById('p1Score') : document.getElementById('p2Score');
+    el.textContent = scores[scoringTeam];
+    el.style.transform = 'scale(1.8)';
+    setTimeout(() => el.style.transform = 'scale(1)', 400);
+    
+    cameraShake = 30; flashAlpha = 0.6;
+    const gt = document.getElementById('goalText');
+    gt.classList.remove('goal-anim'); void gt.offsetWidth; gt.classList.add('goal-anim');
 
-if(scores[lastScorer]>=3){
-endGame(lastScorer);
-return;
+    // 绚丽满屏绚丽庆祝粒子
+    const gx = scoringTeam === 0 ? field.x + field.w : field.x;
+    const gy = field.y + field.h / 2;
+    for (let i = 0; i < 150; i++) {
+        const angle = (Math.PI * 2 / 150) * i + Math.random() * 0.3;
+        const speed = 4 + Math.random() * 14;
+        particles.push({
+            x: gx, y: gy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+            life: 150 + Math.random() * 80, size: 4 + Math.random() * 8,
+            color: ['#ffd700', '#00ff88', '#00ffff', '#ffffff', '#ff0055'][Math.floor(Math.random() * 5)],
+            gravity: 0.06, drag: 0.98
+        });
+    }
+    setTimeout(() => { processGoalReset(scoringTeam); }, 1600);
 }
 
-initField();
-initPlayers();
-resetBall();
-aimPlayer=null;
-isAiming=false;
-shotFired=false;
-aiAim=null;
+function processGoalReset(lastScorer) {
+    particles = [];
+    document.getElementById('goalText').classList.remove('goal-anim');
+    if (scores[lastScorer] >= 3) { endGame(lastScorer); return; }
 
-const loser=lastScorer===0?1:0;
-currentTurn=loser;
-gameState='playing';
-updateTurnUI();
-
-if(currentTurn===1){
-setTimeout(runAI,800);
-}
+    initPlayers(); resetBall();
+    aimPlayer = null; isAiming = false; shotFired = false; aiAim = null;
+    currentTurn = lastScorer === 0 ? 1 : 0; // 输家开球策略
+    gameState = 'playing';
+    updateTurnUI();
+    if (currentTurn === 1) setTimeout(runAI, 800);
 }
 
-// ===== 增强版 地狱 AI =====
-function runAI(){
-if(gameState!=='playing'||currentTurn!==1)return;
-const aiPlayers=players.filter(p=>p.team===1);
+// ===== 地狱 AI 战术算法层 =====
+function runAI() {
+    if (gameState !== 'playing' || currentTurn !== 1) return;
+    const aiPlayers = players.filter(p => p.team === 1);
+    
+    aiPlayers.sort((a, b) => {
+        if (a.isKeeper) return 1; if (b.isKeeper) return -1;
+        return ((a.x - ball.x) ** 2 + (a.y - ball.y) ** 2) - ((b.x - ball.x) ** 2 + (b.y - ball.y) ** 2);
+    });
 
-// 按距离球的远近对非守门员进行基础排序，但允许备选范围更广
-aiPlayers.sort((a,b)=>{
-if(a.isKeeper) return 1;
-if(b.isKeeper) return -1;
-const da=(a.x-ball.x)**2+(a.y-ball.y)**2;
-const db=(b.x-ball.x)**2+(b.y-ball.y)**2;
-return da-db;
-});
+    const candidates = aiPlayers.slice(0, 3);
+    let bestShot = null, bestScore = -Infinity;
 
-const candidates=aiPlayers.slice(0,4); // 扩大决策候选人数
-let bestShot=null, bestScore=-Infinity;
+    candidates.forEach(player => {
+        const dist = Math.sqrt((player.x - ball.x) ** 2 + (player.y - ball.y) ** 2);
+        const baseAngle = Math.atan2(ball.y - player.y, ball.x - player.x);
+        
+        // 广域扫描：全方向计算射门弧度与边缘反弹路径
+        for (let off = -60; off <= 60; off += 3) {
+            const angle = baseAngle + off * Math.PI / 180;
+            for (let pow = 5; pow <= MAX_POWER; pow += 2) {
+                const sc = simulateAI(player, angle, pow);
+                if (sc > bestScore) {
+                    bestScore = sc; bestShot = { player, angle, power: pow };
+                }
+            }
+        }
+    });
 
-// 识别敌方守门员实例
-const pKeeper = players.find(p => p.team === 0 && p.isKeeper);
-
-candidates.forEach(player=>{
-const distToBall=Math.sqrt((player.x-ball.x)**2+(player.y-ball.y)**2);
-const angleToBall=Math.atan2(ball.y-player.y,ball.x-player.x);
-
-
-// 动态搜索步长：兼顾计算量与高精瞄准
-const aStep = distToBall < 120 ? 1.5 : 2.5; 
-const pStep = 1.5;
-const range = distToBall < 100 ? 50 : 70; // 较远时增加侧掠推球的扫描范围
-
-for(let off=-range; off<=range; off+=aStep){
-const angle=angleToBall+off*Math.PI/180;
-// 允许AI使用更低力道控球卡位或超强力道大脚射门
-for(let pow=3; pow<=MAX_POWER; pow+=pStep){
-const sc=simulateAI(player, angle, pow, pKeeper);
-if(sc>bestScore){
-bestScore=sc;
-bestShot={player, angle, power:pow};
-}
-}
-}
-});
-
-if(bestShot){
-aiAim={player:bestShot.player, angle:bestShot.angle, power:bestShot.power};
-const delay=400+Math.random()*400; // 略微提升出手反应速度
-setTimeout(()=>{
-if(gameState!=='playing'||currentTurn!==1)return;
-aiAim=null;
-bestShot.player.vx=Math.cos(bestShot.angle)*bestShot.power;
-bestShot.player.vy=Math.sin(bestShot.angle)*bestShot.power;
-shotFired=true;
-},delay);
-}
+    if (bestShot) {
+        aiAim = { player: bestShot.player, angle: bestShot.angle, power: bestShot.power };
+        setTimeout(() => {
+            if (gameState !== 'playing' || currentTurn !== 1) return;
+            aiAim = null;
+            bestShot.player.vx = Math.cos(bestShot.angle) * bestShot.power;
+            bestShot.player.vy = Math.sin(bestShot.angle) * bestShot.power;
+            AudioEngine.playKick(1); shotFired = true;
+        }, 600 + Math.random() * 500);
+    }
 }
 
-function simulateAI(player, angle, power, enemyKeeper){
-const sp={x:player.x, y:player.y, vx:Math.cos(angle)*power, vy:Math.sin(angle)*power, r:player.r, mass:player.mass};
-const sb={x:ball.x, y:ball.y, vx:ball.vx, vy:ball.vy, r:ball.r, mass:ball.mass};
-let hitBall=false, goalScored=false, ownGoal=false;
-const goalY1=field.y+(field.h-GOAL_WIDTH)/2;
-const goalY2=field.y+(field.h+GOAL_WIDTH)/2;
-const oppGoalX=field.x;
-const myGoalX=field.x+field.w;
+function simulateAI(player, angle, power) {
+    let sp = { x: player.x, y: player.y, vx: Math.cos(angle) * power, vy: Math.sin(angle) * power, r: player.r, mass: player.mass };
+    let sb = { x: ball.x, y: ball.y, vx: ball.vx, vy: ball.vy, r: ball.r, mass: ball.mass };
+    let hitBall = false, goal = false, ownGoal = false;
+    
+    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
+    const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
 
-// 追踪球的最高威胁接近点和守门员拦截状态
-let minPlayerDistToGoal = Infinity;
-let ballBlockedByKeeper = false;
+    for (let step = 0; step < 90; step++) {
+        sp.x += sp.vx; sp.y += sp.vy; sb.x += sb.vx; sb.y += sb.vy;
+        sp.vx *= FRICTION; sp.vy *= FRICTION; sb.vx *= FRICTION; sb.vy *= FRICTION;
 
-for(let step=0; step<130; step++){ // 增加模拟步数以捕捉折射和精细慢速运动
-sp.x+=sp.vx; sp.y+=sp.vy;
-sb.x+=sb.vx; sb.y+=sb.vy;
-sp.vx*=FRICTION; sp.vy*=FRICTION;
-sb.vx*=FRICTION; sb.vy*=FRICTION;
+        if (sb.x - sb.r < field.x && sb.y > goalY1 && sb.y < goalY2) { goal = true; break; }
+        if (sb.x + sb.r > field.x + field.w && sb.y > goalY1 && sb.y < goalY2) { ownGoal = true; break; }
 
-// 墙壁碰撞 SP
-if(sp.x-sp.r<field.x){sp.x=field.x+sp.r; sp.vx*=-WALL_BOUNCE}
-if(sp.x+sp.r>field.x+field.w){sp.x=field.x+field.w-sp.r; sp.vx*=-WALL_BOUNCE}
-if(sp.y-sp.r<field.y){sp.y=field.y+sp.r; sp.vy*=-WALL_BOUNCE}
-if(sp.y+sp.r>field.y+field.h){sp.y=field.y+field.h-sp.r; sp.vy*=-WALL_BOUNCE}
+        // 简易模拟碰撞墙
+        if (sb.x - sb.r < field.x || sb.x + sb.r > field.x + field.w) sb.vx *= -0.75;
+        if (sb.y - sb.r < field.y || sb.y + sb.r > field.y + field.h) sb.vy *= -0.75;
 
-// 墙壁碰撞 SB
-if(sb.x-sb.r<field.x){
-if(sb.y>goalY1&&sb.y<goalY2){if(sb.x<field.x-8){goalScored=true; break}}
-else{sb.vx*=-WALL_BOUNCE; sb.x=field.x+sb.r}
-}
-if(sb.x+sb.r>field.x+field.w){
-if(sb.y>goalY1&&sb.y<goalY2){if(sb.x>field.x+field.w+8){ownGoal=true; break}}
-else{sb.vx*=-WALL_BOUNCE; sb.x=field.x+field.w-sb.r}
-}
-if(sb.y-sb.r<field.y){sb.vy*=-WALL_BOUNCE; sb.y=field.y+ball.r}
-if(sb.y+sb.r>field.y+field.h){sb.vy*=-WALL_BOUNCE; sb.y=field.y+field.h-ball.r}
+        const dx = sb.x - sp.x; const dy = sb.y - sp.y;
+        if (Math.sqrt(dx*dx + dy*dy) < (sb.r + sp.r)) { hitBall = true; sb.vx += sp.vx * 1.2; sb.vy += sp.vy * 1.2; }
+    }
 
-// 检测玩家守门员是否能够到此轨迹上的球
-if(enemyKeeper && !ballBlockedByKeeper){
-const kdx = sb.x - enemyKeeper.x;
-const kdy = sb.y - enemyKeeper.y;
-if(kdx*kdx + kdy*kdy < (sb.r + enemyKeeper.r + 5)**2){
-ballBlockedByKeeper = true;
-}
+    let score = 0;
+    if (goal) score += 500000;
+    if (ownGoal) score -= 300000;
+    if (hitBall) {
+        score += 2000;
+        score += (field.x + field.w - sb.x) * 5; // 推进倾向
+    }
+    return score;
 }
 
-// 球与施力球员碰撞
-const dx=sb.x-sp.x, dy=sb.y-sp.y;
-const dist=Math.sqrt(dx*dx+dy*dy);
-const minDist=sb.r+sp.r;
-if(dist<minDist&&dist>0.1){
-hitBall=true;
-const nx=dx/dist, ny=dy/dist;
-const overlap=minDist-dist;
-sb.x+=nx*overlap*0.5; sb.y+=ny*overlap*0.5;
-sp.x-=nx*overlap*0.5; sp.y-=ny*overlap*0.5;
-const dvx=sb.vx-sp.vx, dvy=sb.vy-sp.vy;
-const dvn=dvx*nx+dvy*ny;
-if(dvn<0){
-const impulse=2*dvn/(sb.mass+sp.mass)*RESTITUTION;
-sb.vx-=impulse*sp.mass*nx; sb.vy-=impulse*sp.mass*ny;
-sp.vx+=impulse*sb.mass*nx; sp.vy+=impulse*sb.mass*ny;
-}
-}
-
-// 与静态其他实体碰撞模拟
-for(let p of players){
-if(p===player) continue;
-const pdx=sp.x-p.x, pdy=sp.y-p.y;
-const pd=Math.sqrt(pdx*pdx+pdy*pdy);
-if(pd<sp.r+p.r&&pd>0){
-const pnx=pdx/pd, pny=pdy/pd;
-sp.x-=pnx*(sp.r+p.r-pd)*0.5;
-sp.y-=pny*(sp.r+p.r-pd)*0.5;
-sp.vx*=0.4; sp.vy*=0.4;
-}
-}
-
-if(step>30&&Math.abs(sp.vx)<0.15&&Math.abs(sp.vy)<0.15&&Math.abs(sb.vx)<0.15&&Math.abs(sb.vy)<0.15) break;
-}
-
-// 核心战术算分
-let score=0;
-if(goalScored){
-score = 2000000;
-if(ballBlockedByKeeper) score -= 1200000; // 强行规避对方守门员死拽方向
-}
-else if(ownGoal){
-score=-1000000;
-}
-else{
-const gdx=oppGoalX-sb.x, gdy=(field.y+field.h/2)-sb.y;
-const gdist=Math.sqrt(gdx*gdx+gdy*gdy);
-score+=Math.max(0,1000-gdist)*8; // 进攻导向：球越靠近对方球门，分值越高
-
-if(gdist>0){
-const dot=(sb.vx*gdx+sb.vy*gdy)/gdist;
-score+=dot*45;
-}
-
-// 防守博弈：评估击球后，该球员最终位置是否处于己方球门和球的中间（卡位）
-const myGoalY = field.y+field.h/2;
-const distToDefend = Math.sqrt((sp.x - (myGoalX - 80))**2 + (sp.y - myGoalY)**2);
-if(ball.x < field.x + field.w*0.5){
-// 如果球在己方半场，激发强烈解围及防守卡位本能
-score -= distToDefend * 4; 
-if(sb.x > field.x + field.w * 0.4) score += 8000; // 大脚解围加分
-}
-
-if(hitBall){
-score+=5000;
-const bs=Math.sqrt(sb.vx*sb.vx+sb.vy*sb.vy);
-score+=bs*60;
-}else{
-// 未触球动作：如果是主动跑回防守位置，给与战略加分，如果是无意义空跑则重罚
-if(ball.x < field.x + field.w * 0.4 && sp.x > ball.x){
-score += 3000 - distToDefend * 3;
-} else {
-score-=9000;
-}
-}
-
-// 避免边缘死角惩罚
-if(sb.y<field.y+25||sb.y>field.y+field.h-25) score-=1500;
-}
-
-// 移除绝对力度的刻板惩罚，只进行极轻微的超远距离低效暴射约束
-if(power > 20 && !goalScored) score -= 150;
-
-return score;
-}
-
-// ===== 绘图与轨迹预测 =====
+// ===== 高级Canvas双层轨迹线绘制 =====
 function getTrajectory(player, angle, power) {
-const sp = {x: player.x, y: player.y, vx: Math.cos(angle)*power, vy: Math.sin(angle)*power, r: player.r, mass: player.mass};
-const sb = {x: ball.x, y: ball.y, vx: ball.vx, vy: ball.vy, r: ball.r, mass: ball.mass};
+    let sp = { x: player.x, y: player.y, vx: Math.cos(angle) * power, vy: Math.sin(angle) * power, r: player.r, mass: player.mass };
+    let sb = { x: ball.x, y: ball.y, vx: ball.vx, vy: ball.vy, r: ball.r, mass: ball.mass };
+    let spPath = [], sbPath = [], hit = false;
+    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
+    const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
 
-const spPath = [{x: sp.x, y: sp.y}];
-const sbPath = [{x: sb.x, y: sb.y}];
+    for (let step = 0; step < 120; step++) {
+        sp.x += sp.vx; sp.y += sp.vy; sb.x += sb.vx; sb.y += sb.vy;
+        sp.vx *= FRICTION; sp.vy *= FRICTION; sb.vx *= FRICTION; sb.vy *= FRICTION;
+        
+        if (sp.x - sp.r < field.x || sp.x + sp.r > field.x + field.w) sp.vx *= -0.7;
+        if (sp.y - sp.r < field.y || sp.y + sp.r > field.y + field.h) sp.vy *= -0.7;
+        if (!(sb.y > goalY1 && sb.y < goalY2)) {
+            if (sb.x - sb.r < field.x || sb.x + sb.r > field.x + field.w) sb.vx *= -0.85;
+        }
+        if (sb.y - sb.r < field.y || sb.y + sb.r > field.y + field.h) sb.vy *= -0.85;
 
-let hitBall = false;
-const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
-const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
+        const dx = sb.x - sp.x; const dy = sb.y - sp.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < (sb.r + sp.r)) { hit = true; sb.vx += sp.vx * 1.2; sb.vy += sp.vy * 1.2; }
 
-for(let step = 0; step < 200; step++) {
-sp.x += sp.vx; sp.y += sp.vy;
-sb.x += sb.vx; sb.y += sb.vy;
-sp.vx *= FRICTION; sp.vy *= FRICTION;
-sb.vx *= FRICTION; sb.vy *= FRICTION;
-
-if(sp.x - sp.r < field.x){ sp.x = field.x + sp.r; sp.vx *= -WALL_BOUNCE; }
-if(sp.x + sp.r > field.x + field.w){ sp.x = field.x + field.w - sp.r; sp.vx *= -WALL_BOUNCE; }
-if(sp.y - sp.r < field.y){ sp.y = field.y + sp.r; sp.vy *= -WALL_BOUNCE; }
-if(sp.y + sp.r > field.y + field.h){ sp.y = field.y + field.h - sp.r; sp.vy *= -WALL_BOUNCE; }
-
-if(sb.x - sb.r < field.x){
-if(!(sb.y > goalY1 && sb.y < goalY2)) { sb.vx *= -WALL_BOUNCE; sb.x = field.x + sb.r; }
-}
-if(sb.x + sb.r > field.x + field.w){
-if(!(sb.y > goalY1 && sb.y < goalY2)) { sb.vx *= -WALL_BOUNCE; sb.x = field.x + field.w - sb.r; }
-}
-if(sb.y - sb.r < field.y){ sb.vy *= -WALL_BOUNCE; sb.y = field.y + sb.r; }
-if(sb.y + sb.r > field.y + field.h){ sb.vy *= -WALL_BOUNCE; sb.y = field.y + field.h - sb.r; }
-
-const dx = sb.x - sp.x, dy = sb.y - sp.y;
-const dist = Math.sqrt(dx * dx + dy * dy);
-const minDist = sb.r + sp.r;
-if(dist < minDist && dist > 0.01){
-hitBall = true;
-const nx = dx / dist, ny = dy / dist;
-const overlap = minDist - dist;
-sb.x += nx * overlap * 0.5; sb.y += ny * overlap * 0.5;
-sp.x -= nx * overlap * 0.5; sp.y -= ny * overlap * 0.5;
-const dvx = sb.vx - sp.vx, dvy = sb.vy - sp.vy;
-const dvn = dvx * nx + dvy * ny;
-if(dvn < 0){
-const impulse = 2 * dvn / (sb.mass + sp.mass) * RESTITUTION;
-sb.vx -= impulse * sp.mass * nx; sb.vy -= impulse * sp.mass * ny;
-sp.vx += impulse * sb.mass * nx; sp.vy += impulse * sb.mass * ny;
-}
+        if (step % 3 === 0) {
+            spPath.push({ x: sp.x, y: sp.y });
+            if (hit) sbPath.push({ x: sb.x, y: sb.y });
+        }
+    }
+    return { spPath, sbPath, hit };
 }
 
-for(let p of players){
-if(p === player) continue;
-const pdx = sp.x - p.x, pdy = sp.y - p.y;
-const pd = Math.sqrt(pdx * pdx + pdy * pdy);
-if(pd < sp.r + p.r && pd > 0.01){
-const pnx = pdx / pd, pny = pdy / pd;
-sp.x -= pnx * (sp.r + p.r - pd) * 0.5;
-sp.y -= pny * (sp.r + p.r - pd) * 0.5;
-const p_dvn = sp.vx * pnx + sp.vy * pny;
-if(p_dvn < 0) {
-const impulse = 2 * p_dvn / (sp.mass + p.mass) * RESTITUTION;
-sp.vx -= impulse * p.mass * pnx;
-sp.vy -= impulse * p.mass * pny;
+// ===== 视图美化与高级渲染渲染 =====
+function drawField() {
+    // 渐变质感绿草坪
+    let grad = ctx.createRadialGradient(W/2, H/2, 10, W/2, H/2, Math.max(W,H));
+    grad.addColorStop(0, '#1b5e20'); grad.addColorStop(1, '#0d3c0f');
+    ctx.fillStyle = grad; ctx.fillRect(field.x, field.y, field.w, field.h);
+
+    // 割草机浅色条纹
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    const stripeW = field.w / 12;
+    for (let i = 0; i < 12; i += 2) {
+        ctx.fillRect(field.x + i * stripeW, field.y, stripeW, field.h);
+    }
+
+    // 球场标准白线
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2.5;
+    ctx.strokeRect(field.x, field.y, field.w, field.h);
+    
+    // 中圈与中线
+    ctx.beginPath(); ctx.moveTo(field.x + field.w/2, field.y); ctx.lineTo(field.x + field.w/2, field.y + field.h); ctx.stroke();
+    ctx.beginPath(); ctx.arc(field.x + field.w/2, field.y + field.h/2, field.h*0.2, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(field.x + field.w/2, field.y + field.h/2, 5, 0, Math.PI*2); ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fill();
+
+    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
+    // 禁区线
+    ctx.strokeRect(field.x, cy() - GOAL_WIDTH, GOAL_WIDTH*0.8, GOAL_WIDTH*2);
+    ctx.strokeRect(field.x + field.w - GOAL_WIDTH*0.8, cy() - GOAL_WIDTH, GOAL_WIDTH*0.8, GOAL_WIDTH*2);
+
+    // 绘制立体感球网
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(field.x - GOAL_DEPTH, goalY1, GOAL_DEPTH, GOAL_WIDTH);
+    ctx.fillRect(field.x + field.w, goalY1, GOAL_DEPTH, GOAL_WIDTH);
+    ctx.strokeRect(field.x - GOAL_DEPTH, goalY1, GOAL_DEPTH, GOAL_WIDTH);
+    ctx.strokeRect(field.x + field.w, goalY1, GOAL_DEPTH, GOAL_WIDTH);
 }
-}
-}
+const cy = () => field.y + field.h / 2;
 
-for(let p of players){
-if(p === player) continue;
-const pdx = sb.x - p.x, pdy = sb.y - p.y;
-const pd = Math.sqrt(pdx * pdx + pdy * pdy);
-if(pd < sb.r + p.r && pd > 0.01){
-const pnx = pdx / pd, pny = pdy / pd;
-sb.x -= pnx * (sb.r + p.r - pd) * 0.5;
-sb.y -= pny * (sb.r + p.r - pd) * 0.5;
-const p_dvn = sb.vx * pnx + sb.vy * pny;
-if(p_dvn < 0) {
-const impulse = 2 * p_dvn / (sb.mass + p.mass) * RESTITUTION;
-sb.vx -= impulse * p.mass * pnx;
-sb.vy -= impulse * p.mass * pny;
-}
-}
-}
+function drawEntities() {
+    // 1. 优先绘制所有实体阴影（增强悬浮错觉）
+    [ball, ...players].forEach(e => {
+        ctx.fillStyle = 'rgba(0,30,0,0.45)';
+        ctx.beginPath();
+        const shadowR = e.r * (1 + e.z * 0.05);
+        ctx.ellipse(e.x, e.y + e.r * 0.6 + e.z*0.3, shadowR, shadowR * 0.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+    });
 
-if(step % 2 === 0) {
-if(Math.abs(sp.vx) > 0.5 || Math.abs(sp.vy) > 0.5) spPath.push({x: sp.x, y: sp.y});
-if(hitBall && (Math.abs(sb.vx) > 0.5 || Math.abs(sb.vy) > 0.5)) sbPath.push({x: sb.x, y: sb.y});
-}
+    // 2. 绘制拖尾特效
+    [ball, ...players].forEach(e => {
+        if(e.trail.length < 2) return;
+        ctx.save();
+        for(let i = 0; i < e.trail.length - 1; i++) {
+            let ratio = i / e.trail.length;
+            ctx.strokeStyle = e === ball ? `rgba(255,215,0,${ratio * 0.35})` : `rgba(${e.team===0?'0,230,118':'255,68,68'},${ratio * 0.3})`;
+            ctx.lineWidth = e.r * 1.5 * ratio; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(e.trail[i].x, e.trail[i].y - e.trail[i].z);
+            ctx.lineTo(e.trail[i+1].x, e.trail[i+1].y - e.trail[i+1].z); ctx.stroke();
+        }
+        ctx.restore();
+    });
 
-if(Math.abs(sp.vx) < 0.15 && Math.abs(sp.vy) < 0.15 && Math.abs(sb.vx) < 0.15 && Math.abs(sb.vy) < 0.15) break;
-}
-return {spPath, sbPath, hitBall};
-}
+    // 3. 绘制球员实体
+    players.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y - p.z); // 应用 Z 轴浮空
 
-function drawField(){
-const grad=ctx.createLinearGradient(0,field.y,0,field.y+field.h);
-grad.addColorStop(0,'#1a5c1a');
-grad.addColorStop(0.5,'#2d8a3e');
-grad.addColorStop(1,'#1a5c1a');
-ctx.fillStyle=grad;
-ctx.fillRect(field.x,field.y,field.w,field.h);
+        // 呼吸边缘发光环
+        if (currentTurn === 0 && p.team === 0 && !isAiming && gameState === 'playing' && !shotFired) {
+            ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 3;
+            ctx.shadowColor = '#00ff88'; ctx.shadowBlur = 15 + Math.sin(Date.now()/120)*5;
+            ctx.beginPath(); ctx.arc(0, 0, p.r + 4, 0, Math.PI * 2); ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
 
-const stripeH=50;
-for(let y=field.y;y<field.y+field.h;y+=stripeH*2){
-ctx.fillStyle='rgba(255,255,255,.025)';
-ctx.fillRect(field.x,y,field.w,stripeH);
-}
+        // 渐变球体化渲染
+        let radGrad = ctx.createRadialGradient(-p.r*0.3, -p.r*0.4, 0, 0, 0, p.r);
+        radGrad.addColorStop(0, '#ffffff'); radGrad.addColorStop(0.3, p.sec); radGrad.addColorStop(1, p.color);
+        ctx.fillStyle = radGrad;
+        ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
 
-ctx.strokeStyle='rgba(255,255,255,.03)';
-ctx.lineWidth=1;
-for(let i=0;i<field.w;i+=25){
-ctx.beginPath();ctx.moveTo(field.x+i,field.y);ctx.lineTo(field.x+i,field.y+field.h);ctx.stroke();
-}
+        ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.stroke();
 
-ctx.strokeStyle='rgba(255,255,255,.45)';
-ctx.lineWidth=3;
-ctx.beginPath();ctx.moveTo(field.x+field.w/2,field.y);ctx.lineTo(field.x+field.w/2,field.y+field.h);ctx.stroke();
+        // 编号标签
+        ctx.fillStyle = (p.color === '#ffffff') ? '#000' : '#fff';
+        ctx.font = `bold ${p.r*0.9}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(p.number, 0, 0);
+        ctx.restore();
+    });
 
-ctx.beginPath();ctx.arc(field.x+field.w/2,field.y+field.h/2,70,0,Math.PI*2);ctx.stroke();
-ctx.beginPath();ctx.arc(field.x+field.w/2,field.y+field.h/2,6,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+    // 4. 绘制经典3D黑白足球
+    ctx.save();
+    ctx.translate(ball.x, ball.y - ball.z);
+    const ballRot = (ball.vx + ball.vy) * 0.05;
+    ctx.rotate(Date.now()*0.002 * Math.min(5, Math.abs(ball.vx)));
+    
+    let ballGrad = ctx.createRadialGradient(-ball.r*0.3, -ball.r*0.3, 0, 0, 0, ball.r);
+    ballGrad.addColorStop(0, '#ffffff'); ballGrad.addColorStop(0.7, '#e0e0e0'); ballGrad.addColorStop(1, '#666666');
+    ctx.fillStyle = ballGrad;
+    ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI * 2); ctx.fill();
+    
+    // 经典足球六边形图纹
+    ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 1.5;
+    for(let i=0; i<Math.PI*2; i+=Math.PI/2.5) {
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(i)*ball.r, Math.sin(i)*ball.r); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
 
-const penW=110,penH=240;
-ctx.strokeRect(field.x,field.y+field.h/2-penH/2,penW,penH);
-ctx.strokeRect(field.x+field.w-penW,field.y+field.h/2-penH/2,penW,penH);
-ctx.beginPath();ctx.arc(field.x+penW,field.y+field.h/2,45,Math.PI*-.5,Math.PI*.5);ctx.stroke();
-ctx.beginPath();ctx.arc(field.x+field.w-penW,field.y+field.h/2,45,Math.PI*.5,Math.PI*1.5);ctx.stroke();
-
-ctx.beginPath();ctx.arc(field.x,field.y,18,0,Math.PI*.5);ctx.stroke();
-ctx.beginPath();ctx.arc(field.x,field.y+field.h,18,Math.PI*1.5,Math.PI*2);ctx.stroke();
-ctx.beginPath();ctx.arc(field.x+field.w,field.y,18,Math.PI*.5,Math.PI);ctx.stroke();
-ctx.beginPath();ctx.arc(field.x+field.w,field.y+field.h,18,Math.PI,Math.PI*1.5);ctx.stroke();
-
-const flagR=5;
-ctx.fillStyle='#ff1744';
-[[field.x,field.y],[field.x+field.w,field.y],[field.x,field.y+field.h],[field.x+field.w,field.y+field.h]].forEach(([x,y])=>{
-ctx.beginPath();ctx.arc(x,y,flagR,0,Math.PI*2);ctx.fill();
-ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,flagR,0,Math.PI*2);ctx.stroke();
-});
-
-const goalY1=field.y+(field.h-GOAL_WIDTH)/2;
-const goalY2=field.y+(field.h+GOAL_WIDTH)/2;
-
-ctx.fillStyle='rgba(255,255,255,.15)';
-ctx.fillRect(field.x-25,goalY1,25,GOAL_WIDTH);
-ctx.strokeStyle='#fff';ctx.lineWidth=4;
-ctx.strokeRect(field.x-25,goalY1,25,GOAL_WIDTH);
-ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;
-for(let i=0;i<=5;i++){
-ctx.beginPath();ctx.moveTo(field.x-25,goalY1+i*GOAL_WIDTH/5);ctx.lineTo(field.x,goalY1+i*GOAL_WIDTH/5);ctx.stroke();
-}
-for(let i=0;i<=5;i++){
-ctx.beginPath();ctx.moveTo(field.x-25+i*25/5,goalY1);ctx.lineTo(field.x-25+i*25/5,goalY2);ctx.stroke();
-}
-
-ctx.fillStyle='rgba(255,255,255,.15)';
-ctx.fillRect(field.x+field.w,goalY1,25,GOAL_WIDTH);
-ctx.strokeStyle='#fff';ctx.lineWidth=4;
-ctx.strokeRect(field.x+field.w,goalY1,25,GOAL_WIDTH);
-ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;
-for(let i=0;i<=5;i++){
-ctx.beginPath();ctx.moveTo(field.x+field.w,goalY1+i*GOAL_WIDTH/5);ctx.lineTo(field.x+field.w+25,goalY1+i*GOAL_WIDTH/5);ctx.stroke();
-}
-for(let i=0;i<=5;i++){
-ctx.beginPath();ctx.moveTo(field.x+field.w+i*25/5,goalY1);ctx.lineTo(field.x+field.w+i*25/5,goalY2);ctx.stroke();
-}
-
-ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=3;
-ctx.strokeRect(field.x,field.y,field.w,field.h);
-
-ctx.fillStyle='rgba(0,0,0,.2)';
-walls.forEach(w=>ctx.fillRect(w.x,w.y,w.w,w.h));
-}
-
-function drawAiming(){
-if(!aimPlayer||!isAiming||currentTurn!==0||gameState!=='playing')return;
-const px=aimPlayer.x,py=aimPlayer.y;
-const dx=px-aimMouseX,dy=py-aimMouseY;
-const dist=Math.sqrt(dx*dx+dy*dy);
-const power=Math.min(dist/4,MAX_POWER);
-const angle=Math.atan2(dy,dx);
-
-ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=2;ctx.setLineDash([6,6]);
-ctx.beginPath();ctx.arc(px,py,MAX_POWER*4,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-
-ctx.strokeStyle='#5d3a1a';ctx.lineWidth=10;ctx.lineCap='round';
-ctx.beginPath();ctx.moveTo(aimMouseX,aimMouseY);ctx.lineTo(px,py);ctx.stroke();
-ctx.strokeStyle='#8B5a2b';ctx.lineWidth=6;
-ctx.beginPath();ctx.moveTo(aimMouseX,aimMouseY);ctx.lineTo(px,py);ctx.stroke();
-
-ctx.fillStyle='#3d2817';ctx.beginPath();ctx.arc(aimMouseX,aimMouseY,13,0,Math.PI*2);ctx.fill();
-ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(aimMouseX,aimMouseY,13,0,Math.PI*2);ctx.stroke();
-
-const traj = getTrajectory(aimPlayer, angle, power);
-
-if(traj.spPath.length > 0) {
-ctx.beginPath();
-ctx.moveTo(traj.spPath[0].x, traj.spPath[0].y);
-for(let i=1; i<traj.spPath.length; i++) {
-ctx.lineTo(traj.spPath[i].x, traj.spPath[i].y);
-}
-ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-ctx.lineWidth = 2;
-ctx.setLineDash([5, 5]);
-ctx.stroke();
-
-const endPlayer = traj.spPath[traj.spPath.length-1];
-ctx.beginPath();
-ctx.arc(endPlayer.x, endPlayer.y, aimPlayer.r, 0, Math.PI*2);
-ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-ctx.fill();
-ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-ctx.stroke();
+    // 5. 粒子渲染
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let pt = particles[i];
+        pt.x += pt.vx; pt.y += pt.vy;
+        if (pt.gravity) pt.vy += pt.gravity;
+        if (pt.drag) { pt.vx *= pt.drag; pt.vy *= pt.drag; }
+        pt.life--;
+        ctx.globalAlpha = Math.max(0, pt.life / 100);
+        ctx.fillStyle = pt.color;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+        if (pt.life <= 0) particles.splice(i, 1);
+    }
 }
 
-if(traj.hitBall && traj.sbPath.length > 0) {
-ctx.beginPath();
-ctx.moveTo(traj.sbPath[0].x, traj.sbPath[0].y);
-for(let i=1; i<traj.sbPath.length; i++) {
-ctx.lineTo(traj.sbPath[i].x, traj.sbPath[i].y);
-}
-ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
-ctx.lineWidth = 3;
-ctx.setLineDash([6, 6]);
-ctx.stroke();
+function drawAiming() {
+    if (!aimPlayer || !isAiming || currentTurn !== 0) return;
+    
+    const dx = touchStartX - aimMouseX;
+    const dy = touchStartY - aimMouseY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const power = Math.min(dist * 0.12, MAX_POWER);
+    const angle = Math.atan2(dy, dx);
 
-const endBall = traj.sbPath[traj.sbPath.length-1];
-ctx.beginPath();
-ctx.arc(endBall.x, endBall.y, ball.r, 0, Math.PI*2);
-ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
-ctx.fill();
-ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
-ctx.stroke();
-}
-ctx.setLineDash([]);
+    // 声音实时发声反馈
+    if(Math.random() < 0.15 && power > 2) AudioEngine.playCharge(power / MAX_POWER);
 
-const aimLen=power*12;
-const ax=px+Math.cos(angle)*aimLen;
-const ay=py+Math.sin(angle)*aimLen;
-const lineGrad=ctx.createLinearGradient(px,py,ax,ay);
-lineGrad.addColorStop(0,'rgba(0,255,136,.9)');
-lineGrad.addColorStop(1,'rgba(0,255,136,.2)');
-ctx.strokeStyle=lineGrad;ctx.lineWidth=4;ctx.setLineDash([10,8]);
-ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ax,ay);ctx.stroke();ctx.setLineDash([]);
+    // 计算预测未来量子路径
+    const traj = getTrajectory(aimPlayer, angle, power * aimPlayer.powerBuff);
 
-ctx.fillStyle='#00ff88';ctx.shadowColor='#00ff88';ctx.shadowBlur=20;
-ctx.beginPath();ctx.moveTo(ax,ay);
-ctx.lineTo(ax-Math.cos(angle-0.4)*24,ay-Math.sin(angle-0.4)*24);
-ctx.lineTo(ax-Math.cos(angle+0.4)*24,ay-Math.sin(angle+0.4)*24);
-ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+    // 1. 绘制球员未来的滚动路径
+    if (traj.spPath.length > 0) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 2; ctx.setLineDash([4, 6]);
+        ctx.beginPath(); ctx.moveTo(aimPlayer.x, aimPlayer.y);
+        traj.spPath.forEach(pt => ctx.lineTo(pt.x, pt.y)); ctx.stroke();
+    }
 
-document.getElementById('powerFill').style.width=(power/MAX_POWER*100)+'%';
-}
+    // 2. 绘制足球撞击折射路径预测线
+    if (traj.hit && traj.sbPath.length > 0) {
+        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3.5; ctx.setLineDash([]);
+        ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.moveTo(traj.sbPath[0].x, traj.sbPath[0].y);
+        traj.sbPath.forEach(pt => ctx.lineTo(pt.x, pt.y)); ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+    ctx.setLineDash([]);
 
-function drawEntities(){
-if(aiAim&&currentTurn===1&&gameState==='playing'){
-const p=aiAim.player;
-const al=aiAim.power*12;
-const ax=p.x+Math.cos(aiAim.angle)*al;
-const ay=p.y+Math.sin(aiAim.angle)*al;
-ctx.strokeStyle='rgba(255,100,100,.5)';ctx.lineWidth=3;ctx.setLineDash([8,8]);
-ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(ax,ay);ctx.stroke();ctx.setLineDash([]);
-}
+    // 3. 绚丽反向物理拉弓瞄准器
+    const arrowLen = power * 10;
+    const ax = aimPlayer.x + Math.cos(angle) * arrowLen;
+    const ay = aimPlayer.y + Math.sin(angle) * arrowLen;
 
-players.forEach(p=>{
-ctx.fillStyle='rgba(0,0,0,.35)';
-ctx.beginPath();ctx.ellipse(p.x,p.y+p.r+4,p.r*0.9,p.r*0.3,0,0,Math.PI*2);ctx.fill();
+    let aimGrad = ctx.createLinearGradient(aimPlayer.x, aimPlayer.y, ax, ay);
+    aimGrad.addColorStop(0, '#00ff88'); aimGrad.addColorStop(1, '#ff1744');
+    ctx.strokeStyle = aimGrad; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(aimPlayer.x, aimPlayer.y); ctx.lineTo(ax, ay); ctx.stroke();
 
-if(p.team===0){ctx.shadowColor=p.color;ctx.shadowBlur=12;}
-else{ctx.shadowColor='rgba(255,100,100,.3)';ctx.shadowBlur=8;}
+    // 充能准星箭头
+    ctx.fillStyle = '#ff1744'; ctx.beginPath();
+    ctx.arc(ax, ay, 6, 0, Math.PI*2); ctx.fill();
 
-const pgrad=ctx.createRadialGradient(p.x-5,p.y-7,0,p.x,p.y,p.r);
-pgrad.addColorStop(0,'#fff');
-pgrad.addColorStop(.25,p.sec||p.color);
-pgrad.addColorStop(1,p.color);
-ctx.fillStyle=pgrad;
-ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
-ctx.shadowBlur=0;
-
-ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=2.5;
-ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.stroke();
-
-ctx.fillStyle='#fff';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
-ctx.fillText(p.number,p.x,p.y);
-
-if(currentTurn===0&&p.team===0&&!isAiming&&gameState==='playing'&&!shotFired){
-const pulse=Math.sin(Date.now()/180)*4;
-ctx.strokeStyle='rgba(0,255,136,.6)';ctx.lineWidth=2.5;
-ctx.beginPath();ctx.arc(p.x,p.y,p.r+10+pulse,0,Math.PI*2);ctx.stroke();
-ctx.strokeStyle='rgba(0,255,136,.25)';ctx.lineWidth=1;
-ctx.beginPath();ctx.arc(p.x,p.y,p.r+16+pulse,0,Math.PI*2);ctx.stroke();
+    document.getElementById('powerFill').style.width = (power / MAX_POWER * 100) + '%';
 }
 
-if(p===aimPlayer){
-ctx.strokeStyle='#00ff88';ctx.lineWidth=4;ctx.shadowColor='#00ff88';ctx.shadowBlur=25;
-ctx.beginPath();ctx.arc(p.x,p.y,p.r+8,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
+function draw() {
+    ctx.save();
+    if (cameraShake > 0) {
+        ctx.translate((Math.random() - 0.5) * cameraShake, (Math.random() - 0.5) * cameraShake);
+        cameraShake *= 0.9; if (cameraShake < 0.2) cameraShake = 0;
+    }
+    ctx.clearRect(0, 0, W, H);
+    drawField();
+    drawAiming();
+    drawEntities();
+
+    if (flashAlpha > 0) {
+        ctx.fillStyle = `rgba(255,255,255,${flashAlpha})`; ctx.fillRect(0, 0, W, H);
+        flashAlpha *= 0.88; if (flashAlpha < 0.01) flashAlpha = 0;
+    }
+    ctx.restore();
 }
 
-if(currentTurn===1&&p.team===1){
-const pulse=Math.sin(Date.now()/150)*3;
-ctx.strokeStyle='rgba(255,100,100,.7)';ctx.lineWidth=2.5;
-ctx.beginPath();ctx.arc(p.x,p.y,p.r+5+pulse,0,Math.PI*2);ctx.stroke();
-}
-});
+// ===== 核心引擎循环 =====
+function gameLoop() {
+    if (gameState === 'playing') {
+        updatePhysics();
+        checkGoal();
 
-const bSpeed=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
-const ballRot=(Date.now()/800)*bSpeed*3;
-ctx.save();
-ctx.translate(ball.x,ball.y);
-ctx.rotate(ballRot);
-
-const bgrad=ctx.createRadialGradient(-4,-4,0,0,0,ball.r);
-bgrad.addColorStop(0,'#fff');
-bgrad.addColorStop(.2,'#e8e8e8');
-bgrad.addColorStop(1,'#222');
-ctx.fillStyle=bgrad;
-ctx.beginPath();ctx.arc(0,0,ball.r,0,Math.PI*2);ctx.fill();
-ctx.strokeStyle='#fff';ctx.lineWidth=2.5;
-ctx.beginPath();ctx.arc(0,0,ball.r,0,Math.PI*2);ctx.stroke();
-
-ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1.5;
-ctx.beginPath();ctx.moveTo(-ball.r+4,0);ctx.lineTo(ball.r-4,0);ctx.stroke();
-ctx.beginPath();ctx.moveTo(0,-ball.r+4);ctx.lineTo(0,ball.r-4);ctx.stroke();
-ctx.beginPath();ctx.arc(0,0,ball.r-4,0,Math.PI*2);ctx.stroke();
-ctx.restore();
-
-ctx.fillStyle='rgba(0,0,0,.3)';
-ctx.beginPath();ctx.ellipse(ball.x,ball.y+ball.r+3,ball.r*0.9,ball.r*0.3,0,0,Math.PI*2);ctx.fill();
-
-for(let i=particles.length-1;i>=0;i--){
-const p=particles[i];
-p.x+=p.vx;p.y+=p.vy;
-p.vy+=p.gravity||0.12;
-p.vx*=p.drag||0.97;
-p.vy*=p.drag||0.97;
-p.life--;
-ctx.globalAlpha=Math.max(0,p.life/140);
-ctx.fillStyle=p.color;
-ctx.beginPath();ctx.arc(p.x,p.y,p.size*(p.life/140),0,Math.PI*2);ctx.fill();
-ctx.globalAlpha=1;
-if(p.life<=0)particles.splice(i,1);
-}
+        if (shotFired && !isAnythingMoving()) {
+            shotFired = false;
+            currentTurn = currentTurn === 0 ? 1 : 0;
+            updateTurnUI();
+            if (currentTurn === 1) setTimeout(runAI, 600);
+        }
+    }
+    draw();
+    requestAnimationFrame(gameLoop);
 }
 
-function draw(){
-ctx.save();
-if(cameraShake>0){
-ctx.translate((Math.random()-.5)*cameraShake,(Math.random()-.5)*cameraShake);
-cameraShake*=0.88;
-if(cameraShake<0.5)cameraShake=0;
-}
-ctx.fillStyle='#0a1a0a';ctx.fillRect(0,0,W,H);
-drawField();
-if(gameState==='playing'||gameState==='goalAnimating'||gameState==='ended'){
-drawAiming();
-drawEntities();
-}
-if(flashAlpha>0){
-ctx.fillStyle=`rgba(255,255,255,${flashAlpha})`;
-ctx.fillRect(0,0,W,H);
-flashAlpha*=0.85;
-if(flashAlpha<0.01)flashAlpha=0;
-}
-ctx.restore();
+// ===== 高触敏多点触控与手势兼容优化 (iPad Native Gestures) =====
+function handleStart(clientX, clientY) {
+    if (gameState !== 'playing' || currentTurn !== 0 || shotFired) return;
+    if (!isAiming && isAnythingMoving()) return;
+
+    for (let p of players) {
+        if (p.team !== 0) continue;
+        const d = Math.sqrt((clientX - p.x) ** 2 + (clientY - p.y) ** 2);
+        if (d < p.r * 2.2) { // 略微放大 iPad 触控点击敏感范围
+            aimPlayer = p; isAiming = true;
+            touchStartX = clientX; touchStartY = clientY;
+            aimMouseX = clientX; aimMouseY = clientY;
+            break;
+        }
+    }
 }
 
-// ===== 主循环 =====
-function gameLoop(){
-if(gameState==='playing'){
-updatePhysics();
-checkGoal();
-
-if(shotFired&&!isAnythingMoving()){
-shotFired=false;
-currentTurn=currentTurn===0?1:0;
-updateTurnUI();
-if(currentTurn===1){
-setTimeout(runAI,500);
-}
-}
-}
-draw();
-requestAnimationFrame(gameLoop);
+function handleMove(clientX, clientY) {
+    if (!isAiming || !aimPlayer) return;
+    aimMouseX = clientX; aimMouseY = clientY;
 }
 
-// ===== 输入 =====
-function getPos(e){
-const rect=canvas.getBoundingClientRect();
-if(e.touches)return{x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};
-return{x:e.clientX-rect.left,y:e.clientY-rect.top};
+function handleEnd() {
+    if (!isAiming || !aimPlayer) return;
+    const dx = touchStartX - aimMouseX; const dy = touchStartY - aimMouseY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const power = Math.min(dist * 0.12, MAX_POWER);
+
+    isAiming = false;
+    document.getElementById('powerFill').style.width = '0%';
+
+    if (power > 1.2) {
+        const angle = Math.atan2(dy, dx);
+        const finalP = power * aimPlayer.powerBuff;
+        aimPlayer.vx = Math.cos(angle) * finalP;
+        aimPlayer.vy = Math.sin(angle) * finalP;
+        AudioEngine.playKick(1);
+        shotFired = true;
+    }
+    aimPlayer = null;
 }
 
-canvas.addEventListener('mousedown',handleStart);
-canvas.addEventListener('mousemove',handleMove);
-canvas.addEventListener('mouseup',handleEnd);
-canvas.addEventListener('touchstart',e=>{e.preventDefault();handleStart(e)},{passive:false});
-canvas.addEventListener('touchmove',e=>{e.preventDefault();handleMove(e)},{passive:false});
-canvas.addEventListener('touchend',e=>{e.preventDefault();handleEnd()},{passive:false});
+// 适配 iPad 触控屏事件监听
+canvas.addEventListener('mousedown', e => handleStart(e.clientX, e.clientY));
+canvas.addEventListener('mousemove', e => handleMove(e.clientX, e.clientY));
+canvas.addEventListener('mouseup', handleEnd);
 
-function handleStart(e){
-if(gameState!=='playing'||currentTurn!==0||shotFired)return;
-if(!isAiming&&isAnythingMoving())return;
-const pos=getPos(e);
-for(let p of players){
-if(p.team!==0)continue;
-const dist=Math.sqrt((pos.x-p.x)**2+(pos.y-p.y)**2);
-if(dist<p.r+30){
-aimPlayer=p;isAiming=true;
-aimMouseX=pos.x;aimMouseY=pos.y;
-document.getElementById('turnIndicator').textContent='向后拉蓄力 · 圆周移动改方向 · 松开射门';
-break;
-}
-}
-}
+canvas.addEventListener('touchstart', e => {
+    e.preventDefault(); const t = e.touches[0]; handleStart(t.clientX, t.clientY);
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+    e.preventDefault(); const t = e.touches[0]; handleMove(t.clientX, t.clientY);
+}, { passive: false });
+canvas.addEventListener('touchend', e => { e.preventDefault(); handleEnd(); }, { passive: false });
 
-function handleMove(e){
-if(!isAiming||!aimPlayer||gameState!=='playing')return;
-const pos=getPos(e);
-aimMouseX=pos.x;aimMouseY=pos.y;
+// ===== 局终判定 =====
+function endGame(winner) {
+    gameState = 'ended';
+    showScreen('resultScreen');
+    const win = (winner === 0);
+    document.getElementById('resEmoji').textContent = win ? '🏆' : '👑';
+    document.getElementById('resTitle').textContent = win ? `${selectedTeam.name} 登顶世界之巅！` : `${opponentTeam.name} 夺得冠军！`;
+    document.getElementById('resTitle').style.color = win ? '#00ff88' : '#ff3366';
+    document.getElementById('resScore').textContent = `${scores[0]} - ${scores[1]}`;
 }
 
-function handleEnd(){
-if(!isAiming||!aimPlayer)return;
-const shooter=aimPlayer;
-const px=shooter.x,py=shooter.y;
-const dx=px-aimMouseX,dy=py-aimMouseY;
-const dist=Math.sqrt(dx*dx+dy*dy);
-const power=Math.min(dist/4,MAX_POWER);
-isAiming=false;aimPlayer=null;
-document.getElementById('powerFill').style.width='0%';
-document.getElementById('turnIndicator').textContent='你的回合 - 点击球员开始瞄准';
-if(power>1.5){
-const angle=Math.atan2(dy,dx);
-shooter.vx=Math.cos(angle)*power;
-shooter.vy=Math.sin(angle)*power;
-shotFired=true;
-}
+function restartGame() {
+    scores = [0, 0]; currentTurn = 0; gameState = 'playing';
+    particles = []; aimPlayer = null; isAiming = false; shotFired = false; aiAim = null;
+    showScreen('gameScreen');
+    resize(); initPlayers(); resetBall(); updateTurnUI();
 }
 
-// ===== 结束 =====
-function endGame(winner){
-gameState='ended';
-showScreen('resultScreen');
-const isWin=winner===0;
-document.getElementById('resEmoji').textContent=isWin?'🏆':'😢';
-document.getElementById('resTitle').textContent=isWin?`${selectedTeam.name} 获胜！`:`${opponentTeam.name} 获胜！`;
-document.getElementById('resTitle').style.color=isWin?'#00ff88':'#ff1744';
-document.getElementById('resScore').textContent=`${scores[0]} - ${scores[1]}`;
-}
-
-function restartGame(){
-scores=[0,0];currentTurn=0;gameState='playing';
-particles=[];aimPlayer=null;isAiming=false;shotFired=false;aiAim=null;flashAlpha=0;
-showScreen('gameScreen');
-initField();initPlayers();resetBall();
-updateTurnUI();
-}
-
+// 自动引擎自启
 resize();
 showScreen('mainMenu');
 requestAnimationFrame(gameLoop);
