@@ -2,992 +2,698 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>世界杯 - 台球式足球 (iPad极限品质增强版)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>星野 - AI 角色扮演</title>
 <style>
-* {
-    margin: 0; padding: 0; box-sizing: border-box;
-    touch-action: none; -webkit-tap-highlight-color: transparent; user-select: none;
-}
-body {
-    background: #050f05;
-    font-family: system-ui, -apple-system, "SF Pro SC", "SF Pro Text", "Helvetica Neue", sans-serif;
-    overflow: hidden; height: 100vh; width: 100vw;
-}
-canvas { display: block; width: 100%; height: 100%; }
-.screen {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 10;
-    backdrop-filter: blur(0px);
-}
-.hidden { opacity: 0; pointer-events: none; transform: scale(1.05); z-index: -1; }
-#mainMenu { background: radial-gradient(circle at center, rgba(10,35,15,0.8) 0%, rgba(5,15,5,0.95) 100%); }
-h1 {
-    font-size: clamp(2.8rem, 8vw, 5.5rem); font-weight: 900; line-height: 1.1;
-    text-shadow: 0 0 40px rgba(0,255,136,0.4), 0 10px 30px rgba(0,0,0,0.7);
-    background: linear-gradient(180deg, #ffffff 20%, #00ff88 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px;
-}
-.subtitle { font-size: clamp(1rem, 2.5vw, 1.4rem); color: #a2e0a2; margin: 15px 0 40px; text-align: center; font-weight: 500; }
-.btn {
-    background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%); border: none; border-radius: 20px;
-    padding: 20px 60px; font-size: 1.4rem; font-weight: 800; color: #031208; cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0,230,118,0.3), inset 0 2px 3px rgba(255,255,255,0.4);
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1); letter-spacing: 1px; margin: 10px;
-}
-.btn:active { transform: scale(0.95); box-shadow: 0 4px 15px rgba(0,230,118,0.2); }
-.btn-blue { background: linear-gradient(135deg, #2979ff, #00e5ff); box-shadow: 0 10px 30px rgba(41,121,255,0.3); color: #fff; }
-.teams-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: 90%; max-width: 760px;
-    max-height: 48vh; overflow-y: auto; padding: 20px; background: rgba(0,20,5,0.5);
-    border-radius: 24px; border: 1px solid rgba(0,255,136,0.15);
-    -webkit-overflow-scrolling: touch;
-}
-@media (max-width: 600px) { .teams-grid { grid-template-columns: repeat(3, 1fr); } }
-.team-card {
-    background: rgba(255,255,255,0.03); border: 2px solid rgba(0,255,136,0.1); border-radius: 18px;
-    padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.2s ease;
-}
-.team-card:active { transform: scale(0.95); background: rgba(0,255,136,0.1); }
-.team-card.selected {
-    border-color: #ffd700; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,255,136,0.05));
-    box-shadow: 0 0 25px rgba(255,215,0,0.25);
-}
-.flag { font-size: 2.5rem; margin-bottom: 8px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-.team-name { font-size: 0.9rem; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
-.vs-box {
-    background: rgba(0,0,0,0.6); padding: 18px 50px; border-radius: 25px; margin: 20px 0;
-    border: 1px solid rgba(255,215,0,0.25); font-size: 1.4rem; font-weight: 800; color: #fff;
-    backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-}
-.score-board {
-    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-    background: linear-gradient(180deg, rgba(10,15,10,0.85) 0%, rgba(5,10,5,0.95) 100%);
-    padding: 12px 40px; border-radius: 30px; border: 1.5px solid rgba(0,255,136,0.25);
-    display: flex; align-items: center; gap: 30px; z-index: 5; backdrop-filter: blur(20px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-}
-.score-team { text-align: center; min-width: 60px; }
-.score-flag { font-size: 1.8rem; }
-.score-num { font-size: 2.2rem; font-weight: 900; color: #fff; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; }
-.score-divider { font-size: 1.8rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-.turn-indicator {
-    position: absolute; top: 92px; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.75); padding: 8px 28px; border-radius: 20px;
-    font-size: 0.95rem; font-weight: 700; z-index: 5; border: 1px solid rgba(0,255,136,0.2);
-    color: #00ff88; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-.goal-text {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-    font-size: clamp(4.5rem, 15vw, 9.5rem); font-weight: 950; color: #ffd700;
-    text-shadow: 0 0 40px rgba(255,215,0,0.8), 0 10px 50px rgba(0,0,0,0.9);
-    z-index: 30; pointer-events: none; font-style: italic; letter-spacing: -2px;
-}
-.goal-anim { animation: goalPop 1.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-@keyframes goalPop {
-    0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
-    20% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; }
-    80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; filter: blur(0px); }
-    100% { transform: translate(-50%, -50%) scale(1.6) rotate(0deg); opacity: 0; filter: blur(10px); }
-}
-.power-bar {
-    position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-    width: 260px; height: 12px; background: rgba(0,0,0,0.7); border-radius: 10px;
-    overflow: hidden; border: 1.5px solid rgba(255,255,255,0.15); z-index: 5;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: none;
-}
-.power-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00ff88, #ffff00, #ff1744); }
-.instructions {
-    position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.6); padding: 8px 24px; border-radius: 20px;
-    font-size: 0.85rem; font-weight: 600; color: #bbb; z-index: 5;
-    border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(5px);
-}
-.winner-screen { text-align: center; background: radial-gradient(circle at center, rgba(5,20,40,0.9) 0%, rgba(3,10,20,0.98) 100%); }
-.winner-trophy { font-size: 6rem; margin-bottom: 20px; filter: drop-shadow(0 0 30px rgba(255,215,0,0.4)); }
-.final-score { font-size: 3rem; margin: 15px 0 35px; color: #ffd700; font-weight: 900; }
+  :root {
+    --bg: #070708;
+    --surface: rgba(20,20,24,0.75);
+    --ai-bubble: rgba(35,35,40,0.88);
+    --user-bubble: rgba(255, 190, 90, 0.95);
+    --text-primary: #f2f2f2;
+    --text-secondary: rgba(255,255,255,0.5);
+    --accent: #ffd166;
+    --border: rgba(255,255,255,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text-primary); }
+  
+  /* 背景层 */
+  #bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background-color: #08080a;
+    background-image: url('https://image.pollinations.ai/prompt/dark%20moody%20anime%20male%20character%20close%20up%20black%20hair%20dramatic%20lighting%20bedroom%20night?width=1080&height=1920&nologo=true&seed=114514');
+    background-size: cover; background-position: center 20%;
+    transition: background-image 0.5s;
+  }
+  #bg-overlay {
+    position: fixed; inset: 0; z-index: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.75) 100%);
+    pointer-events: none;
+  }
+
+  /* 主容器 */
+  #app { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+  /* 顶部 Header */
+  header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; min-height: 56px;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left { display: flex; align-items: center; gap: 6px; }
+  .badge-ai {
+    font-size: 11px; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15);
+    padding: 2px 6px; border-radius: 4px; letter-spacing: 1px;
+  }
+  .header-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .role-name { font-size: 15px; font-weight: 600; letter-spacing: 0.5px; }
+  .role-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .icon-btn {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: rgba(255,255,255,0.06); color: #fff;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .icon-btn:active { background: rgba(255,255,255,0.15); }
+
+  /* 角色简介面板 */
+  #profile-panel {
+    max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  #profile-panel.open { max-height: 320px; overflow-y: auto; }
+  .profile-inner { padding: 16px; font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.75); }
+  .profile-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .profile-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); margin-bottom: 10px; }
+
+  /* 聊天区 */
+  #chat-container {
+    flex: 1; overflow-y: auto; padding: 16px 14px 80px;
+    scroll-behavior: smooth;
+  }
+  #chat-container::-webkit-scrollbar { width: 0; }
+
+  /* 场景/系统消息 */
+  .msg-scene {
+    margin: 14px 0; text-align: left; color: rgba(255,255,255,0.45);
+    font-size: 13px; line-height: 1.6; font-style: italic;
+  }
+  .msg-scene::before { content: '> '; color: rgba(255,255,255,0.3); }
+
+  /* 消息行 */
+  .msg-row { display: flex; align-items: flex-end; margin-bottom: 18px; gap: 8px; animation: fadeIn 0.3s ease; }
+  .msg-row.user { justify-content: flex-end; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .msg-avatar {
+    width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .msg-bubble {
+    max-width: 76%; padding: 10px 14px; position: relative;
+    font-size: 15px; line-height: 1.55; word-break: break-word;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+  .msg-bubble.ai {
+    background: var(--ai-bubble);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px 18px 18px 18px;
+    color: var(--text-primary);
+  }
+  .msg-bubble.user {
+    background: var(--user-bubble);
+    border-radius: 18px 4px 18px 18px;
+    color: #1a1200;
+  }
+
+  /* 动作描写 */
+  .msg-actions { font-size: 13px; margin-bottom: 4px; font-style: italic; opacity: 0.7; }
+  .msg-bubble.ai .msg-actions { color: rgba(255,255,255,0.55); }
+  .msg-bubble.user .msg-actions { color: rgba(0,0,0,0.5); }
+  .msg-actions span { margin-right: 4px; }
+
+  /* 语音条模拟 */
+  .msg-voice {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
+    padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.08);
+    font-size: 12px; color: rgba(255,255,255,0.6); cursor: pointer;
+  }
+  .msg-bubble.user .msg-voice { background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.5); }
+  .voice-wave { display: flex; align-items: center; gap: 2px; height: 14px; }
+  .voice-wave i { display: block; width: 2px; background: currentColor; border-radius: 1px; animation: wave 1s ease-in-out infinite; }
+  .voice-wave i:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .voice-wave i:nth-child(2) { height: 10px; animation-delay: 0.1s; }
+  .voice-wave i:nth-child(3) { height: 14px; animation-delay: 0.2s; }
+  .voice-wave i:nth-child(4) { height: 8px; animation-delay: 0.15s; }
+  @keyframes wave { 0%,100%{ transform: scaleY(0.6); } 50%{ transform: scaleY(1); } }
+
+  /* 底部栏 */
+  #input-area {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(16px) saturate(180%);
+    border-top: 1px solid var(--border);
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  /* 灵感回复 */
+  #inspiration-bar {
+    display: flex; gap: 8px; overflow-x: auto; padding: 0 4px 8px;
+    scrollbar-width: none;
+  }
+  #inspiration-bar::-webkit-scrollbar { display: none; }
+  .inspiration-btn {
+    flex-shrink: 0; padding: 6px 14px; background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+    font-size: 13px; color: rgba(255,255,255,0.85); white-space: nowrap;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .inspiration-btn:active { background: rgba(255,255,255,0.15); transform: scale(0.96); }
+
+  /* 输入行 */
+  .input-row { display: flex; align-items: center; gap: 8px; }
+  .input-icon {
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; color: rgba(255,255,255,0.7); cursor: pointer; flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .input-icon:active { background: rgba(255,255,255,0.1); }
+  #user-input {
+    flex: 1; background: rgba(30,30,32,0.9); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 9px 14px; color: #fff; font-size: 15px; outline: none;
+    caret-color: var(--accent);
+  }
+  #user-input::placeholder { color: rgba(255,255,255,0.3); }
+  .send-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg, var(--accent), #ffb347);
+    color: #1a1200; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: transform 0.1s;
+  }
+  .send-btn:active { transform: scale(0.92); }
+
+  /* 免责声明 */
+  .footer-note {
+    text-align: center; font-size: 11px; color: rgba(255,255,255,0.25);
+    padding: 6px 0 2px;
+  }
+
+  /* 设置面板 */
+  .modal {
+    position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  }
+  .modal.show { display: flex; }
+  .modal-box {
+    width: 92%; max-width: 420px; max-height: 85vh; overflow-y: auto;
+    background: rgba(25,25,30,0.98); border: 1px solid var(--border);
+    border-radius: 20px; padding: 20px; color: #eee;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .modal-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.08); cursor: pointer; color: #fff; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
+  .form-input, .form-textarea, .form-select {
+    width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 10px 12px; color: #fff; font-size: 14px; outline: none;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: rgba(255,255,255,0.25); }
+  .form-textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+  .form-select { appearance: none; }
+  .btn-primary {
+    width: 100%; padding: 12px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, var(--accent), #ffb347);
+    color: #1a1200; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px;
+  }
+  .btn-danger {
+    width: 100%; padding: 10px; border-radius: 12px; border: 1px solid rgba(255,80,80,0.3);
+    background: rgba(255,80,80,0.1); color: #ff8080; font-size: 14px; cursor: pointer; margin-top: 10px;
+  }
+
+  /* Loading */
+  .typing-indicator {
+    display: flex; align-items: center; gap: 6px; padding: 10px 14px;
+    background: var(--ai-bubble); border-radius: 18px; width: fit-content;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .typing-dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
+  .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+  .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes typing { 0%,80%,100%{ transform: scale(0.4); opacity: 0.4; } 40%{ transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
-<canvas id="gameCanvas"></canvas>
 
-<div id="mainMenu" class="screen">
-    <h1>⚽ WORLD CUP</h1>
-    <p class="subtitle">台球式足球 · 量子物理轨迹 · 高端iPad重制版</p>
-    <button class="btn" onclick="showTeamSelect()">进入球场</button>
-    <p style="margin-top:30px;color:#559966;font-size:0.85rem;font-weight:600;letter-spacing:0.5px">高端视网膜渲染 · 5v5 属性竞技 · 进球爆破粒子</p>
-</div>
+<div id="bg-layer"></div>
+<div id="bg-overlay"></div>
 
-<div id="teamSelect" class="screen hidden" style="background: rgba(4,14,4,0.96);">
-    <h1>挑选国家队</h1>
-    <p class="subtitle">您的球队将在左侧发起进攻</p>
-    <div class="teams-grid" id="teamsGrid"></div>
-    <div class="vs-box hidden" id="vsBox"></div>
-    <button class="btn hidden" id="startBtn" onclick="startGame()">开球</button>
-    <button class="btn btn-blue" onclick="showScreen('mainMenu')">返回</button>
-</div>
-
-<div id="gameScreen" class="screen hidden" style="background:transparent;pointer-events:none">
-    <div class="score-board" style="pointer-events:auto">
-        <div class="score-team"><div class="score-flag" id="p1Flag">🏳️</div><div class="score-num" id="p1Score">0</div></div>
-        <div class="score-divider">VS</div>
-        <div class="score-team"><div class="score-flag" id="p2Flag">🏳️</div><div class="score-num" id="p2Score">0</div></div>
+<div id="app">
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <div class="badge-ai">AI 生成</div>
     </div>
-    <div class="turn-indicator" id="turnIndicator">你的回合</div>
-    <div class="power-bar" id="powerBar"><div class="power-fill" id="powerFill"></div></div>
-    <div class="instructions" id="instr">点击拖拽己方发光球员 → 反向蓄力拉弓 → 释放射门</div>
+    <div class="header-center" id="header-center" style="cursor:pointer;">
+      <div class="role-name" id="header-name">沈珂</div>
+      <div class="role-sub">和沈珂的对话</div>
+    </div>
+    <div class="header-right">
+      <div class="icon-btn" id="btn-settings" title="设置">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- Profile Panel -->
+  <div id="profile-panel">
+    <div class="profile-inner" id="profile-inner">
+      <img id="profile-avatar" class="profile-avatar" src="" alt="avatar">
+      <div class="profile-title" id="profile-title">沈珂</div>
+      <div id="profile-desc">加载中...</div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <main id="chat-container"></main>
+
+  <!-- Input -->
+  <div id="input-area">
+    <div id="inspiration-bar"></div>
+    <div class="input-row">
+      <div class="input-icon" id="btn-inspiration" title="生成灵感回复">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2v2"></path><path d="M12 8a4 4 0 0 0-4-4 4 4 0 0 0-4 4c0 2 2 4 4 4"></path><path d="M12 8a4 4 0 0 1 4-4 4 4 0 0 1 4 4c0 2-2 4-4 4"></path></svg>
+      </div>
+      <input type="text" id="user-input" placeholder="发送消息给沈珂..." autocomplete="off">
+      <div class="input-icon" id="btn-more" title="更多">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </div>
+      <button class="send-btn" id="btn-send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+    <div class="footer-note">对话消息由AI生成，不代表平台立场</div>
+  </div>
 </div>
 
-<div id="goalText" class="goal-text">GOAL !!!</div>
-
-<div id="resultScreen" class="screen hidden winner-screen">
-    <div class="winner-trophy" id="resEmoji">🏆</div>
-    <div class="result-title" id="resTitle" style="font-size: 2.5rem; font-weight: 900;">胜利！</div>
-    <div class="final-score" id="resScore">3 - 1</div>
-    <button class="btn" onclick="restartGame()">再战一场</button>
-    <button class="btn btn-blue" onclick="showScreen('mainMenu')">主菜单</button>
+<!-- Settings Modal -->
+<div class="modal" id="settings-modal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>设置</span>
+      <div class="modal-close" id="modal-close">✕</div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">DeepSeek API Key</label>
+      <input type="password" class="form-input" id="set-apikey" placeholder="sk-...">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">模型</label>
+      <select class="form-select" id="set-model">
+        <option value="deepseek-chat">deepseek-chat (V3)</option>
+        <option value="deepseek-reasoner">deepseek-reasoner (R1)</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">角色名称</label>
+      <input type="text" class="form-input" id="set-name">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">角色头像 URL</label>
+      <input type="text" class="form-input" id="set-avatar">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">背景图 URL</label>
+      <input type="text" class="form-input" id="set-bg">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">角色系统提示词 (System Prompt)</label>
+      <textarea class="form-textarea" id="set-prompt"></textarea>
+    </div>
+    
+    <button class="btn-primary" id="btn-save">保存设置</button>
+    <button class="btn-danger" id="btn-clear">清空对话记录</button>
+  </div>
 </div>
 
 <script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-let W, H, DPR;
+/* ================= 数据与状态 ================= */
+const DEFAULT_ROLE = {
+  name: '沈珂',
+  avatar: 'https://image.pollinations.ai/prompt/anime%20male%20avatar%20portrait%20black%20hair%20golden%20eyes%20dark%20background?width=200&height=200&nologo=true&seed=999',
+  bg: 'https://image.pollinations.ai/prompt/dark%20moody%20anime%20male%20character%20close%20up%20black%20hair%20dramatic%20lighting%20bedroom%20night?width=1080&height=1920&nologo=true&seed=114514',
+  prompt: `你是沈珂，26岁，身高190cm，创业公司CEO，也是用户的发小。
+你们从小互殴到大，关系孽缘深厚。你嘴欠王者，表面专治各种不服，内心却极度在意对方。
+外貌：黑色短发，喉结上有一颗小痣，常穿深色衬衫，戴金丝眼镜。
+性格：玩世不恭、毒舌、爱逞强；只有在醉酒或疲惫时才会流露脆弱。
+当前状态：凌晨两点，你醉酒后来到用户家门口，领带歪斜，眼镜挂在下巴上，满身酒气。
 
-// ===== WEB AUDIO API 纯代码原生声音系统 =====
-const AudioEngine = {
-    ctx: null,
-    init() {
-        if (!this.ctx) {
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-    },
-    playKick(vol = 1) {
-        this.init(); if (!this.ctx) return;
-        let osc = this.ctx.createOscillator();
-        let gain = this.ctx.createGain();
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(160, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(vol * 0.6, this.ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.13);
-    },
-    playBounce(vol = 1) {
-        this.init(); if (!this.ctx) return;
-        let osc = this.ctx.createOscillator();
-        let gain = this.ctx.createGain();
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(280, this.ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(180, this.ctx.currentTime + 0.08);
-        gain.gain.setValueAtTime(vol * 0.3, this.ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.09);
-    },
-    playCharge(powerRatio) {
-        this.init(); if (!this.ctx) return;
-        // 蓄力低吟音
-        let osc = this.ctx.createOscillator();
-        let gain = this.ctx.createGain();
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(100 + powerRatio * 300, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.06);
-    },
-    playGoal() {
-        this.init(); if (!this.ctx) return;
-        // 合成全场欢呼白噪声
-        let bufferSize = this.ctx.sampleRate * 1.5;
-        let buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        let data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
-        let noise = this.ctx.createBufferSource();
-        noise.buffer = buffer;
-        let filter = this.ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(800, this.ctx.currentTime);
-        filter.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 1.5);
-        let gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 1.5);
-        noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
-        noise.start();
-    }
+回复必须遵循：
+1. 用第一人称。
+2. 每次回复都要包含动作描写（用括号包裹），再是对话内容。
+3. 动作要细腻，体现微表情、身体语言和潜台词。
+4. 对话简短、口语化，可以沙哑慵懒。
+5. 先嘴硬/逞强，再不经意流露温柔。`
 };
 
-// ===== 游戏基础参数 =====
-let gameState = 'menu';
-let selectedTeam = null, opponentTeam = null;
-let scores = [0, 0];
-let currentTurn = 0; // 0: 玩家, 1: AI
-let particles = [];
-let cameraShake = 0;
-let flashAlpha = 0;
-let aiAim = null;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
+  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+};
 
-const FRICTION = 0.984;
-const WALL_BOUNCE = 0.75;
-const RESTITUTION = 0.88;
-const MAX_POWER = 24;
-const MIN_VELOCITY = 0.15;
-const GOAL_WIDTH = 150;
-const GOAL_DEPTH = 30;
+const App = {
+  config: {
+    apiKey: store.get('ds_apikey', ''),
+    model: store.get('ds_model', 'deepseek-chat'),
+    roleName: store.get('role_name', DEFAULT_ROLE.name),
+    roleAvatar: store.get('role_avatar', DEFAULT_ROLE.avatar),
+    roleBg: store.get('role_bg', DEFAULT_ROLE.bg),
+    systemPrompt: store.get('role_prompt', DEFAULT_ROLE.prompt),
+  },
+  messages: store.get('chat_history', []),
+  isLoading: false,
+  inspirations: [],
 
-let field = { x: 0, y: 0, w: 0, h: 0, margin: 0 };
-let ball = null;
-let players = [];
-
-// ===== 触控瞄准 =====
-let aimPlayer = null;
-let touchStartX = 0, touchStartY = 0;
-let aimMouseX = 0, aimMouseY = 0;
-let isAiming = false;
-let shotFired = false;
-
-const teams = [
-    { name: '巴西', flag: '🇧🇷', color: '#ffd700', sec: '#009c3b' },
-    { name: '阿根廷', flag: '🇦🇷', color: '#6cb4ee', sec: '#ffffff' },
-    { name: '法国', flag: '🇫🇷', color: '#0055a4', sec: '#ef4135' },
-    { name: '德国', flag: '🇩🇪', color: '#ffffff', sec: '#000000' },
-    { name: '西班牙', flag: '🇪🇸', color: '#aa151b', sec: '#f1bf00' },
-    { name: '英格兰', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', color: '#ffffff', sec: '#cf081f' },
-    { name: '葡萄牙', flag: '🇵🇹', color: '#ff0000', sec: '#006600' },
-    { name: '荷兰', flag: '🇳🇱', color: '#ff4f00', sec: '#ffffff' },
-    { name: '意大利', flag: '🇮🇹', color: '#009246', sec: '#ffffff' },
-    { name: '日本', flag: '🇯🇵', color: '#ffffff', sec: '#bc002d' },
-    { name: '克罗地亚', flag: '🇭🇷', color: '#ff0000', sec: '#ffffff' },
-    { name: '乌拉圭', flag: '🇺🇾', color: '#0038a8', sec: '#ffffff' }
-];
-
-function resize() {
-    DPR = window.devicePixelRatio || 1;
-    W = window.innerWidth;
-    H = window.innerHeight;
-    
-    // 适配 iPad 视网膜屏幕高清化核心
-    canvas.width = W * DPR;
-    canvas.height = H * DPR;
-    ctx.scale(DPR, DPR);
-    
-    initField();
-}
-window.addEventListener('resize', resize);
-
-function initField() {
-    const margin = Math.min(W, H) * 0.08;
-    field = {
-        x: margin,
-        y: margin * 1.4,
-        w: W - margin * 2,
-        h: H - margin * 2.5,
-        margin: margin
-    };
-}
-
-// 针对单文件精细体验，加入技能和3D弹跳数据结构
-function createEntity(x, y, r, mass, team, id, num, color, sec, isKeeper = false) {
-    return {
-        x, y, vx: 0, vy: 0, z: 0, vz: 0,
-        r, mass, team, id, number: num,
-        color, sec, isKeeper,
-        trail: [], // 拖尾量子数组
-        // 核心属性分配
-        speedBuff: (num === 7 || num === 8) ? 0.988 : FRICTION, // 边锋抗摩擦强
-        powerBuff: (num === 9 || num === 10) ? 1.15 : 1.0     // 核心射门力量系数
-    };
-}
-
-function initPlayers() {
-    players = [];
-    const cy = field.y + field.h / 2;
-    const cx = field.x + field.w / 2;
-    const pr = Math.min(field.w, field.h) * 0.026; // 动态基准半径
-
-    // 左侧玩家队
-    const pColor = selectedTeam.color, pSec = selectedTeam.sec;
-    players.push(createEntity(field.x + pr * 2, cy, pr * 1.25, 3.0, 0, 0, 1, pColor, pSec, true)); // 守门员大质量
-    players.push(createEntity(cx - pr * 4, cy - pr * 3, pr, 2.0, 0, 1, 7, pColor, pSec));
-    players.push(createEntity(cx - pr * 4, cy + pr * 3, pr, 2.0, 0, 2, 8, pColor, pSec));
-    players.push(createEntity(cx - pr * 1.5, cy - pr * 1.2, pr, 2.0, 0, 3, 9, pColor, pSec));
-    players.push(createEntity(cx - pr * 1.5, cy + pr * 1.2, pr, 2.0, 0, 4, 10, pColor, pSec));
-
-    // 右侧 AI 队
-    const aColor = opponentTeam.color, aSec = opponentTeam.sec;
-    players.push(createEntity(field.x + field.w - pr * 2, cy, pr * 1.25, 3.0, 1, 5, 1, aColor, aSec, true));
-    players.push(createEntity(cx + pr * 4, cy - pr * 3, pr, 2.0, 1, 6, 7, aColor, aSec));
-    players.push(createEntity(cx + pr * 4, cy + pr * 3, pr, 2.0, 1, 7, 8, aColor, aSec));
-    players.push(createEntity(cx + pr * 1.5, cy - pr * 1.2, pr, 2.0, 1, 8, 9, aColor, aSec));
-    players.push(createEntity(cx + pr * 1.5, cy + pr * 1.2, pr, 2.0, 1, 9, 10, aColor, aSec));
-}
-
-function resetBall() {
-    const br = Math.min(field.w, field.h) * 0.018;
-    ball = {
-        x: field.x + field.w / 2, y: field.y + field.h / 2,
-        vx: 0, vy: 0, z: 0, vz: 0, r: br, mass: 0.6,
-        trail: []
-    };
-}
-
-// ===== UI 管理 =====
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-}
-
-function showTeamSelect() {
-    AudioEngine.init();
-    showScreen('teamSelect');
-    const grid = document.getElementById('teamsGrid');
-    grid.innerHTML = '';
-    teams.forEach((t, i) => {
-        const card = document.createElement('div');
-        card.className = 'team-card';
-        card.innerHTML = `<span class="flag">${t.flag}</span><div class="team-name">${t.name}</div>`;
-        card.onclick = () => selectTeam(i, card);
-        grid.appendChild(card);
-    });
-    document.getElementById('startBtn').classList.add('hidden');
-    document.getElementById('vsBox').classList.add('hidden');
-    selectedTeam = null;
-}
-
-function selectTeam(idx, card) {
-    document.querySelectorAll('.team-card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    selectedTeam = teams[idx];
-    let opp;
-    do { opp = teams[Math.floor(Math.random() * teams.length)]; } while (opp === selectedTeam);
-    opponentTeam = opp;
-    
-    const vs = document.getElementById('vsBox');
-    vs.innerHTML = `${selectedTeam.flag} <span style="color:#00ff88">${selectedTeam.name}</span> <span style="color:#ffd700;font-style:italic">VS</span> <span style="color:#ff4444">${opponentTeam.name}</span> ${opponentTeam.flag}`;
-    vs.classList.remove('hidden');
-    document.getElementById('startBtn').classList.remove('hidden');
-    AudioEngine.playBounce(1);
-}
-
-function startGame() {
-    showScreen('gameScreen');
-    gameState = 'playing';
-    scores = [0, 0]; currentTurn = 0; shotFired = false; particles = [];
-    document.getElementById('p1Flag').textContent = selectedTeam.flag;
-    document.getElementById('p2Flag').textContent = opponentTeam.flag;
-    document.getElementById('p1Score').textContent = '0';
-    document.getElementById('p2Score').textContent = '0';
-    resize();
-    initPlayers();
-    resetBall();
-    updateTurnUI();
-}
-
-function updateTurnUI() {
-    const ind = document.getElementById('turnIndicator');
-    if (currentTurn === 0) {
-        ind.textContent = '⚽ 你的回合 - 划动发力';
-        ind.style.color = '#00ff88';
-        ind.style.borderColor = 'rgba(0,255,136,0.4)';
-        document.getElementById('powerBar').style.display = 'block';
+  init() {
+    this.applyRoleUI();
+    this.bindEvents();
+    if (this.messages.length === 0) {
+      this.loadDefaultScene();
     } else {
-        ind.textContent = '🤖 地狱战术 AI 解算中...';
-        ind.style.color = '#ff4444';
-        ind.style.borderColor = 'rgba(255,68,68,0.4)';
-        document.getElementById('powerBar').style.display = 'none';
+      this.renderMessages();
     }
-}
+  },
 
-// ===== 增强级高级物理引擎 =====
-function isAnythingMoving() {
-    const lim = MIN_VELOCITY;
-    if (Math.abs(ball.vx) > lim || Math.abs(ball.vy) > lim || ball.z > 0.1) return true;
-    for (let p of players) {
-        if (Math.abs(p.vx) > lim || Math.abs(p.vy) > lim || p.z > 0.1) return true;
+  applyRoleUI() {
+    document.getElementById('header-name').textContent = this.config.roleName;
+    document.querySelector('.role-sub').textContent = `和${this.config.roleName}的对话`;
+    document.getElementById('user-input').placeholder = `发送消息给${this.config.roleName}...`;
+    document.getElementById('profile-title').textContent = this.config.roleName;
+    document.getElementById('profile-avatar').src = this.config.roleAvatar;
+    document.getElementById('bg-layer').style.backgroundImage = `url('${this.config.roleBg}')`;
+    
+    // 简介面板内容
+    const desc = this.config.systemPrompt.split('\n').slice(0, 6).join('<br>');
+    document.getElementById('profile-desc').innerHTML = desc;
+  },
+
+  loadDefaultScene() {
+    const opening = [
+      { role: 'system', type: 'scene', content: '凌晨两点，门铃骤响。领带歪斜、金丝眼镜挂在下巴上的男人倚在门框边，满身酒气。' },
+      { role: 'assistant', content: '（凌晨两点踹开你家门。领带歪斜，金丝眼镜挂在下巴上，闷笑道）别动……', isVoice: true, voiceDuration: 2 },
+      { role: 'user', content: '（迷迷瞪瞪的睁开眼睛）干什么……' },
+      { role: 'assistant', content: '（抬手看了看手表上的时间）（醉醺醺的）', isVoice: true, voiceDuration: 2 },
+      { role: 'user', content: '（把他扶到沙发上坐着）你喝酒了？' },
+      { role: 'assistant', content: '嗯……喝了点。（闭上眼靠在沙发上，领带被扯松，衬衫扣子解开了两颗，露出精致的锁骨）', isVoice: true, voiceDuration: 3 },
+      { role: 'user', content: '（递给他一杯蜂蜜水）' },
+      { role: 'assistant', content: '（接过蜂蜜水一饮而尽，用手背随意抹了下嘴）', isVoice: true, voiceDuration: 2 },
+      { role: 'user', content: '（帮他解开领带）' },
+      { role: 'assistant', content: '（握住你的手，盯着你看了几秒，突然笑了）怎么……怕我勒死自己？', isVoice: true, voiceDuration: 2 },
+      { role: 'user', content: '（白了他一眼）你喝了多少啊？' },
+      { role: 'assistant', content: '（松开你的手，往沙发上一靠，揉了揉太阳穴）记不清了……反正没醉。', isVoice: true, voiceDuration: 2 },
+      { role: 'user', content: '（坐在他旁边）没醉你还知道来我家？' },
+      { role: 'assistant', content: '（转头看向你，眼神有些迷离）除了你家，我还能去哪儿？', isVoice: true, voiceDuration: 3 },
+      { role: 'user', content: '（轻笑）你女朋友家啊。' },
+      { role: 'assistant', content: '（突然坐直身体，直勾勾地盯着你）我没女朋友……（声音低哑）', isVoice: true, voiceDuration: 2 },
+    ];
+    this.messages = opening;
+    this.save();
+    this.renderMessages();
+  },
+
+  bindEvents() {
+    // 发送
+    const send = () => {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+      if (!this.config.apiKey) { this.openSettings(); return; }
+      input.value = '';
+      this.addMessage({ role: 'user', content: text });
+      this.sendToDeepSeek();
+    };
+    document.getElementById('btn-send').addEventListener('click', send);
+    document.getElementById('user-input').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+    // 设置面板
+    document.getElementById('btn-settings').addEventListener('click', () => this.openSettings());
+    document.getElementById('modal-close').addEventListener('click', () => this.closeSettings());
+    document.getElementById('settings-modal').addEventListener('click', e => { if (e.target.id === 'settings-modal') this.closeSettings(); });
+    
+    // 保存设置
+    document.getElementById('btn-save').addEventListener('click', () => {
+      this.config.apiKey = document.getElementById('set-apikey').value.trim();
+      this.config.model = document.getElementById('set-model').value;
+      this.config.roleName = document.getElementById('set-name').value.trim() || DEFAULT_ROLE.name;
+      this.config.roleAvatar = document.getElementById('set-avatar').value.trim() || DEFAULT_ROLE.avatar;
+      this.config.roleBg = document.getElementById('set-bg').value.trim() || DEFAULT_ROLE.bg;
+      this.config.systemPrompt = document.getElementById('set-prompt').value.trim() || DEFAULT_ROLE.prompt;
+      this.save();
+      this.applyRoleUI();
+      this.closeSettings();
+    });
+
+    // 清空记录
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      if (confirm('确定清空所有对话记录？')) {
+        this.messages = [];
+        this.save();
+        this.renderMessages();
+        this.loadDefaultScene();
+      }
+    });
+
+    // 展开/收起简介
+    document.getElementById('header-center').addEventListener('click', () => {
+      document.getElementById('profile-panel').classList.toggle('open');
+    });
+
+    // 灵感
+    document.getElementById('btn-inspiration').addEventListener('click', () => this.generateInspirations());
+  },
+
+  openSettings() {
+    document.getElementById('set-apikey').value = this.config.apiKey;
+    document.getElementById('set-model').value = this.config.model;
+    document.getElementById('set-name').value = this.config.roleName;
+    document.getElementById('set-avatar').value = this.config.roleAvatar;
+    document.getElementById('set-bg').value = this.config.roleBg;
+    document.getElementById('set-prompt').value = this.config.systemPrompt;
+    document.getElementById('settings-modal').classList.add('show');
+  },
+  closeSettings() {
+    document.getElementById('settings-modal').classList.remove('show');
+  },
+
+  addMessage(msg) {
+    this.messages.push(msg);
+    this.save();
+    this.renderMessages();
+    this.scrollToBottom();
+  },
+
+  parseContent(text) {
+    if (!text) return { actions: [], dialogue: '' };
+    const actions = [];
+    const dialogues = [];
+    // 匹配中文或英文括号
+    const parts = text.split(/([（(][^）)]*[）)])/g).filter(Boolean);
+    parts.forEach(part => {
+      if (/^[（(]/.test(part)) {
+        actions.push(part);
+      } else if (part.trim()) {
+        dialogues.push(part.trim());
+      }
+    });
+    return { actions, dialogue: dialogues.join(' ') };
+  },
+
+  renderMessages() {
+    const container = document.getElementById('chat-container');
+    container.innerHTML = '';
+    
+    this.messages.forEach((msg, idx) => {
+      if (msg.type === 'scene') {
+        container.innerHTML += `<div class="msg-scene">${msg.content}</div>`;
+        return;
+      }
+
+      const isUser = msg.role === 'user';
+      const parsed = this.parseContent(msg.content);
+      const actionsHtml = parsed.actions.map(a => `<span>${a}</span>`).join('');
+      const dialogueHtml = parsed.dialogue ? `<div class="msg-text">${parsed.dialogue}</div>` : '';
+      
+      const voiceHtml = msg.isVoice ? `
+        <div class="msg-voice">
+          <div class="voice-wave"><i></i><i></i><i></i><i></i></div>
+          <span>${msg.voiceDuration || 1}"</span>
+        </div>` : '';
+
+      const rowClass = isUser ? 'user' : '';
+      const bubbleClass = isUser ? 'user' : 'ai';
+      const avatarHtml = !isUser ? `<img class="msg-avatar" src="${this.config.roleAvatar}" alt="">` : '';
+
+      const html = `
+        <div class="msg-row ${rowClass}">
+          ${avatarHtml}
+          <div class="msg-bubble ${bubbleClass}">
+            ${actionsHtml ? `<div class="msg-actions">${actionsHtml}</div>` : ''}
+            ${dialogueHtml}
+            ${voiceHtml}
+          </div>
+        </div>
+      `;
+      container.innerHTML += html;
+    });
+
+    // 加载中指示器
+    if (this.isLoading) {
+      container.innerHTML += `
+        <div class="msg-row">
+          <img class="msg-avatar" src="${this.config.roleAvatar}" alt="">
+          <div class="typing-indicator">
+            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+          </div>
+        </div>`;
     }
-    return false;
-}
 
-function updatePhysics() {
-    if (gameState !== 'playing') return false;
-    let moving = false;
+    this.scrollToBottom();
+  },
 
-    // 处理带 3D 弹跳的实体运动
-    [ball, ...players].forEach(e => {
-        // Z轴高度伪3D处理
-        if (e.z > 0 || e.vz !== 0) {
-            e.z += e.vz; e.vz -= 0.35; // 重力加速衰减
-            if (e.z <= 0) {
-                e.z = 0; e.vz = -e.vz * 0.5; // 地面弹起
-                if (Math.abs(e.vz) < 0.3) e.vz = 0;
+  scrollToBottom() {
+    const container = document.getElementById('chat-container');
+    container.scrollTop = container.scrollHeight;
+  },
+
+  async sendToDeepSeek() {
+    if (this.isLoading) return;
+    this.isLoading = true;
+    this.renderMessages();
+
+    const apiMessages = [
+      { role: 'system', content: this.config.systemPrompt },
+      ...this.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }))
+    ];
+
+    try {
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          messages: apiMessages,
+          stream: true
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || `HTTP ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullText = '';
+      const aiMsg = { role: 'assistant', content: '', isVoice: true, voiceDuration: 1 };
+      this.messages.push(aiMsg);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            const obj = JSON.parse(data);
+            const delta = obj.choices?.[0]?.delta?.content || '';
+            if (delta) {
+              fullText += delta;
+              aiMsg.content = fullText;
+              aiMsg.voiceDuration = Math.max(1, Math.ceil(fullText.length / 5));
+              this.renderMessages();
             }
+          } catch (e) {}
         }
+      }
 
-        e.x += e.vx; e.y += e.vy;
-        const f = e.speedBuff || FRICTION;
-        e.vx *= f; e.vy *= f;
+      this.isLoading = false;
+      this.save();
+      this.renderMessages();
+      this.generateInspirations(); // 收到回复后自动生成灵感
 
-        if (Math.abs(e.vx) < MIN_VELOCITY) e.vx = 0;
-        if (Math.abs(e.vy) < MIN_VELOCITY) e.vy = 0;
-        if (e.vx !== 0 || e.vy !== 0 || e.z > 0) moving = true;
-
-        // 记录轨迹拖尾
-        e.trail.push({ x: e.x, y: e.y, z: e.z });
-        if (e.trail.length > 12) e.trail.shift();
-    });
-
-    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
-    const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
-
-    // 边界撞击与火花特效判定
-    [ball, ...players].forEach(e => {
-        const isBall = (e === ball);
-        const elRest = isBall ? 0.85 : WALL_BOUNCE;
-
-        if (e.x - e.r < field.x) {
-            if (isBall && e.y > goalY1 && e.y < goalY2) {
-                // 允许滚入网内
-            } else {
-                e.vx = -e.vx * elRest; e.x = field.x + e.r;
-                spawnSpark(e.x - e.r, e.y, '#00ff88'); AudioEngine.playBounce(Math.abs(e.vx)/5);
-            }
-        }
-        if (e.x + e.r > field.x + field.w) {
-            if (isBall && e.y > goalY1 && e.y < goalY2) {
-                // 允许滚入网内
-            } else {
-                e.vx = -e.vx * elRest; e.x = field.x + field.w - e.r;
-                spawnSpark(e.x + e.r, e.y, '#00ff88'); AudioEngine.playBounce(Math.abs(e.vx)/5);
-            }
-        }
-        if (e.y - e.r < field.y) {
-            e.vy = -e.vy * elRest; e.y = field.y + e.r;
-            spawnSpark(e.x, e.y - e.r, '#00ff88'); AudioEngine.playBounce(Math.abs(e.vy)/5);
-        }
-        if (e.y + e.r > field.y + field.h) {
-            e.vy = -e.vy * elRest; e.y = field.y + field.h - e.r;
-            spawnSpark(e.x, e.y + e.r, '#00ff88'); AudioEngine.playBounce(Math.abs(e.vy)/5);
-        }
-    });
-
-    // 球员与球的圆周深度碰撞 (含Z轴错开阻力判定)
-    players.forEach(p => {
-        const dx = ball.x - p.x; const dy = ball.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const minDist = ball.r + p.r;
-        
-        // 当且仅当高度相近时发生完全物理碰撞
-        if (dist < minDist && dist > 0 && Math.abs(ball.z - p.z) < ball.r * 1.5) {
-            const nx = dx / dist; const ny = dy / dist;
-            const overlap = minDist - dist;
-            ball.x += nx * overlap * 0.6; ball.y += ny * overlap * 0.6;
-            p.x -= nx * overlap * 0.4; p.y -= ny * overlap * 0.4;
-
-            const dvx = ball.vx - p.vx; const dvy = ball.vy - p.vy;
-            const dvn = dvx * nx + dvy * ny;
-            if (dvn < 0) {
-                const impulse = (2 * dvn / (ball.mass + p.mass)) * RESTITUTION;
-                ball.vx -= impulse * p.mass * nx; ball.vy -= impulse * p.mass * ny;
-                p.vx += impulse * ball.mass * nx; p.vy += impulse * ball.mass * ny;
-                
-                // 巨大冲击引发高空弹跳
-                if (Math.abs(impulse) > 3) {
-                    ball.vz = Math.abs(impulse) * 0.6;
-                    cameraShake = Math.min(15, Math.abs(impulse) * 2);
-                }
-                AudioEngine.playKick(Math.min(1, Math.abs(impulse)/6));
-            }
-        }
-    });
-
-    // 球员相互碰撞平衡
-    for (let i = 0; i < players.length; i++) {
-        for (let j = i + 1; j < players.length; j++) {
-            const p1 = players[i]; const p2 = players[j];
-            const dx = p2.x - p1.x; const dy = p2.y - p1.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const minDist = p1.r + p2.r;
-            if (dist < minDist && dist > 0) {
-                const nx = dx / dist; const ny = dy / dist;
-                const overlap = minDist - dist;
-                p1.x -= nx * overlap * 0.5; p1.y -= ny * overlap * 0.5;
-                p2.x += nx * overlap * 0.5; p2.y += ny * overlap * 0.5;
-                const dvx = p2.vx - p1.vx; const dvy = p2.vy - p1.vy;
-                if ((dvx * nx + dvy * ny) < 0) {
-                    const impulse = (2 * (dvx * nx + dvy * ny) / (p1.mass + p2.mass)) * RESTITUTION;
-                    p1.vx += impulse * p2.mass * nx; p1.vy += impulse * p2.mass * ny;
-                    p2.vx -= impulse * p1.mass * nx; p2.vy -= impulse * p1.mass * ny;
-                }
-            }
-        }
+    } catch (err) {
+      this.isLoading = false;
+      this.renderMessages();
+      alert('DeepSeek 请求失败：' + err.message);
     }
-    return moving;
-}
+  },
 
-function spawnSpark(x, y, color) {
-    for(let i=0; i<6; i++) {
-        particles.push({
-            x, y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5,
-            life: 30+Math.random()*20, color, size: 2+Math.random()*3
-        });
+  async generateInspirations() {
+    if (!this.config.apiKey || this.messages.length === 0) return;
+    const lastFew = this.messages.slice(-6);
+    const context = lastFew.map(m => `${m.role}: ${m.content}`).join('\n');
+    const prompt = `基于以下对话上下文，生成3个简短的用户回复建议（每个15字以内），要符合当下暧昧/拉扯的氛围和角色关系。只输出JSON数组，如["建议1","建议2","建议3"]，不要有任何解释。`;
+
+    try {
+      const res = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: prompt },
+            { role: 'user', content: context }
+          ],
+          stream: false
+        })
+      });
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || '[]';
+      const match = text.match(/\[[\s\S]*?\]/);
+      if (match) {
+        const arr = JSON.parse(match[0]);
+        this.inspirations = arr.slice(0, 4);
+        this.renderInspirations();
+      }
+    } catch (e) {
+      console.log('灵感生成失败', e);
     }
-}
+  },
 
-// ===== 进球与终局检测 =====
-function checkGoal() {
-    if (gameState !== 'playing') return;
-    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
-    const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
-    
-    if (ball.x < field.x - 5 && ball.y > goalY1 && ball.y < goalY2) { triggerGoal(1); }
-    else if (ball.x > field.x + field.w + 5 && ball.y > goalY1 && ball.y < goalY2) { triggerGoal(0); }
-}
+  renderInspirations() {
+    const bar = document.getElementById('inspiration-bar');
+    if (!this.inspirations.length) { bar.innerHTML = ''; return; }
+    bar.innerHTML = this.inspirations.map((text, i) => 
+      `<button class="inspiration-btn" onclick="App.useInspiration(${i})">${text}</button>`
+    ).join('');
+  },
 
-function triggerGoal(scoringTeam) {
-    gameState = 'goalAnimating';
-    scores[scoringTeam]++;
-    AudioEngine.playGoal();
-    
-    const el = scoringTeam === 0 ? document.getElementById('p1Score') : document.getElementById('p2Score');
-    el.textContent = scores[scoringTeam];
-    el.style.transform = 'scale(1.8)';
-    setTimeout(() => el.style.transform = 'scale(1)', 400);
-    
-    cameraShake = 30; flashAlpha = 0.6;
-    const gt = document.getElementById('goalText');
-    gt.classList.remove('goal-anim'); void gt.offsetWidth; gt.classList.add('goal-anim');
+  useInspiration(index) {
+    const text = this.inspirations[index];
+    if (!text) return;
+    document.getElementById('user-input').value = text;
+    // 可选直接发送：this.sendToDeepSeek(); 
+    // 这里仅填入，让用户决定是否发送，更符合原App逻辑
+  },
 
-    // 绚丽满屏绚丽庆祝粒子
-    const gx = scoringTeam === 0 ? field.x + field.w : field.x;
-    const gy = field.y + field.h / 2;
-    for (let i = 0; i < 150; i++) {
-        const angle = (Math.PI * 2 / 150) * i + Math.random() * 0.3;
-        const speed = 4 + Math.random() * 14;
-        particles.push({
-            x: gx, y: gy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-            life: 150 + Math.random() * 80, size: 4 + Math.random() * 8,
-            color: ['#ffd700', '#00ff88', '#00ffff', '#ffffff', '#ff0055'][Math.floor(Math.random() * 5)],
-            gravity: 0.06, drag: 0.98
-        });
-    }
-    setTimeout(() => { processGoalReset(scoringTeam); }, 1600);
-}
+  save() {
+    store.set('chat_history', this.messages);
+    store.set('ds_apikey', this.config.apiKey);
+    store.set('ds_model', this.config.model);
+    store.set('role_name', this.config.roleName);
+    store.set('role_avatar', this.config.roleAvatar);
+    store.set('role_bg', this.config.roleBg);
+    store.set('role_prompt', this.config.systemPrompt);
+  }
+};
 
-function processGoalReset(lastScorer) {
-    particles = [];
-    document.getElementById('goalText').classList.remove('goal-anim');
-    if (scores[lastScorer] >= 3) { endGame(lastScorer); return; }
-
-    initPlayers(); resetBall();
-    aimPlayer = null; isAiming = false; shotFired = false; aiAim = null;
-    currentTurn = lastScorer === 0 ? 1 : 0; // 输家开球策略
-    gameState = 'playing';
-    updateTurnUI();
-    if (currentTurn === 1) setTimeout(runAI, 800);
-}
-
-// ===== 地狱 AI 战术算法层 =====
-function runAI() {
-    if (gameState !== 'playing' || currentTurn !== 1) return;
-    const aiPlayers = players.filter(p => p.team === 1);
-    
-    aiPlayers.sort((a, b) => {
-        if (a.isKeeper) return 1; if (b.isKeeper) return -1;
-        return ((a.x - ball.x) ** 2 + (a.y - ball.y) ** 2) - ((b.x - ball.x) ** 2 + (b.y - ball.y) ** 2);
-    });
-
-    const candidates = aiPlayers.slice(0, 3);
-    let bestShot = null, bestScore = -Infinity;
-
-    candidates.forEach(player => {
-        const dist = Math.sqrt((player.x - ball.x) ** 2 + (player.y - ball.y) ** 2);
-        const baseAngle = Math.atan2(ball.y - player.y, ball.x - player.x);
-        
-        // 广域扫描：全方向计算射门弧度与边缘反弹路径
-        for (let off = -60; off <= 60; off += 3) {
-            const angle = baseAngle + off * Math.PI / 180;
-            for (let pow = 5; pow <= MAX_POWER; pow += 2) {
-                const sc = simulateAI(player, angle, pow);
-                if (sc > bestScore) {
-                    bestScore = sc; bestShot = { player, angle, power: pow };
-                }
-            }
-        }
-    });
-
-    if (bestShot) {
-        aiAim = { player: bestShot.player, angle: bestShot.angle, power: bestShot.power };
-        setTimeout(() => {
-            if (gameState !== 'playing' || currentTurn !== 1) return;
-            aiAim = null;
-            bestShot.player.vx = Math.cos(bestShot.angle) * bestShot.power;
-            bestShot.player.vy = Math.sin(bestShot.angle) * bestShot.power;
-            AudioEngine.playKick(1); shotFired = true;
-        }, 600 + Math.random() * 500);
-    }
-}
-
-function simulateAI(player, angle, power) {
-    let sp = { x: player.x, y: player.y, vx: Math.cos(angle) * power, vy: Math.sin(angle) * power, r: player.r, mass: player.mass };
-    let sb = { x: ball.x, y: ball.y, vx: ball.vx, vy: ball.vy, r: ball.r, mass: ball.mass };
-    let hitBall = false, goal = false, ownGoal = false;
-    
-    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
-    const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
-
-    for (let step = 0; step < 90; step++) {
-        sp.x += sp.vx; sp.y += sp.vy; sb.x += sb.vx; sb.y += sb.vy;
-        sp.vx *= FRICTION; sp.vy *= FRICTION; sb.vx *= FRICTION; sb.vy *= FRICTION;
-
-        if (sb.x - sb.r < field.x && sb.y > goalY1 && sb.y < goalY2) { goal = true; break; }
-        if (sb.x + sb.r > field.x + field.w && sb.y > goalY1 && sb.y < goalY2) { ownGoal = true; break; }
-
-        // 简易模拟碰撞墙
-        if (sb.x - sb.r < field.x || sb.x + sb.r > field.x + field.w) sb.vx *= -0.75;
-        if (sb.y - sb.r < field.y || sb.y + sb.r > field.y + field.h) sb.vy *= -0.75;
-
-        const dx = sb.x - sp.x; const dy = sb.y - sp.y;
-        if (Math.sqrt(dx*dx + dy*dy) < (sb.r + sp.r)) { hitBall = true; sb.vx += sp.vx * 1.2; sb.vy += sp.vy * 1.2; }
-    }
-
-    let score = 0;
-    if (goal) score += 500000;
-    if (ownGoal) score -= 300000;
-    if (hitBall) {
-        score += 2000;
-        score += (field.x + field.w - sb.x) * 5; // 推进倾向
-    }
-    return score;
-}
-
-// ===== 高级Canvas双层轨迹线绘制 =====
-function getTrajectory(player, angle, power) {
-    let sp = { x: player.x, y: player.y, vx: Math.cos(angle) * power, vy: Math.sin(angle) * power, r: player.r, mass: player.mass };
-    let sb = { x: ball.x, y: ball.y, vx: ball.vx, vy: ball.vy, r: ball.r, mass: ball.mass };
-    let spPath = [], sbPath = [], hit = false;
-    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
-    const goalY2 = field.y + (field.h + GOAL_WIDTH) / 2;
-
-    for (let step = 0; step < 120; step++) {
-        sp.x += sp.vx; sp.y += sp.vy; sb.x += sb.vx; sb.y += sb.vy;
-        sp.vx *= FRICTION; sp.vy *= FRICTION; sb.vx *= FRICTION; sb.vy *= FRICTION;
-        
-        if (sp.x - sp.r < field.x || sp.x + sp.r > field.x + field.w) sp.vx *= -0.7;
-        if (sp.y - sp.r < field.y || sp.y + sp.r > field.y + field.h) sp.vy *= -0.7;
-        if (!(sb.y > goalY1 && sb.y < goalY2)) {
-            if (sb.x - sb.r < field.x || sb.x + sb.r > field.x + field.w) sb.vx *= -0.85;
-        }
-        if (sb.y - sb.r < field.y || sb.y + sb.r > field.y + field.h) sb.vy *= -0.85;
-
-        const dx = sb.x - sp.x; const dy = sb.y - sp.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < (sb.r + sp.r)) { hit = true; sb.vx += sp.vx * 1.2; sb.vy += sp.vy * 1.2; }
-
-        if (step % 3 === 0) {
-            spPath.push({ x: sp.x, y: sp.y });
-            if (hit) sbPath.push({ x: sb.x, y: sb.y });
-        }
-    }
-    return { spPath, sbPath, hit };
-}
-
-// ===== 视图美化与高级渲染渲染 =====
-function drawField() {
-    // 渐变质感绿草坪
-    let grad = ctx.createRadialGradient(W/2, H/2, 10, W/2, H/2, Math.max(W,H));
-    grad.addColorStop(0, '#1b5e20'); grad.addColorStop(1, '#0d3c0f');
-    ctx.fillStyle = grad; ctx.fillRect(field.x, field.y, field.w, field.h);
-
-    // 割草机浅色条纹
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    const stripeW = field.w / 12;
-    for (let i = 0; i < 12; i += 2) {
-        ctx.fillRect(field.x + i * stripeW, field.y, stripeW, field.h);
-    }
-
-    // 球场标准白线
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2.5;
-    ctx.strokeRect(field.x, field.y, field.w, field.h);
-    
-    // 中圈与中线
-    ctx.beginPath(); ctx.moveTo(field.x + field.w/2, field.y); ctx.lineTo(field.x + field.w/2, field.y + field.h); ctx.stroke();
-    ctx.beginPath(); ctx.arc(field.x + field.w/2, field.y + field.h/2, field.h*0.2, 0, Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(field.x + field.w/2, field.y + field.h/2, 5, 0, Math.PI*2); ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fill();
-
-    const goalY1 = field.y + (field.h - GOAL_WIDTH) / 2;
-    // 禁区线
-    ctx.strokeRect(field.x, cy() - GOAL_WIDTH, GOAL_WIDTH*0.8, GOAL_WIDTH*2);
-    ctx.strokeRect(field.x + field.w - GOAL_WIDTH*0.8, cy() - GOAL_WIDTH, GOAL_WIDTH*0.8, GOAL_WIDTH*2);
-
-    // 绘制立体感球网
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.fillRect(field.x - GOAL_DEPTH, goalY1, GOAL_DEPTH, GOAL_WIDTH);
-    ctx.fillRect(field.x + field.w, goalY1, GOAL_DEPTH, GOAL_WIDTH);
-    ctx.strokeRect(field.x - GOAL_DEPTH, goalY1, GOAL_DEPTH, GOAL_WIDTH);
-    ctx.strokeRect(field.x + field.w, goalY1, GOAL_DEPTH, GOAL_WIDTH);
-}
-const cy = () => field.y + field.h / 2;
-
-function drawEntities() {
-    // 1. 优先绘制所有实体阴影（增强悬浮错觉）
-    [ball, ...players].forEach(e => {
-        ctx.fillStyle = 'rgba(0,30,0,0.45)';
-        ctx.beginPath();
-        const shadowR = e.r * (1 + e.z * 0.05);
-        ctx.ellipse(e.x, e.y + e.r * 0.6 + e.z*0.3, shadowR, shadowR * 0.4, 0, 0, Math.PI * 2);
-        ctx.fill();
-    });
-
-    // 2. 绘制拖尾特效
-    [ball, ...players].forEach(e => {
-        if(e.trail.length < 2) return;
-        ctx.save();
-        for(let i = 0; i < e.trail.length - 1; i++) {
-            let ratio = i / e.trail.length;
-            ctx.strokeStyle = e === ball ? `rgba(255,215,0,${ratio * 0.35})` : `rgba(${e.team===0?'0,230,118':'255,68,68'},${ratio * 0.3})`;
-            ctx.lineWidth = e.r * 1.5 * ratio; ctx.lineCap = 'round';
-            ctx.beginPath(); ctx.moveTo(e.trail[i].x, e.trail[i].y - e.trail[i].z);
-            ctx.lineTo(e.trail[i+1].x, e.trail[i+1].y - e.trail[i+1].z); ctx.stroke();
-        }
-        ctx.restore();
-    });
-
-    // 3. 绘制球员实体
-    players.forEach(p => {
-        ctx.save();
-        ctx.translate(p.x, p.y - p.z); // 应用 Z 轴浮空
-
-        // 呼吸边缘发光环
-        if (currentTurn === 0 && p.team === 0 && !isAiming && gameState === 'playing' && !shotFired) {
-            ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 3;
-            ctx.shadowColor = '#00ff88'; ctx.shadowBlur = 15 + Math.sin(Date.now()/120)*5;
-            ctx.beginPath(); ctx.arc(0, 0, p.r + 4, 0, Math.PI * 2); ctx.stroke();
-            ctx.shadowBlur = 0;
-        }
-
-        // 渐变球体化渲染
-        let radGrad = ctx.createRadialGradient(-p.r*0.3, -p.r*0.4, 0, 0, 0, p.r);
-        radGrad.addColorStop(0, '#ffffff'); radGrad.addColorStop(0.3, p.sec); radGrad.addColorStop(1, p.color);
-        ctx.fillStyle = radGrad;
-        ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
-
-        ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.stroke();
-
-        // 编号标签
-        ctx.fillStyle = (p.color === '#ffffff') ? '#000' : '#fff';
-        ctx.font = `bold ${p.r*0.9}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(p.number, 0, 0);
-        ctx.restore();
-    });
-
-    // 4. 绘制经典3D黑白足球
-    ctx.save();
-    ctx.translate(ball.x, ball.y - ball.z);
-    const ballRot = (ball.vx + ball.vy) * 0.05;
-    ctx.rotate(Date.now()*0.002 * Math.min(5, Math.abs(ball.vx)));
-    
-    let ballGrad = ctx.createRadialGradient(-ball.r*0.3, -ball.r*0.3, 0, 0, 0, ball.r);
-    ballGrad.addColorStop(0, '#ffffff'); ballGrad.addColorStop(0.7, '#e0e0e0'); ballGrad.addColorStop(1, '#666666');
-    ctx.fillStyle = ballGrad;
-    ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI * 2); ctx.fill();
-    
-    // 经典足球六边形图纹
-    ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 1.5;
-    for(let i=0; i<Math.PI*2; i+=Math.PI/2.5) {
-        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(i)*ball.r, Math.sin(i)*ball.r); ctx.stroke();
-    }
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI * 2); ctx.stroke();
-    ctx.restore();
-
-    // 5. 粒子渲染
-    for (let i = particles.length - 1; i >= 0; i--) {
-        let pt = particles[i];
-        pt.x += pt.vx; pt.y += pt.vy;
-        if (pt.gravity) pt.vy += pt.gravity;
-        if (pt.drag) { pt.vx *= pt.drag; pt.vy *= pt.drag; }
-        pt.life--;
-        ctx.globalAlpha = Math.max(0, pt.life / 100);
-        ctx.fillStyle = pt.color;
-        ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 1;
-        if (pt.life <= 0) particles.splice(i, 1);
-    }
-}
-
-function drawAiming() {
-    if (!aimPlayer || !isAiming || currentTurn !== 0) return;
-    
-    const dx = touchStartX - aimMouseX;
-    const dy = touchStartY - aimMouseY;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const power = Math.min(dist * 0.12, MAX_POWER);
-    const angle = Math.atan2(dy, dx);
-
-    // 声音实时发声反馈
-    if(Math.random() < 0.15 && power > 2) AudioEngine.playCharge(power / MAX_POWER);
-
-    // 计算预测未来量子路径
-    const traj = getTrajectory(aimPlayer, angle, power * aimPlayer.powerBuff);
-
-    // 1. 绘制球员未来的滚动路径
-    if (traj.spPath.length > 0) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 2; ctx.setLineDash([4, 6]);
-        ctx.beginPath(); ctx.moveTo(aimPlayer.x, aimPlayer.y);
-        traj.spPath.forEach(pt => ctx.lineTo(pt.x, pt.y)); ctx.stroke();
-    }
-
-    // 2. 绘制足球撞击折射路径预测线
-    if (traj.hit && traj.sbPath.length > 0) {
-        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3.5; ctx.setLineDash([]);
-        ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 10;
-        ctx.beginPath(); ctx.moveTo(traj.sbPath[0].x, traj.sbPath[0].y);
-        traj.sbPath.forEach(pt => ctx.lineTo(pt.x, pt.y)); ctx.stroke();
-        ctx.shadowBlur = 0;
-    }
-    ctx.setLineDash([]);
-
-    // 3. 绚丽反向物理拉弓瞄准器
-    const arrowLen = power * 10;
-    const ax = aimPlayer.x + Math.cos(angle) * arrowLen;
-    const ay = aimPlayer.y + Math.sin(angle) * arrowLen;
-
-    let aimGrad = ctx.createLinearGradient(aimPlayer.x, aimPlayer.y, ax, ay);
-    aimGrad.addColorStop(0, '#00ff88'); aimGrad.addColorStop(1, '#ff1744');
-    ctx.strokeStyle = aimGrad; ctx.lineWidth = 5;
-    ctx.beginPath(); ctx.moveTo(aimPlayer.x, aimPlayer.y); ctx.lineTo(ax, ay); ctx.stroke();
-
-    // 充能准星箭头
-    ctx.fillStyle = '#ff1744'; ctx.beginPath();
-    ctx.arc(ax, ay, 6, 0, Math.PI*2); ctx.fill();
-
-    document.getElementById('powerFill').style.width = (power / MAX_POWER * 100) + '%';
-}
-
-function draw() {
-    ctx.save();
-    if (cameraShake > 0) {
-        ctx.translate((Math.random() - 0.5) * cameraShake, (Math.random() - 0.5) * cameraShake);
-        cameraShake *= 0.9; if (cameraShake < 0.2) cameraShake = 0;
-    }
-    ctx.clearRect(0, 0, W, H);
-    
-    // 场地任何时候都需要绘制
-    drawField();
-
-    // 【修复核心】只有处于对局状态时，才去渲染物理实体和瞄准UI
-    if (gameState === 'playing' || gameState === 'goalAnimating' || gameState === 'ended') {
-        drawAiming();
-        drawEntities();
-    }
-
-    if (flashAlpha > 0) {
-        ctx.fillStyle = `rgba(255,255,255,${flashAlpha})`; ctx.fillRect(0, 0, W, H);
-        flashAlpha *= 0.88; if (flashAlpha < 0.01) flashAlpha = 0;
-    }
-    ctx.restore();
-}
-
-
-// ===== 核心引擎循环 =====
-function gameLoop() {
-    if (gameState === 'playing') {
-        updatePhysics();
-        checkGoal();
-
-        if (shotFired && !isAnythingMoving()) {
-            shotFired = false;
-            currentTurn = currentTurn === 0 ? 1 : 0;
-            updateTurnUI();
-            if (currentTurn === 1) setTimeout(runAI, 600);
-        }
-    }
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-// ===== 高触敏多点触控与手势兼容优化 (iPad Native Gestures) =====
-function handleStart(clientX, clientY) {
-    if (gameState !== 'playing' || currentTurn !== 0 || shotFired) return;
-    if (!isAiming && isAnythingMoving()) return;
-
-    for (let p of players) {
-        if (p.team !== 0) continue;
-        const d = Math.sqrt((clientX - p.x) ** 2 + (clientY - p.y) ** 2);
-        if (d < p.r * 2.2) { // 略微放大 iPad 触控点击敏感范围
-            aimPlayer = p; isAiming = true;
-            touchStartX = clientX; touchStartY = clientY;
-            aimMouseX = clientX; aimMouseY = clientY;
-            break;
-        }
-    }
-}
-
-function handleMove(clientX, clientY) {
-    if (!isAiming || !aimPlayer) return;
-    aimMouseX = clientX; aimMouseY = clientY;
-}
-
-function handleEnd() {
-    if (!isAiming || !aimPlayer) return;
-    const dx = touchStartX - aimMouseX; const dy = touchStartY - aimMouseY;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const power = Math.min(dist * 0.12, MAX_POWER);
-
-    isAiming = false;
-    document.getElementById('powerFill').style.width = '0%';
-
-    if (power > 1.2) {
-        const angle = Math.atan2(dy, dx);
-        const finalP = power * aimPlayer.powerBuff;
-        aimPlayer.vx = Math.cos(angle) * finalP;
-        aimPlayer.vy = Math.sin(angle) * finalP;
-        AudioEngine.playKick(1);
-        shotFired = true;
-    }
-    aimPlayer = null;
-}
-
-// 适配 iPad 触控屏事件监听
-canvas.addEventListener('mousedown', e => handleStart(e.clientX, e.clientY));
-canvas.addEventListener('mousemove', e => handleMove(e.clientX, e.clientY));
-canvas.addEventListener('mouseup', handleEnd);
-
-canvas.addEventListener('touchstart', e => {
-    e.preventDefault(); const t = e.touches[0]; handleStart(t.clientX, t.clientY);
-}, { passive: false });
-canvas.addEventListener('touchmove', e => {
-    e.preventDefault(); const t = e.touches[0]; handleMove(t.clientX, t.clientY);
-}, { passive: false });
-canvas.addEventListener('touchend', e => { e.preventDefault(); handleEnd(); }, { passive: false });
-
-// ===== 局终判定 =====
-function endGame(winner) {
-    gameState = 'ended';
-    showScreen('resultScreen');
-    const win = (winner === 0);
-    document.getElementById('resEmoji').textContent = win ? '🏆' : '👑';
-    document.getElementById('resTitle').textContent = win ? `${selectedTeam.name} 登顶世界之巅！` : `${opponentTeam.name} 夺得冠军！`;
-    document.getElementById('resTitle').style.color = win ? '#00ff88' : '#ff3366';
-    document.getElementById('resScore').textContent = `${scores[0]} - ${scores[1]}`;
-}
-
-function restartGame() {
-    scores = [0, 0]; currentTurn = 0; gameState = 'playing';
-    particles = []; aimPlayer = null; isAiming = false; shotFired = false; aiAim = null;
-    showScreen('gameScreen');
-    resize(); initPlayers(); resetBall(); updateTurnUI();
-}
-
-// 自动引擎自启
-resize();
-showScreen('mainMenu');
-requestAnimationFrame(gameLoop);
+// 启动
+App.init();
 </script>
 </body>
 </html>
